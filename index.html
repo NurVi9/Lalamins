@@ -6,15 +6,14 @@
   <title>Luminox</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
   <style>
-    .rotate-icon {
-      transition: transform 0.3s ease;
-    }
-    .rotate-icon.rotate {
-      transform: rotate(180deg);
-    }
+    .rotate-icon { transition: transform 0.3s ease; }
+    .rotate-icon.rotate { transform: rotate(180deg); }
+    #carousel { transition: transform 0.5s ease-in-out; }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col transition-colors duration-300" id="body">
+
+  <!-- Header -->
   <header class="bg-blue-400 shadow p-4 sticky top-0 z-50">
     <div class="container mx-auto flex justify-between items-center">
       <div class="flex items-center space-x-4">
@@ -30,9 +29,6 @@
       <div class="flex items-center space-x-4">
         <div class="relative hidden md:block" id="desktop-search">
           <input type="text" id="search-input" placeholder="Cari postingan..." class="p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-white" />
-          <button id="search-btn" class="absolute right-1 top-1/2 transform -translate-y-1/2 text-white transition duration-300 ease-in-out transform hover:scale-105">
-            🔍
-          </button>
         </div>
         <button id="mobile-search-btn" class="text-white md:hidden transition duration-300 ease-in-out transform hover:scale-105">🔍</button>
         <button id="darkmode-btn" class="text-white transition duration-300 ease-in-out transform hover:scale-105">
@@ -44,7 +40,7 @@
       </div>
     </div>
     <div class="hidden flex-col mt-2 md:hidden px-4" id="mobile-search-container">
-      <input type="text" placeholder="Cari postingan..." class="p-2 rounded border border-gray-300 w-full focus:outline-none focus:ring-2 focus:ring-white" />
+      <input type="text" id="mobile-search-input" placeholder="Cari postingan..." class="p-2 rounded border border-gray-300 w-full focus:outline-none focus:ring-2 focus:ring-white" />
     </div>
     <nav class="hidden flex-col space-y-2 mt-2 md:hidden px-4" id="nav-menu">
       <a href="#" class="text-white hover:text-gray-100">Beranda</a>
@@ -54,36 +50,33 @@
     </nav>
   </header>
 
-  <!-- Carousel -->
-  <section class="relative overflow-hidden">
-    <div class="flex transition-transform duration-500 ease-in-out" id="carousel">
-      <div class="min-w-full"><img src="https://www.dropbox.com/scl/fi/s78cxyelrt44nzpwntp75/2fd3e1ca69404094771ac1cf00ae2e2e.jpg?rlkey=o6kxigblu4fw91q9gmkmwzblb&st=c1pj4xop&raw=1" class="w-full h-auto object-cover" alt="Banner 1"></div>
-      <div class="min-w-full"><img src="https://www.dropbox.com/scl/fi/k2az6b1aibbrgqpb4krlq/0527453d80fa774802c048255826e7ff.jpg?rlkey=bt465rdmlwo5iu0imkr5pp8rx&st=3z7y473p&raw=1" class="w-full h-auto object-cover" alt="Banner 2"></div>
-      <div class="min-w-full"><img src="https://www.dropbox.com/scl/fi/nts514n4fcbx5cj555l4n/0cf2b2e4eb49b092f6e58d664c0d0cbf.jpg?rlkey=bhrtektwezj9jikwrwiigk5im&st=r1ujsgx7&raw=1" class="w-full h-auto object-cover" alt="Banner 3"></div>
+  <!-- Banner / Carousel -->
+  <section class="relative overflow-hidden w-full h-64 bg-gray-200">
+    <div id="carousel" class="flex w-full h-full">
+      <div class="flex-shrink-0 w-full h-full"><img src="https://www.dropbox.com/scl/fi/s78cxyelrt44nzpwntp75/2fd3e1ca69404094771ac1cf00ae2e2e.jpg?rlkey=o6kxigblu4fw91q9gmkmwzblb&st=c1pj4xop&raw=1" class="w-full h-full object-cover" /></div>
+      <div class="flex-shrink-0 w-full h-full"><img src="https://www.dropbox.com/scl/fi/k2az6b1aibbrgqpb4krlq/0527453d80fa774802c048255826e7ff.jpg?rlkey=bt465rdmlwo5iu0imkr5pp8rx&st=3z7y473p&raw=1" class="w-full h-full object-cover" /></div>
+      <div class="flex-shrink-0 w-full h-full"><img src="https://www.dropbox.com/scl/fi/nts514n4fcbx5cj555l4n/0cf2b2e4eb49b092f6e58d664c0d0cbf.jpg?rlkey=bhrtektwezj9jikwrwiigk5im&st=r1ujsgx7&raw=1" class="w-full h-full object-cover" /></div>
     </div>
-    <button id="prevBtn" class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-40 text-white rounded-full p-2 hover:bg-opacity-70 focus:outline-none transition duration-300 ease-in-out hover:scale-110">❮</button>
-    <button id="nextBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-40 text-white rounded-full p-2 hover:bg-opacity-70 focus:outline-none transition duration-300 ease-in-out hover:scale-110">❯</button>
+    <button id="prevBtn" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white px-3 py-2">❮</button>
+    <button id="nextBtn" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white px-3 py-2">❯</button>
   </section>
 
   <!-- Postingan -->
   <section class="container mx-auto px-4 py-6">
     <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Postingan Terbaru</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <!-- Postingan 1 -->
-      <a href="#" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:shadow-xl transition duration-300 ease-in-out transform hover:scale-105 post-item">
-        <img src="https://www.dropbox.com/scl/fi/dt5cn2bxqrfdhofvpfvrv/ed5ad721ee13c1e7b2982e094f8f7294_1.jpg?rlkey=d3if34h3g00hdomug10n9jrg7&st=yjwn4zfi&raw=1" alt="Jujutsu Kaisen" class="rounded mb-2 w-full h-48 object-cover" />
+      <a href="post.html" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:shadow-xl transition duration-300 ease-in-out transform hover:scale-105 post-item">
+        <img src="https://via.placeholder.com/300x200" alt="Jujutsu Kaisen" class="rounded mb-2 w-full h-48 object-cover" />
         <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-1 post-title">Jujutsu Kaisen</h3>
         <p class="text-gray-600 dark:text-gray-300 text-sm">Genre: Action, Comedy, Demons, Horror, Supernatural, School, Shounen</p>
       </a>
-      <!-- Postingan 2 -->
       <a href="#" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:shadow-xl transition duration-300 ease-in-out transform hover:scale-105 post-item">
-        <img src="https://www.dropbox.com/scl/fi/vklwnv6wf01x9ry78e7vj/ceb64dbb03537e462fa7c18a61539d5c_1.jpg?rlkey=f2o4nmsw9moqise6i33snmftu&st=j6sh2y0l&raw=1" alt="Jujutsu Kaisen S2" class="rounded mb-2 w-full h-48 object-cover" />
+        <img src="https://via.placeholder.com/300x200" alt="Jujutsu Kaisen S2" class="rounded mb-2 w-full h-48 object-cover" />
         <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-1 post-title">Jujutsu Kaisen S2</h3>
         <p class="text-gray-600 dark:text-gray-300 text-sm">Genre: Action, Fantasy, Mystery, Psychological, School, Shounen, Supernatural</p>
       </a>
-      <!-- Postingan 3 -->
       <a href="#" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:shadow-xl transition duration-300 ease-in-out transform hover:scale-105 post-item">
-        <img src="https://www.dropbox.com/scl/fi/axdmw0idfakyxel99q823/28fea2161525e632743ff62d1cefb798_1.jpg?rlkey=uhmmpblkd67lmnhnsotv0nbg9&st=drobtazq&raw=1" alt="Jujutsu Kaisen 0" class="rounded mb-2 w-full h-48 object-cover" />
+        <img src="https://via.placeholder.com/300x200" alt="Jujutsu Kaisen 0" class="rounded mb-2 w-full h-48 object-cover" />
         <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-1 post-title">Jujutsu Kaisen 0</h3>
         <p class="text-gray-600 dark:text-gray-300 text-sm">Genre: Action, Demons, Movie, School, Shounen, Supernatural</p>
       </a>
@@ -95,7 +88,6 @@
     © 2025 Luminox. All rights reserved.
   </footer>
 
-  <!-- Script -->
   <script>
     const menuBtn = document.getElementById('menu-btn');
     const navMenu = document.getElementById('nav-menu');
@@ -105,38 +97,30 @@
     const darkmodeIcon = document.getElementById('darkmode-icon');
     const body = document.getElementById('body');
     const searchInput = document.getElementById('search-input');
+    const mobileSearchInput = document.getElementById('mobile-search-input');
     const posts = document.querySelectorAll('.post-item');
 
-    menuBtn.addEventListener('click', () => {
-      navMenu.classList.toggle('hidden');
-    });
-
-    mobileSearchBtn.addEventListener('click', () => {
-      mobileSearchContainer.classList.toggle('hidden');
-    });
-
+    menuBtn.addEventListener('click', () => navMenu.classList.toggle('hidden'));
+    mobileSearchBtn.addEventListener('click', () => mobileSearchContainer.classList.toggle('hidden'));
     darkmodeBtn.addEventListener('click', () => {
       body.classList.toggle('dark');
       darkmodeIcon.classList.add('rotate');
-      setTimeout(() => {
-        darkmodeIcon.classList.remove('rotate');
-        if (body.classList.contains('dark')) {
-          darkmodeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.293 14.707A8 8 0 119.293 6.707 6 6 0 0017.293 14.707z" />';
-        } else {
-          darkmodeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-9h1M3 12h1m15.07 5.07l.7.7m-12.02 0l-.7.7m12.02-12.02l.7-.7m-12.02 0l-.7-.7M12 8a4 4 0 000 8 4 4 0 000-8z" />';
-        }
-      }, 300);
+      setTimeout(() => darkmodeIcon.classList.remove('rotate'), 300);
     });
 
-    searchInput.addEventListener('input', () => {
-      const query = searchInput.value.toLowerCase();
+    // Search: judul + genre
+    function doSearch(query) {
+      query = query.toLowerCase();
       posts.forEach(post => {
         const title = post.querySelector('.post-title').textContent.toLowerCase();
-        post.style.display = title.includes(query) ? '' : 'none';
+        const desc = post.querySelector('p').textContent.toLowerCase();
+        post.style.display = (title.includes(query) || desc.includes(query)) ? '' : 'none';
       });
-    });
+    }
+    searchInput.addEventListener('input', () => doSearch(searchInput.value));
+    mobileSearchInput.addEventListener('input', () => doSearch(mobileSearchInput.value));
 
-    // Banner Carousel Script
+    // Carousel
     let index = 0;
     const totalSlides = document.querySelectorAll('#carousel > div').length;
     const carousel = document.getElementById('carousel');
@@ -147,10 +131,10 @@
       index = (i + totalSlides) % totalSlides;
       carousel.style.transform = `translateX(-${index * 100}%)`;
     }
-
     prevBtn.addEventListener('click', () => showSlide(index - 1));
     nextBtn.addEventListener('click', () => showSlide(index + 1));
     setInterval(() => showSlide(index + 1), 5000);
   </script>
+
 </body>
 </html>
