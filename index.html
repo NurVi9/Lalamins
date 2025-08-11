@@ -6,135 +6,289 @@
   <title>Luminox</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
   <style>
-    .rotate-icon { transition: transform 0.3s ease; }
-    .rotate-icon.rotate { transform: rotate(180deg); }
-    #carousel { transition: transform 0.5s ease-in-out; }
+    #carousel { transition: transform 0.8s cubic-bezier(.4,0,.2,1); }
+
+    /* Fade-in animation */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { opacity: 0; animation: fadeInUp 0.6s forwards; }
+
+    /* Efek hover postingan */
+    .post-item {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .post-item:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+    .post-item img {
+      width: 100%;
+      height: auto;
+      border-radius: 0.5rem;
+      transition: transform 0.3s ease;
+    }
+    .post-item:hover img {
+      transform: scale(1.05);
+    }
+
+    /* Burger menu langsung jadi X */
+    .burger-line { transition: none; }
+    .menu-open .line1 { transform: rotate(45deg) translateY(8px); }
+    .menu-open .line2 { opacity: 0; }
+    .menu-open .line3 { transform: rotate(-45deg) translateY(-8px); }
+
+    /* Smooth slide + glassmorphism */
+    #mobile-menu {
+      transform: translateY(-20px);
+      opacity: 0;
+      transition: max-height 0.5s ease, transform 0.4s ease, opacity 0.4s ease;
+    }
+    #mobile-menu.menu-active {
+      transform: translateY(0);
+      opacity: 1;
+      background: rgba(37, 99, 235, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+    #menu-btn.menu-open {
+      background-color: rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+    }
+
+    /* Spinner Loading */
+    #loading-spinner {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-top: 4px solid #3b82f6;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      animation: spin 0.8s linear infinite;
+      margin: auto;
+    }
+    body.dark .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top: 4px solid #60a5fa;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col transition-colors duration-300" id="body">
+<body class="bg-gray-50 min-h-screen flex flex-col transition-colors duration-500 dark:bg-gray-900" id="body">
 
-  <!-- Header -->
-  <header class="bg-blue-400 shadow p-4 sticky top-0 z-50">
-    <div class="container mx-auto flex justify-between items-center">
+  <!-- HEADER -->
+  <header id="main-header" class="bg-gradient-to-r from-blue-500 to-indigo-500 shadow-lg sticky top-0 z-50 transition-all duration-300">
+    <div class="container mx-auto flex justify-between items-center p-4">
       <div class="flex items-center space-x-4">
-        <img src="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=9i095v5o&dl=1" alt="Logo" class="w-10 h-10 rounded-full border-2 border-white" />
+        <img src="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=9i095v5o&dl=1" alt="Logo" class="w-10 h-10 rounded-full border-2 border-white shadow" />
         <h1 class="text-xl font-bold text-white">Luminox</h1>
-        <nav class="hidden md:flex space-x-4">
-          <a href="#" class="text-white hover:text-gray-100">Beranda</a>
-          <a href="#" class="text-white hover:text-gray-100">Tentang</a>
-          <a href="payment.html" class="text-white hover:text-gray-100">Layanan</a>
-          <a href="#" class="text-white hover:text-gray-100">Kontak</a>
-        </nav>
       </div>
-      <div class="flex items-center space-x-4">
-        <div class="relative hidden md:block" id="desktop-search">
-          <input type="text" id="search-input" placeholder="Cari postingan..." class="p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-white" />
+
+      <nav class="hidden md:flex space-x-6 items-center">
+        <a href="#" class="text-white font-medium hover:text-yellow-300 transition">Beranda</a>
+        <div class="relative group">
+          <button class="text-white font-medium hover:text-yellow-300 transition flex items-center">
+            Layanan ▾
+          </button>
+          <div class="absolute left-0 top-full mt-2 bg-white text-gray-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+            <a href="payment.html" class="block px-6 py-3 hover:bg-gray-100">Paket Premium</a>
+            <a href="#" class="block px-6 py-3 hover:bg-gray-100">Konsultasi</a>
+          </div>
         </div>
-        <button id="mobile-search-btn" class="text-white md:hidden transition duration-300 ease-in-out transform hover:scale-105">🔍</button>
-        <button id="darkmode-btn" class="text-white transition duration-300 ease-in-out transform hover:scale-105">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 rotate-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" id="darkmode-icon">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-9h1M3 12h1m15.07 5.07l.7.7m-12.02 0l-.7.7m12.02-12.02l.7-.7m-12.02 0l-.7-.7M12 8a4 4 0 000 8 4 4 0 000-8z" />
-          </svg>
+        <a href="#" class="text-white font-medium hover:text-yellow-300 transition">Tentang</a>
+        <a href="#" class="text-white font-medium hover:text-yellow-300 transition">Kontak</a>
+      </nav>
+
+      <div class="flex items-center space-x-3">
+        <button id="search-toggle" class="text-white hover:scale-110 transform transition">🔍</button>
+        <button id="darkmode-btn" class="text-white hover:scale-110 transform transition">🌙</button>
+        <button id="menu-btn" class="md:hidden w-7 h-7 flex flex-col justify-between items-center p-1 rounded hover:bg-blue-600 transition-all">
+          <span class="burger-line line1 block w-6 h-0.5 bg-white rounded"></span>
+          <span class="burger-line line2 block w-6 h-0.5 bg-white rounded"></span>
+          <span class="burger-line line3 block w-6 h-0.5 bg-white rounded"></span>
         </button>
-        <button id="menu-btn" class="md:hidden text-white transition duration-300 ease-in-out transform hover:scale-105">☰</button>
       </div>
     </div>
-    <div class="hidden flex-col mt-2 md:hidden px-4" id="mobile-search-container">
-      <input type="text" id="mobile-search-input" placeholder="Cari postingan..." class="p-2 rounded border border-gray-300 w-full focus:outline-none focus:ring-2 focus:ring-white" />
+
+    <div id="search-container" class="bg-blue-600 overflow-hidden max-h-0 transition-all duration-500">
+      <div class="container mx-auto p-4">
+        <input id="search-input" type="text" placeholder="Cari postingan..." class="w-full p-3 rounded-lg border-0 shadow focus:ring-4 focus:ring-yellow-300" />
+      </div>
     </div>
-    <nav class="hidden flex-col space-y-2 mt-2 md:hidden px-4" id="nav-menu">
-      <a href="#" class="text-white hover:text-gray-100">Beranda</a>
-      <a href="#" class="text-white hover:text-gray-100">Tentang</a>
-      <a href="#" class="text-white hover:text-gray-100">Layanan</a>
-      <a href="#" class="text-white hover:text-gray-100">Kontak</a>
+
+    <nav id="mobile-menu" class="max-h-0 overflow-hidden flex-col bg-gradient-to-b from-blue-500 to-indigo-500 md:hidden">
+      <a href="#" class="block px-6 py-3 text-white hover:bg-blue-600 transition">Beranda</a>
+      <div class="border-t border-blue-400">
+        <button id="mobile-submenu-btn" class="w-full flex justify-between items-center px-6 py-3 text-white hover:bg-blue-600 transition">
+          Layanan ▾
+        </button>
+        <div id="mobile-submenu" class="max-h-0 overflow-hidden bg-blue-600 transition-all duration-500">
+          <a href="payment.html" class="block px-8 py-3 text-white hover:bg-blue-500">Paket Premium</a>
+          <a href="#" class="block px-8 py-3 text-white hover:bg-blue-500">Konsultasi</a>
+        </div>
+      </div>
+      <a href="#" class="block px-6 py-3 text-white hover:bg-blue-600 transition">Tentang</a>
+      <a href="#" class="block px-6 py-3 text-white hover:bg-blue-600 transition">Kontak</a>
     </nav>
   </header>
 
-  <!-- Banner / Carousel -->
+  <!-- CAROUSEL -->
   <section class="relative overflow-hidden w-full h-64 bg-gray-200">
     <div id="carousel" class="flex w-full h-full">
-      <div class="flex-shrink-0 w-full h-full"><img src="https://www.dropbox.com/scl/fi/s78cxyelrt44nzpwntp75/2fd3e1ca69404094771ac1cf00ae2e2e.jpg?rlkey=o6kxigblu4fw91q9gmkmwzblb&st=c1pj4xop&raw=1" class="w-full h-full object-cover" /></div>
-      <div class="flex-shrink-0 w-full h-full"><img src="https://www.dropbox.com/scl/fi/k2az6b1aibbrgqpb4krlq/0527453d80fa774802c048255826e7ff.jpg?rlkey=bt465rdmlwo5iu0imkr5pp8rx&st=3z7y473p&raw=1" class="w-full h-full object-cover" /></div>
-      <div class="flex-shrink-0 w-full h-full"><img src="https://www.dropbox.com/scl/fi/nts514n4fcbx5cj555l4n/0cf2b2e4eb49b092f6e58d664c0d0cbf.jpg?rlkey=bhrtektwezj9jikwrwiigk5im&st=r1ujsgx7&raw=1" class="w-full h-full object-cover" /></div>
-    </div>
-    <button id="prevBtn" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white px-3 py-2">❮</button>
-    <button id="nextBtn" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white px-3 py-2">❯</button>
-  </section>
-
-  <!-- Postingan -->
-  <section class="container mx-auto px-4 py-6">
-    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Postingan Terbaru</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <a href="post.html" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:shadow-xl transition duration-300 ease-in-out transform hover:scale-105 post-item">
-        <img src="https://via.placeholder.com/300x200" alt="Jujutsu Kaisen" class="rounded mb-2 w-full h-48 object-cover" />
-        <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-1 post-title">Jujutsu Kaisen</h3>
-        <p class="text-gray-600 dark:text-gray-300 text-sm">Genre: Action, Comedy, Demons, Horror, Supernatural, School, Shounen</p>
-      </a>
-      <a href="#" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:shadow-xl transition duration-300 ease-in-out transform hover:scale-105 post-item">
-        <img src="https://via.placeholder.com/300x200" alt="Jujutsu Kaisen S2" class="rounded mb-2 w-full h-48 object-cover" />
-        <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-1 post-title">Jujutsu Kaisen S2</h3>
-        <p class="text-gray-600 dark:text-gray-300 text-sm">Genre: Action, Fantasy, Mystery, Psychological, School, Shounen, Supernatural</p>
-      </a>
-      <a href="#" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:shadow-xl transition duration-300 ease-in-out transform hover:scale-105 post-item">
-        <img src="https://via.placeholder.com/300x200" alt="Jujutsu Kaisen 0" class="rounded mb-2 w-full h-48 object-cover" />
-        <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-1 post-title">Jujutsu Kaisen 0</h3>
-        <p class="text-gray-600 dark:text-gray-300 text-sm">Genre: Action, Demons, Movie, School, Shounen, Supernatural</p>
-      </a>
+      <div class="flex-shrink-0 w-full h-full"><img src="https://www.dropbox.com/scl/fi/0nj4z0qe79cxqtelk2ecr/57863546a9eddec8fe6c3d865dc36ad4.jpg?rlkey=2ofwypodgwipm5ugni32kdwow&st=fns33dbd&dl=1" loading="lazy" class="w-full h-full object-cover" /></div>
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="bg-white border-t p-4 text-center text-gray-500 text-sm dark:bg-gray-800 dark:text-gray-300 transition duration-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+  <!-- POSTINGAN -->
+  <section class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Postingan Terbaru</h2>
+    <div id="post-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 post-item fade-in cursor-pointer" data-link="post.html">
+        <img src="https://www.dropbox.com/scl/fi/cgz0co7k26b8tovk7ag4f/IMG_20250810_142227_889.jpg?rlkey=n2gydifd0jnbshebvwwvk8hcn&st=0qnved1o&dl=1" loading="lazy" class="mb-3 w-full object-cover" />
+        <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400 post-title">Sameko Saba</h3>
+        <p class="text-gray-600 dark:text-gray-300 text-sm post-desc">Genre: -</p>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 post-item fade-in cursor-pointer" data-link="posting.html">
+        <img src="https://www.dropbox.com/scl/fi/uwcmw5oodewidt49dmem4/f2dfdc4aecb5bb33b3e2245929ef3037.jpg?rlkey=xxoehpupgz6uj9azxcsvs9lbn&st=hwv640vz&dl=1" loading="lazy" class="mb-3 w-full object-cover" />
+        <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400 post-title">RLCraft</h3>
+        <p class="text-gray-600 dark:text-gray-300 text-sm post-desc">Type: Template</p>
+      </div>
+    </div>
+    <div id="loading-spinner"><div class="spinner"></div></div>
+    <p id="no-results" class="hidden text-center text-gray-500 mt-6">Tidak ada postingan ditemukan</p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-white dark:bg-gray-800 p-4 text-center text-gray-500 dark:text-gray-300 text-sm">
     © 2025 Luminox. All rights reserved.
   </footer>
 
+  <!-- SCRIPT -->
   <script>
     const menuBtn = document.getElementById('menu-btn');
-    const navMenu = document.getElementById('nav-menu');
-    const mobileSearchBtn = document.getElementById('mobile-search-btn');
-    const mobileSearchContainer = document.getElementById('mobile-search-container');
-    const darkmodeBtn = document.getElementById('darkmode-btn');
-    const darkmodeIcon = document.getElementById('darkmode-icon');
-    const body = document.getElementById('body');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileSubmenuBtn = document.getElementById('mobile-submenu-btn');
+    const mobileSubmenu = document.getElementById('mobile-submenu');
+    const searchToggle = document.getElementById('search-toggle');
+    const searchContainer = document.getElementById('search-container');
     const searchInput = document.getElementById('search-input');
-    const mobileSearchInput = document.getElementById('mobile-search-input');
     const posts = document.querySelectorAll('.post-item');
+    const postList = document.getElementById('post-list');
+    const noResults = document.getElementById('no-results');
+    const loadingSpinner = document.getElementById('loading-spinner');
 
-    menuBtn.addEventListener('click', () => navMenu.classList.toggle('hidden'));
-    mobileSearchBtn.addEventListener('click', () => mobileSearchContainer.classList.toggle('hidden'));
-    darkmodeBtn.addEventListener('click', () => {
-      body.classList.toggle('dark');
-      darkmodeIcon.classList.add('rotate');
-      setTimeout(() => darkmodeIcon.classList.remove('rotate'), 300);
+    // Menu toggle
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('max-h-0');
+      mobileMenu.classList.toggle('max-h-screen');
+      menuBtn.classList.toggle('menu-open');
+      mobileMenu.classList.toggle('menu-active');
     });
 
-    // Search: judul + genre
-    function doSearch(query) {
-      query = query.toLowerCase();
-      posts.forEach(post => {
+    // Mobile submenu
+    mobileSubmenuBtn.addEventListener('click', () => {
+      mobileSubmenu.classList.toggle('max-h-0');
+      mobileSubmenu.classList.toggle('max-h-40');
+    });
+
+    // Search toggle
+    searchToggle.addEventListener('click', () => {
+      searchContainer.classList.toggle('max-h-0');
+      searchContainer.classList.toggle('max-h-20');
+      searchInput.focus();
+    });
+
+    // Search filter
+    searchInput.addEventListener('input', () => {
+      const query = searchInput.value.toLowerCase();
+      let visibleCount = 0;
+      document.querySelectorAll('.post-item').forEach(post => {
         const title = post.querySelector('.post-title').textContent.toLowerCase();
-        const desc = post.querySelector('p').textContent.toLowerCase();
-        post.style.display = (title.includes(query) || desc.includes(query)) ? '' : 'none';
+        const desc = post.querySelector('.post-desc').textContent.toLowerCase();
+        const match = title.includes(query) || desc.includes(query);
+        post.style.display = match ? '' : 'none';
+        if (match) visibleCount++;
       });
-    }
-    searchInput.addEventListener('input', () => doSearch(searchInput.value));
-    mobileSearchInput.addEventListener('input', () => doSearch(mobileSearchInput.value));
+      noResults.classList.toggle('hidden', visibleCount > 0);
+    });
+
+    // Dark mode
+    document.getElementById('darkmode-btn').addEventListener('click', () => {
+      document.getElementById('body').classList.toggle('dark');
+    });
+
+    // Klik postingan
+    posts.forEach(item => {
+      item.addEventListener('click', () => {
+        const link = item.getAttribute('data-link') || '#';
+        window.location.href = link;
+      });
+    });
+
+    // Lazy load fade-in
+    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+      img.style.opacity = 0;
+      img.onload = () => {
+        img.style.transition = "opacity 0.5s ease";
+        img.style.opacity = 1;
+      };
+    });
+
+    // Infinite scroll + loading spinner
+    let loadCount = 0;
+    let isLoading = false;
+    const samplePosts = [
+      { title: "Post Baru 1", desc: "Genre: Adventure", img: "https://via.placeholder.com/300x200", link: "detail1.html" },
+      { title: "Post Baru 2", desc: "Genre: Action", img: "https://via.placeholder.com/300x200", link: "detail2.html" },
+      { title: "Post Baru 3", desc: "Type: Template", img: "https://via.placeholder.com/300x200", link: "detail3.html" },
+      { title: "Post Baru 4", desc: "Genre: RPG", img: "https://via.placeholder.com/300x200", link: "detail4.html" }
+    ];
+
+    window.addEventListener('scroll', () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50 && !isLoading) {
+        if (loadCount < 3) {
+          isLoading = true;
+          loadingSpinner.style.display = "block";
+          setTimeout(() => {
+            samplePosts.forEach(p => {
+              const div = document.createElement('div');
+              div.className = "bg-white dark:bg-gray-800 rounded-lg shadow p-4 post-item fade-in cursor-pointer";
+              div.setAttribute('data-link', p.link);
+              div.innerHTML = `
+                <img src="${p.img}" loading="lazy" class="mb-3 w-full object-cover" />
+                <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400 post-title">${p.title}</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm post-desc">${p.desc}</p>
+              `;
+              div.addEventListener('click', () => { window.location.href = p.link; });
+              postList.appendChild(div);
+            });
+            loadCount++;
+            isLoading = false;
+            loadingSpinner.style.display = "none";
+          }, 1000);
+        }
+      }
+    });
 
     // Carousel
     let index = 0;
-    const totalSlides = document.querySelectorAll('#carousel > div').length;
+    const slides = document.querySelectorAll('#carousel > div');
     const carousel = document.getElementById('carousel');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-
+    document.getElementById('prevBtn').onclick = () => showSlide(index - 1);
+    document.getElementById('nextBtn').onclick = () => showSlide(index + 1);
     function showSlide(i) {
-      index = (i + totalSlides) % totalSlides;
+      index = (i + slides.length) % slides.length;
       carousel.style.transform = `translateX(-${index * 100}%)`;
     }
-    prevBtn.addEventListener('click', () => showSlide(index - 1));
-    nextBtn.addEventListener('click', () => showSlide(index + 1));
     setInterval(() => showSlide(index + 1), 5000);
   </script>
-
 </body>
 </html>
