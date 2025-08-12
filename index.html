@@ -6,163 +6,159 @@
   <title>Luminox</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
   <style>
-    #carousel { transition: transform 0.8s cubic-bezier(.4,0,.2,1); }
-
-    /* Fade-in animation */
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+  
+    /* Fade-in Animation */
     .fade-in { opacity: 0; animation: fadeInUp 0.6s forwards; }
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
 
-    /* Efek hover postingan */
-    .post-item {
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* Post Card */
+    .post-item { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .post-item:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+    .post-item img { width: 100%; height: auto; object-fit: contain; border-radius: 0.5rem; transition: transform 0.3s ease; }
+    .post-item:hover img { transform: scale(1.05); }
+
+    /* Spinner */
+    .spinner { border: 4px solid rgba(0,0,0,0.1); border-top: 4px solid #3b82f6; border-radius: 50%; width: 36px; height: 36px; animation: spin 0.8s linear infinite; margin: auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    body.dark .spinner { border: 4px solid rgba(255,255,255,0.2); border-top: 4px solid #60a5fa; }
+
+    /* Menu Burger to Back */
+    .burger-line { transition: all 0.3s ease; }
+    .menu-open .line1, .menu-open .line2, .menu-open .line3 { width: 0; }
+    .menu-open::after {
+      content: "←";
+      color: white;
+      font-size: 1.2rem;
+      position: absolute;
+      left: 0.3rem;
+      top: 0.1rem;
     }
-    .post-item:hover {
-      transform: translateY(-5px) scale(1.02);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-    }
-    .post-item img {
+
+    /* Filter Button Active Animation + Highlight */
+    .filter-btn { position: relative; overflow: hidden; transition: transform 0.2s ease, background-color 0.3s ease; }
+    .filter-btn:active { transform: scale(0.9); }
+    .filter-btn::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: -100%;
       width: 100%;
-      height: auto;
-      border-radius: 0.5rem;
-      transition: transform 0.3s ease;
+      height: 3px;
+      background-color: #3b82f6;
+      transition: left 0.3s ease;
     }
-    .post-item:hover img {
-      transform: scale(1.05);
+    .filter-active { background-color: #3b82f6 !important; color: white !important; }
+    .filter-active::after { left: 0; }
+
+    /* Popup Overlay with Blur + Animation */
+    #popup-overlay { 
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
-
-    /* Burger menu langsung jadi X */
-    .burger-line { transition: none; }
-    .menu-open .line1 { transform: rotate(45deg) translateY(8px); }
-    .menu-open .line2 { opacity: 0; }
-    .menu-open .line3 { transform: rotate(-45deg) translateY(-8px); }
-
-    /* Smooth slide + glassmorphism */
-    #mobile-menu {
-      transform: translateY(-20px);
+    #popup-box { 
+      animation: popupFadeScale 0.5s ease forwards; 
       opacity: 0;
-      transition: max-height 0.5s ease, transform 0.4s ease, opacity 0.4s ease;
+      transform: scale(0.7);
     }
-    #mobile-menu.menu-active {
-      transform: translateY(0);
-      opacity: 1;
-      background: rgba(37, 99, 235, 0.6);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-    }
-    #menu-btn.menu-open {
-      background-color: rgba(255, 255, 255, 0.15);
-      border-radius: 50%;
-    }
-
-    /* Spinner Loading */
-    #loading-spinner {
-      display: none;
-      text-align: center;
-      padding: 20px;
-    }
-    .spinner {
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      border-top: 4px solid #3b82f6;
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      animation: spin 0.8s linear infinite;
-      margin: auto;
-    }
-    body.dark .spinner {
-      border: 4px solid rgba(255, 255, 255, 0.2);
-      border-top: 4px solid #60a5fa;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    @keyframes popupFadeScale {
+      to { opacity: 1; transform: scale(1); }
     }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col transition-colors duration-500 dark:bg-gray-900" id="body">
+  
+<!-- POPUP -->
+<div id="popup-overlay" class="fixed inset-0 flex items-center justify-center z-50 bg-gradient-to-b from-black/50 to-black/60 backdrop-blur-sm">
+  <div id="popup-box" class="relative bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-2xl p-6 w-11/12 sm:w-96 lg:w-[30rem] text-center border border-white/20 dark:border-gray-700/30 backdrop-blur-xl animate-popup">
+    
+    <!-- Tombol Close -->
+    <button id="popup-close" class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md transition duration-300">
+      ✕
+    </button>
+    
+    <!-- Gambar -->
+    <img src="https://www.dropbox.com/scl/fi/eihtri11v6wowjt9tamnv/43aa37a346aa69cfd78ea4b05edab1f7_Nero_AI_Image_Upscaler_Photo_Face.jpeg?rlkey=gyjyn8xafjn1l2hmz2xlsixb7&st=j9pwudkf&dl=1" 
+         class="mx-auto mb-4 rounded-xl shadow-lg max-w-full h-auto max-h-[60vh] border border-gray-300 dark:border-gray-700" 
+         alt="Notifikasi">
+    
+    <!-- Teks -->
+    <p class="text-gray-800 dark:text-gray-200 mb-4 text-base sm:text-lg font-medium">
+      Selamat datang di <span class="font-bold text-blue-500">Luminox</span>!  
+      Selamat menikmati konten terbaru kami 🎉
+    </p>
+  </div>
+</div>
+
+<style>
+@keyframes popupFadeScale {
+  0% { opacity: 0; transform: scale(0.85); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-popup {
+  animation: popupFadeScale 0.5s ease forwards;
+}
+</style>
+
+
 
   <!-- HEADER -->
-  <header id="main-header" class="bg-gradient-to-r from-blue-500 to-indigo-500 shadow-lg sticky top-0 z-50 transition-all duration-300">
-    <div class="container mx-auto flex justify-between items-center p-4">
-      <div class="flex items-center space-x-4">
-        <img src="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=9i095v5o&dl=1" alt="Logo" class="w-10 h-10 rounded-full border-2 border-white shadow" />
-        <h1 class="text-xl font-bold text-white">Luminox</h1>
-      </div>
-
-      <nav class="hidden md:flex space-x-6 items-center">
-        <a href="#" class="text-white font-medium hover:text-yellow-300 transition">Beranda</a>
-        <div class="relative group">
-          <button class="text-white font-medium hover:text-yellow-300 transition flex items-center">
-            Layanan ▾
-          </button>
-          <div class="absolute left-0 top-full mt-2 bg-white text-gray-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-            <a href="payment.html" class="block px-6 py-3 hover:bg-gray-100">Paket Premium</a>
-            <a href="#" class="block px-6 py-3 hover:bg-gray-100">Konsultasi</a>
-          </div>
+  <header class="bg-gradient-to-r from-blue-500 to-indigo-500 shadow-lg sticky top-0 z-40">
+    <div class="container mx-auto flex justify-between items-center p-4 relative">
+      <div class="flex items-center space-x-6">
+        <div class="flex items-center space-x-4">
+          <img src="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=9i095v5o&dl=1" class="w-10 h-10 rounded-full border-2 border-white shadow" />
+          <h1 class="text-xl font-bold text-white">Luminox</h1>
         </div>
-        <a href="#" class="text-white font-medium hover:text-yellow-300 transition">Tentang</a>
-        <a href="#" class="text-white font-medium hover:text-yellow-300 transition">Kontak</a>
-      </nav>
-
+        <!-- Desktop Menu -->
+        <nav class="hidden md:flex space-x-6">
+          <a href="#" class="text-white hover:text-yellow-300">Beranda</a>
+          <a href="#" class="text-white hover:text-yellow-300">Tentang</a>
+          <a href="#" class="text-white hover:text-yellow-300">Kontak</a>
+        </nav>
+      </div>
       <div class="flex items-center space-x-3">
-        <button id="search-toggle" class="text-white hover:scale-110 transform transition">🔍</button>
-        <button id="darkmode-btn" class="text-white hover:scale-110 transform transition">🌙</button>
-        <button id="menu-btn" class="md:hidden w-7 h-7 flex flex-col justify-between items-center p-1 rounded hover:bg-blue-600 transition-all">
-          <span class="burger-line line1 block w-6 h-0.5 bg-white rounded"></span>
-          <span class="burger-line line2 block w-6 h-0.5 bg-white rounded"></span>
-          <span class="burger-line line3 block w-6 h-0.5 bg-white rounded"></span>
+        <button id="search-toggle" class="text-white text-lg">🔍</button>
+        <button id="darkmode-btn" class="text-white text-lg">🌙</button>
+        
+        <!-- Mobile Menu Button -->
+        <button id="menu-btn" class="flex flex-col justify-between w-6 h-5 md:hidden relative">
+          <span class="burger-line line1 block h-0.5 bg-white rounded"></span>
+          <span class="burger-line line2 block h-0.5 bg-white rounded"></span>
+          <span class="burger-line line3 block h-0.5 bg-white rounded"></span>
         </button>
       </div>
     </div>
-
+    
+    <!-- Mobile Menu -->
+    <nav id="mobile-menu" class="max-h-0 overflow-hidden flex-col bg-blue-600 md:hidden transition-all duration-500">
+      <a href="#" class="block px-6 py-3 text-white hover:bg-blue-700">Beranda</a>
+      <a href="#" class="block px-6 py-3 text-white hover:bg-blue-700">Tentang</a>
+      <a href="#" class="block px-6 py-3 text-white hover:bg-blue-700">Kontak</a>
+    </nav>
+    
+    <!-- Search Bar -->
     <div id="search-container" class="bg-blue-600 overflow-hidden max-h-0 transition-all duration-500">
       <div class="container mx-auto p-4">
         <input id="search-input" type="text" placeholder="Cari postingan..." class="w-full p-3 rounded-lg border-0 shadow focus:ring-4 focus:ring-yellow-300" />
       </div>
     </div>
-
-    <nav id="mobile-menu" class="max-h-0 overflow-hidden flex-col bg-gradient-to-b from-blue-500 to-indigo-500 md:hidden">
-      <a href="#" class="block px-6 py-3 text-white hover:bg-blue-600 transition">Beranda</a>
-      <div class="border-t border-blue-400">
-        <button id="mobile-submenu-btn" class="w-full flex justify-between items-center px-6 py-3 text-white hover:bg-blue-600 transition">
-          Layanan ▾
-        </button>
-        <div id="mobile-submenu" class="max-h-0 overflow-hidden bg-blue-600 transition-all duration-500">
-          <a href="payment.html" class="block px-8 py-3 text-white hover:bg-blue-500">Paket Premium</a>
-          <a href="#" class="block px-8 py-3 text-white hover:bg-blue-500">Konsultasi</a>
-        </div>
-      </div>
-      <a href="#" class="block px-6 py-3 text-white hover:bg-blue-600 transition">Tentang</a>
-      <a href="#" class="block px-6 py-3 text-white hover:bg-blue-600 transition">Kontak</a>
-    </nav>
   </header>
 
-  <!-- CAROUSEL -->
-  <section class="relative overflow-hidden w-full h-64 bg-gray-200">
-    <div id="carousel" class="flex w-full h-full">
-      <div class="flex-shrink-0 w-full h-full"><img src="https://www.dropbox.com/scl/fi/0nj4z0qe79cxqtelk2ecr/57863546a9eddec8fe6c3d865dc36ad4.jpg?rlkey=2ofwypodgwipm5ugni32kdwow&st=fns33dbd&dl=1" loading="lazy" class="w-full h-full object-cover" /></div>
+  <!-- FILTER -->
+  <section class="container mx-auto px-4 py-4">
+    <div class="flex flex-wrap sm:flex-nowrap gap-2">
+      <button class="filter-btn filter-active px-3 py-1 rounded bg-blue-500 text-white text-sm sm:text-base" data-filter="all">Semua</button>
+      <button class="filter-btn px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 dark:text-white text-sm sm:text-base" data-filter="template">Template</button>
+      <button class="filter-btn px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 dark:text-white text-sm sm:text-base" data-filter="addon">Addon</button>
     </div>
   </section>
 
   <!-- POSTINGAN -->
-  <section class="container mx-auto px-4 py-8">
+  <section class="container mx-auto px-4 pb-8">
     <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Postingan Terbaru</h2>
-    <div id="post-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 post-item fade-in cursor-pointer" data-link="post.html">
-        <img src="https://www.dropbox.com/scl/fi/cgz0co7k26b8tovk7ag4f/IMG_20250810_142227_889.jpg?rlkey=n2gydifd0jnbshebvwwvk8hcn&st=0qnved1o&dl=1" loading="lazy" class="mb-3 w-full object-cover" />
-        <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400 post-title">Sameko Saba</h3>
-        <p class="text-gray-600 dark:text-gray-300 text-sm post-desc">Genre: -</p>
-      </div>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 post-item fade-in cursor-pointer" data-link="posting.html">
-        <img src="https://www.dropbox.com/scl/fi/uwcmw5oodewidt49dmem4/f2dfdc4aecb5bb33b3e2245929ef3037.jpg?rlkey=xxoehpupgz6uj9azxcsvs9lbn&st=hwv640vz&dl=1" loading="lazy" class="mb-3 w-full object-cover" />
-        <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400 post-title">RLCraft</h3>
-        <p class="text-gray-600 dark:text-gray-300 text-sm post-desc">Type: Template</p>
-      </div>
-    </div>
-    <div id="loading-spinner"><div class="spinner"></div></div>
+    <div id="post-list" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"></div>
+    <div id="loading-spinner" class="hidden"><div class="spinner"></div></div>
     <p id="no-results" class="hidden text-center text-gray-500 mt-6">Tidak ada postingan ditemukan</p>
   </section>
 
@@ -171,124 +167,131 @@
     © 2025 Luminox. All rights reserved.
   </footer>
 
-  <!-- SCRIPT -->
   <script>
+    const postList = document.getElementById('post-list');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const searchInput = document.getElementById('search-input');
+    const noResults = document.getElementById('no-results');
     const menuBtn = document.getElementById('menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
-    const mobileSubmenuBtn = document.getElementById('mobile-submenu-btn');
-    const mobileSubmenu = document.getElementById('mobile-submenu');
-    const searchToggle = document.getElementById('search-toggle');
-    const searchContainer = document.getElementById('search-container');
-    const searchInput = document.getElementById('search-input');
-    const posts = document.querySelectorAll('.post-item');
-    const postList = document.getElementById('post-list');
-    const noResults = document.getElementById('no-results');
-    const loadingSpinner = document.getElementById('loading-spinner');
+    const popupOverlay = document.getElementById('popup-overlay');
+    const popupClose = document.getElementById('popup-close');
 
-    // Menu toggle
-    menuBtn.addEventListener('click', () => {
-      mobileMenu.classList.toggle('max-h-0');
-      mobileMenu.classList.toggle('max-h-screen');
-      menuBtn.classList.toggle('menu-open');
-      mobileMenu.classList.toggle('menu-active');
+    let loadCount = 0;
+    let isLoading = false;
+    const samplePosts = [
+      { title: "Cave Biome", desc: "Type: Addon", filter: "addon", img: "https://www.dropbox.com/scl/fi/n90v47mrj7mnspw0fpbhe/IMG-20250709-WA0034.jpg?rlkey=p8h9fykzjwjmbva5bm3rwpxpm&st=nq2xmxcd&dl=1", link: "posting2.html" },
+      { title: "RLCraft", desc: "Type: Template", filter: "template", img: "https://www.dropbox.com/scl/fi/47i0hm26g7qovlz4ksw2v/IMG-20250723-WA0000.jpg?rlkey=pxw8c73i13elpr9avyytntkvu&st=ycakjqki&dl=1", link: "posting1.html" }
+    ];
+
+    function createPost(p) {
+      const div = document.createElement('div');
+      div.className = "bg-white dark:bg-gray-800 rounded-lg shadow p-3 post-item fade-in cursor-pointer";
+      div.dataset.filter = p.filter;
+      div.setAttribute('data-link', p.link);
+      div.innerHTML = `
+        <img src="${p.img}" loading="lazy" />
+        <h3 class="text-base font-semibold text-blue-600 dark:text-blue-400 post-title">${p.title}</h3>
+        <p class="text-gray-600 dark:text-gray-300 text-xs post-desc">${p.desc}</p>
+        <div class="flex justify-between items-center mt-2 text-xs text-gray-500 dark:text-gray-400">
+          <span class="views">👁 ${Math.floor(Math.random()*50)+1}</span>
+          <button class="like-btn">❤️ 0</button>
+        </div>
+      `;
+      div.addEventListener('click', e => {
+        if (!e.target.classList.contains('like-btn')) {
+          window.location.href = p.link;
+        }
+      });
+      div.querySelector('.like-btn').addEventListener('click', e => {
+        e.stopPropagation();
+        let count = parseInt(e.target.textContent.replace('❤️ ', ''));
+        e.target.textContent = `❤️ ${count+1}`;
+      });
+      postList.appendChild(div);
+    }
+
+    function loadPosts() {
+      isLoading = true;
+      loadingSpinner.classList.remove('hidden');
+      setTimeout(() => {
+        samplePosts.forEach(p => createPost(p));
+        loadCount++;
+        isLoading = false;
+        loadingSpinner.classList.add('hidden');
+        observeViews();
+      }, 800);
+    }
+
+    function observeViews() {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const viewEl = entry.target.querySelector('.views');
+            let count = parseInt(viewEl.textContent.replace('👁 ', ''));
+            viewEl.textContent = `👁 ${count+1}`;
+          }
+        });
+      }, { threshold: 1.0 });
+
+      document.querySelectorAll('.post-item').forEach(item => observer.observe(item));
+    }
+
+    window.addEventListener('scroll', () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50 && !isLoading && loadCount < 3) {
+        loadPosts();
+      }
     });
 
-    // Mobile submenu
-    mobileSubmenuBtn.addEventListener('click', () => {
-      mobileSubmenu.classList.toggle('max-h-0');
-      mobileSubmenu.classList.toggle('max-h-40');
-    });
+    loadPosts();
 
-    // Search toggle
-    searchToggle.addEventListener('click', () => {
-      searchContainer.classList.toggle('max-h-0');
-      searchContainer.classList.toggle('max-h-20');
-      searchInput.focus();
-    });
-
-    // Search filter
     searchInput.addEventListener('input', () => {
-      const query = searchInput.value.toLowerCase();
+      const q = searchInput.value.toLowerCase();
       let visibleCount = 0;
       document.querySelectorAll('.post-item').forEach(post => {
-        const title = post.querySelector('.post-title').textContent.toLowerCase();
-        const desc = post.querySelector('.post-desc').textContent.toLowerCase();
-        const match = title.includes(query) || desc.includes(query);
+        const t = post.querySelector('.post-title').textContent.toLowerCase();
+        const d = post.querySelector('.post-desc').textContent.toLowerCase();
+        const match = t.includes(q) || d.includes(q);
         post.style.display = match ? '' : 'none';
         if (match) visibleCount++;
       });
       noResults.classList.toggle('hidden', visibleCount > 0);
     });
 
-    // Dark mode
-    document.getElementById('darkmode-btn').addEventListener('click', () => {
-      document.getElementById('body').classList.toggle('dark');
-    });
-
-    // Klik postingan
-    posts.forEach(item => {
-      item.addEventListener('click', () => {
-        const link = item.getAttribute('data-link') || '#';
-        window.location.href = link;
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('filter-active'));
+        btn.classList.add('filter-active');
+        const filter = btn.dataset.filter;
+        document.querySelectorAll('.post-item').forEach(post => {
+          post.style.display = (filter === 'all' || post.dataset.filter === filter) ? '' : 'none';
+        });
       });
     });
 
-    // Lazy load fade-in
-    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
-      img.style.opacity = 0;
-      img.onload = () => {
-        img.style.transition = "opacity 0.5s ease";
-        img.style.opacity = 1;
-      };
+    document.getElementById('darkmode-btn').addEventListener('click', () => {
+      document.body.classList.toggle('dark');
     });
 
-    // Infinite scroll + loading spinner
-    let loadCount = 0;
-    let isLoading = false;
-    const samplePosts = [
-      { title: "Post Baru 1", desc: "Genre: Adventure", img: "https://via.placeholder.com/300x200", link: "detail1.html" },
-      { title: "Post Baru 2", desc: "Genre: Action", img: "https://via.placeholder.com/300x200", link: "detail2.html" },
-      { title: "Post Baru 3", desc: "Type: Template", img: "https://via.placeholder.com/300x200", link: "detail3.html" },
-      { title: "Post Baru 4", desc: "Genre: RPG", img: "https://via.placeholder.com/300x200", link: "detail4.html" }
-    ];
-
-    window.addEventListener('scroll', () => {
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50 && !isLoading) {
-        if (loadCount < 3) {
-          isLoading = true;
-          loadingSpinner.style.display = "block";
-          setTimeout(() => {
-            samplePosts.forEach(p => {
-              const div = document.createElement('div');
-              div.className = "bg-white dark:bg-gray-800 rounded-lg shadow p-4 post-item fade-in cursor-pointer";
-              div.setAttribute('data-link', p.link);
-              div.innerHTML = `
-                <img src="${p.img}" loading="lazy" class="mb-3 w-full object-cover" />
-                <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400 post-title">${p.title}</h3>
-                <p class="text-gray-600 dark:text-gray-300 text-sm post-desc">${p.desc}</p>
-              `;
-              div.addEventListener('click', () => { window.location.href = p.link; });
-              postList.appendChild(div);
-            });
-            loadCount++;
-            isLoading = false;
-            loadingSpinner.style.display = "none";
-          }, 1000);
-        }
-      }
+    document.getElementById('search-toggle').addEventListener('click', () => {
+      document.getElementById('search-container').classList.toggle('max-h-0');
+      document.getElementById('search-container').classList.toggle('max-h-20');
+      searchInput.focus();
     });
 
-    // Carousel
-    let index = 0;
-    const slides = document.querySelectorAll('#carousel > div');
-    const carousel = document.getElementById('carousel');
-    document.getElementById('prevBtn').onclick = () => showSlide(index - 1);
-    document.getElementById('nextBtn').onclick = () => showSlide(index + 1);
-    function showSlide(i) {
-      index = (i + slides.length) % slides.length;
-      carousel.style.transform = `translateX(-${index * 100}%)`;
-    }
-    setInterval(() => showSlide(index + 1), 5000);
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('max-h-0');
+      mobileMenu.classList.toggle('max-h-40');
+      menuBtn.classList.toggle('menu-open');
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      popupOverlay.classList.remove('hidden');
+    });
+
+    popupClose.addEventListener('click', () => {
+      popupOverlay.classList.add('hidden');
+    });
   </script>
 </body>
 </html>

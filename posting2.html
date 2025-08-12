@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Luminox</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    /* Animasi masuk */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-fadeUp {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-gradient-to-r from-blue-500 to-indigo-500 shadow-lg">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2 text-white hover:opacity-80 transition">
+        ⬅ <span class="font-medium">Kembali</span>
+      </a>
+      <div class="flex items-center gap-2 text-white font-bold">
+        <img src="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=9i095v5o&dl=1" class="w-9 h-9 rounded-full border border-white shadow-md" alt="logo">
+        Luminox
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto p-4 space-y-8">
+    <!-- Poster + Info -->
+    <div class="flex flex-col md:flex-row gap-8 animate-fadeUp">
+      <!-- Poster -->
+      <div class="flex-shrink-0 w-full md:w-64 transform hover:scale-105 transition duration-300">
+        <img src="https://www.dropbox.com/scl/fi/n90v47mrj7mnspw0fpbhe/IMG-20250709-WA0034.jpg?rlkey=p8h9fykzjwjmbva5bm3rwpxpm&st=nq2xmxcd&dl=1" alt="Poster" class="rounded-xl shadow-lg w-full">
+      </div>
+      <!-- Info -->
+      <div class="flex-1 space-y-4">
+        <h1 class="text-4xl font-extrabold text-gray-900">RLCraft</h1>
+        <div class="bg-white rounded-lg shadow p-4">
+          <h2 class="font-semibold text-lg mb-2 text-indigo-600">Informasi</h2>
+          <p class="text-gray-700 leading-relaxed">
+            Studio: Honey Frost<br>
+            Type: Addon<br>
+            Credit: Noirr<br>
+            Update: 1.1
+          </p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <h2 class="font-semibold text-lg mb-2 text-indigo-600">Deskripsi</h2>
+          <p class="text-gray-700 leading-relaxed">
+            Jika ingin cepat update bisa join ke saluran.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Link Download -->
+    <section class="animate-fadeUp" style="animation-delay: 0.3s;">
+      <h2 class="text-2xl font-bold mb-4 text-gray-900">Link Download</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5">
+        <!-- Tombol -->
+        <a href="https://www.mediafire.com/file/ntr1lw1qzu3zbpd/Cave_Biomes_Add-On_By_noirr.mcaddon/file" 
+           class="bg-white rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-1 transition-all p-4 flex items-center justify-center font-semibold text-blue-600 border border-gray-100">
+          MediaFire
+        </a>
+        <a href="post.html?ep=2" 
+           class="bg-white rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-1 transition-all p-4 flex items-center justify-center font-semibold text-green-600 border border-gray-100">
+          Google Drive
+        </a>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>
