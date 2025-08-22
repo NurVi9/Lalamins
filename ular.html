@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        /* Background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100vw);
+                opacity: 0;
+            }
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            max-width: 500px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(0deg);
+            z-index: -1;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            width: 100%;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+            background: linear-gradient(to right, #00ffcc, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: 1px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, #00ffcc, #00ccff);
+            border-radius: 3px;
+        }
+        
+        .score-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .score-box {
+            text-align: center;
+            color: white;
+            flex: 1;
+            position: relative;
+            padding: 10px;
+        }
+        
+        .score-box:first-child::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 15%;
+            height: 70%;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.3), transparent);
+        }
+        
+        .score-title {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 300;
+        }
+        
+        .score-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 200, 255, 0.7);
+            color: #ffffff;
+        }
+        
+        .game-board {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        canvas {
+            display: block;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+        }
+        
+        .arrow-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 220px;
+        }
+        
+        .control-btn {
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(145deg, rgba(0, 0, 0, 0.3), rgba(50, 50, 50, 0.3));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent);
+            border-radius: 12px;
+        }
+        
+        .control-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .control-btn:hover {
+            background: linear-gradient(145deg, rgba(0, 150, 200, 0.4), rgba(0, 100, 150, 0.4));
+        }
+        
+        #up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        
+        #left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+        
+        #right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+        
+        #down {
+            grid-column: 2;
+            grid-row: 3;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .action-btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            min-width: 140px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+            z-index: -1;
+        }
+        
+        .action-btn:hover::before {
+            transform: translateX(100%);
+        }
+        
+        #start-btn {
+            background: linear-gradient(to right, #00b4db, #0083b0);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 180, 219, 0.4);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1.05);
+                box-shadow: 0 10px 25px rgba(0, 180, 219, 0.4);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 15px 30px rgba(0, 180, 219, 0.6);
+            }
+            100% {
+                transform: scale(1.05);
+                box-shadow: 0 10px 25px rgba(0, 180, 219, 0.4);
+            }
+        }
+        
+        #reset-btn {
+            background: linear-gradient(to right, #ff758c, #ff7eb3);
+            color: white;
+            transform: scale(1);
+            box-shadow: 0 8px 20px rgba(255, 117, 140, 0.4);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        #reset-btn:hover {
+            box-shadow: 0 12px 25px rgba(255, 117, 140, 0.5);
+        }
+        
+        #start-btn:hover {
+            animation: none;
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 15px 30px rgba(0, 180, 219, 0.6);
+        }
+        
+        .action-btn:active {
+            transform: translateY(0) scale(1);
+        }
+        
+        .instructions {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 12px;
+            color: white;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .instructions p {
+            margin: 8px 0;
+            font-size: 0.95rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2rem;
+            display: none;
+            border-radius: 15px;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+        }
+        
+        .game-over h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 50, 50, 0.8);
+            color: #ff3366;
+            animation: gameOverText 1.5s infinite alternate;
+        }
+        
+        @keyframes gameOverText {
+            from {
+                transform: scale(1);
+                text-shadow: 0 0 20px rgba(255, 50, 50, 0.8);
+            }
+            to {
+                transform: scale(1.05);
+                text-shadow: 0 0 30px rgba(255, 0, 0, 1);
+            }
+        }
+        
+        .game-over p {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+        
+        #final-score {
+            color: #ffcc00;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
+        }
+        
+        .game-over button {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: linear-gradient(to right, #00b4db, #0083b0);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 180, 219, 0.4);
+        }
+        
+        .game-over button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 180, 219, 0.6);
+        }
+        
+        @media (max-width: 500px) {
+            .game-container {
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .score-value {
+                font-size: 1.8rem;
+            }
+            
+            .control-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 1.5rem;
+            }
+            
+            .action-btn {
+                padding: 14px 25px;
+                font-size: 1.1rem;
+                min-width: 120px;
+            }
+            
+            #start-btn {
+                padding: 15px 25px;
+            }
+            
+            .game-over h2 {
+                font-size: 2.2rem;
+            }
+            
+            .game-over p {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background particles -->
+    <div class="particles" id="particles"></div>
+    
+    <div class="game-container">
+        <div class="header">
+            <h1>Snake Game</h1>
+        </div>
+        
+        <div class="score-container">
+            <div class="score-box">
+                <div class="score-title">SCORE</div>
+                <div id="score" class="score-value">0</div>
+            </div>
+            <div class="score-box">
+                <div class="score-title">HIGH SCORE</div>
+                <div id="high-score" class="score-value">0</div>
+            </div>
+        </div>
+        
+        <div class="game-board">
+            <canvas id="game-canvas"></canvas>
+            <div id="game-over" class="game-over">
+                <h2>Game Over</h2>
+                <p>Skor Anda: <span id="final-score">0</span></p>
+                <button id="restart-btn">Main Lagi</button>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="arrow-controls">
+                <button id="up" class="control-btn">↑</button>
+                <button id="left" class="control-btn">←</button>
+                <button id="right" class="control-btn">→</button>
+                <button id="down" class="control-btn">↓</button>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="start-btn">Mulai</button>
+                <button id="reset-btn">Reset</button>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <p>Gunakan tombol panah atau WASD untuk mengontrol ular</p>
+            <p>Makan makanan berwarna untuk menambah score</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('game-canvas');
+            const ctx = canvas.getContext('2d');
+            const scoreDisplay = document.getElementById('score');
+            const highScoreDisplay = document.getElementById('high-score');
+            const finalScoreDisplay = document.getElementById('final-score');
+            const gameOverScreen = document.getElementById('game-over');
+            const startBtn = document.getElementById('start-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const upBtn = document.getElementById('up');
+            const downBtn = document.getElementById('down');
+            const leftBtn = document.getElementById('left');
+            const rightBtn = document.getElementById('right');
+            const particlesContainer = document.getElementById('particles');
+            
+            // Create background particles
+            function createParticles() {
+                particlesContainer.innerHTML = '';
+                const particleCount = Math.floor(window.innerWidth / 20);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    
+                    const size = Math.random() * 5 + 2;
+                    const posX = Math.random() * 100;
+                    const posY = Math.random() * 100;
+                    const delay = Math.random() * 15;
+                    const duration = Math.random() * 20 + 15;
+                    
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    particle.style.left = `${posX}vw`;
+                    particle.style.top = `${posY}vh`;
+                    particle.style.animationDelay = `${delay}s`;
+                    particle.style.animationDuration = `${duration}s`;
+                    
+                    particlesContainer.appendChild(particle);
+                }
+            }
+            
+            createParticles();
+            window.addEventListener('resize', createParticles);
+            
+            // Ukuran canvas
+            const size = Math.min(500, window.innerWidth - 80);
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Konstanta game
+            const gridSize = 20;
+            const cellSize = canvas.width / gridSize;
+            let speed = 150; // ms
+            let score = 0;
+            let highScore = localStorage.getItem('snakeHighScore') || 0;
+            highScoreDisplay.textContent = highScore;
+            
+            // Variabel game
+            let snake = [];
+            let food = {};
+            let direction = 'right';
+            let nextDirection = 'right';
+            let gameInterval = null;
+            let gameRunning = false;
+            
+            // Inisialisasi game
+            function initGame() {
+                snake = [
+                    {x: 10, y: 10},
+                    {x: 9, y: 10},
+                    {x: 8, y: 10}
+                ];
+                generateFood();
+                score = 0;
+                scoreDisplay.textContent = score;
+                direction = 'right';
+                nextDirection = 'right';
+            }
+            
+            // Generate makanan di posisi random
+            function generateFood() {
+                food = {
+                    x: Math.floor(Math.random() * gridSize),
+                    y: Math.floor(Math.random() * gridSize)
+                };
+                
+                // Pastikan makanan tidak muncul di atas ular
+                for (let segment of snake) {
+                    if (segment.x === food.x && segment.y === food.y) {
+                        return generateFood();
+                    }
+                }
+            }
+            
+            // Gambar game dengan efek visual yang ditingkatkan
+            function draw() {
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Gambar latar belakang grid yang lebih menarik
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+                for (let i = 0; i < gridSize; i++) {
+                    for (let j = 0; j < gridSize; j++) {
+                        if ((i + j) % 2 === 0) {
+                            ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
+                        }
+                    }
+                }
+                
+                // Gambar border untuk setiap cell
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+                ctx.lineWidth = 0.5;
+                for (let i = 0; i <= gridSize; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(i * cellSize, 0);
+                    ctx.lineTo(i * cellSize, canvas.height);
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(0, i * cellSize);
+                    ctx.lineTo(canvas.width, i * cellSize);
+                    ctx.stroke();
+                }
+                
+                // Gambar ular dengan efek yang lebih menarik
+                snake.forEach((segment, index) => {
+                    // Efek glow untuk seluruh ular
+                    ctx.shadowColor = 'rgba(0, 255, 200, 0.5)';
+                    ctx.shadowBlur = 10;
+                    
+                    if (index === 0) {
+                        // Kepala ular dengan gradient
+                        const gradient = ctx.createLinearGradient(
+                            segment.x * cellSize, 
+                            segment.y * cellSize,
+                            segment.x * cellSize + cellSize,
+                            segment.y * cellSize + cellSize
+                        );
+                        gradient.addColorStop(0, '#4CAF50');
+                        gradient.addColorStop(1, '#2E8B57');
+                        
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(segment.x * cellSize, segment.y * cellSize, cellSize, cellSize);
+                        
+                        // Mata ular
+                        ctx.fillStyle = '#000';
+                        ctx.shadowBlur = 0;
+                        const eyeSize = cellSize / 5;
+                        const offset = cellSize / 4;
+                        
+                        if (direction === 'right') {
+                            ctx.fillRect(segment.x * cellSize + cellSize - offset, segment.y * cellSize + offset, eyeSize, eyeSize);
+                            ctx.fillRect(segment.x * cellSize + cellSize - offset, segment.y * cellSize + cellSize - offset - eyeSize, eyeSize, eyeSize);
+                        } else if (direction === 'left') {
+                            ctx.fillRect(segment.x * cellSize + offset, segment.y * cellSize + offset, eyeSize, eyeSize);
+                            ctx.fillRect(segment.x * cellSize + offset, segment.y * cellSize + cellSize - offset - eyeSize, eyeSize, eyeSize);
+                        } else if (direction === 'up') {
+                            ctx.fillRect(segment.x * cellSize + offset, segment.y * cellSize + offset, eyeSize, eyeSize);
+                            ctx.fillRect(segment.x * cellSize + cellSize - offset - eyeSize, segment.y * cellSize + offset, eyeSize, eyeSize);
+                        } else if (direction === 'down') {
+                            ctx.fillRect(segment.x * cellSize + offset, segment.y * cellSize + cellSize - offset - eyeSize, eyeSize, eyeSize);
+                            ctx.fillRect(segment.x * cellSize + cellSize - offset - eyeSize, segment.y * cellSize + cellSize - offset - eyeSize, eyeSize, eyeSize);
+                        }
+                    } else {
+                        // Badan ular dengan gradien warna yang lebih halus
+                        const greenValue = 150 + Math.floor(105 * (1 - index / snake.length));
+                        ctx.fillStyle = `rgb(50, ${greenValue}, 50)`;
+                        ctx.fillRect(segment.x * cellSize, segment.y * cellSize, cellSize, cellSize);
+                    }
+                    
+                    // Efek 3D untuk segment ular
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(segment.x * cellSize, segment.y * cellSize, cellSize, cellSize);
+                    
+                    // Highlight pada bagian atas segment
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(segment.x * cellSize, segment.y * cellSize);
+                    ctx.lineTo(segment.x * cellSize + cellSize, segment.y * cellSize);
+                    ctx.lineTo(segment.x * cellSize + cellSize, segment.y * cellSize + cellSize);
+                    ctx.stroke();
+                });
+                
+                ctx.shadowBlur = 0;
+                
+                // Gambar makanan dengan efek yang lebih menarik
+                const foodX = food.x * cellSize + cellSize / 2;
+                const foodY = food.y * cellSize + cellSize / 2;
+                const foodRadius = cellSize / 2 - 2;
+                
+                // Efek glow untuk makanan
+                ctx.shadowColor = '#FF5252';
+                ctx.shadowBlur = 15;
+                
+                // Gradient untuk makanan
+                const foodGradient = ctx.createRadialGradient(
+                    foodX, foodY, 0,
+                    foodX, foodY, foodRadius
+                );
+                foodGradient.addColorStop(0, '#FF7B7B');
+                foodGradient.addColorStop(1, '#FF5252');
+                
+                ctx.fillStyle = foodGradient;
+                ctx.beginPath();
+                ctx.arc(foodX, foodY, foodRadius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.shadowBlur = 0;
+                
+                // Highlight untuk makanan
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.beginPath();
+                ctx.arc(foodX - foodRadius/3, foodY - foodRadius/3, foodRadius/4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Update game state
+            function update() {
+                // Update arah
+                direction = nextDirection;
+                
+                // Simpan posisi kepala lama
+                const head = {x: snake[0].x, y: snake[0].y};
+                
+                // Pindahkan kepala berdasarkan arah
+                if (direction === 'right') head.x++;
+                if (direction === 'left') head.x--;
+                if (direction === 'up') head.y--;
+                if (direction === 'down') head.y++;
+                
+                // Cek tabrakan dengan dinding
+                if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
+                    gameOver();
+                    return;
+                }
+                
+                // Cek tabrakan dengan diri sendiri
+                for (let i = 0; i < snake.length; i++) {
+                    if (snake[i].x === head.x && snake[i].y === head.y) {
+                        gameOver();
+                        return;
+                    }
+                }
+                
+                // Tambahkan kepala baru
+                snake.unshift(head);
+                
+                // Cek jika makan makanan
+                if (head.x === food.x && head.y === food.y) {
+                    // Tambah score
+                    score += 10;
+                    scoreDisplay.textContent = score;
+                    
+                    // Animasi score
+                    scoreDisplay.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        scoreDisplay.style.transform = 'scale(1)';
+                    }, 200);
+                    
+                    // Generate makanan baru
+                    generateFood();
+                    
+                    // Tingkatkan kecepatan
+                    if (speed > 50 && score % 50 === 0) {
+                        speed -= 10;
+                        clearInterval(gameInterval);
+                        gameInterval = setInterval(gameLoop, speed);
+                    }
+                } else {
+                    // Hapus ekor jika tidak makan
+                    snake.pop();
+                }
+            }
+            
+            // Game loop
+            function gameLoop() {
+                update();
+                draw();
+            }
+            
+            // Game over
+            function gameOver() {
+                clearInterval(gameInterval);
+                gameRunning = false;
+                
+                // Update high score
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('snakeHighScore', highScore);
+                    highScoreDisplay.textContent = highScore;
+                    
+                    // Animasi high score
+                    highScoreDisplay.style.transform = 'scale(1.3)';
+                    setTimeout(() => {
+                        highScoreDisplay.style.transform = 'scale(1)';
+                    }, 500);
+                }
+                
+                // Tampilkan game over screen
+                finalScoreDisplay.textContent = score;
+                gameOverScreen.style.display = 'flex';
+            }
+            
+            // Start game
+            function startGame() {
+                if (gameRunning) return;
+                
+                initGame();
+                gameOverScreen.style.display = 'none';
+                gameRunning = true;
+                gameInterval = setInterval(gameLoop, speed);
+                
+                // Animasi tombol start
+                startBtn.style.transform = 'scale(1)';
+            }
+            
+            // Event listeners untuk tombol kontrol
+            document.addEventListener('keydown', (e) => {
+                switch(e.key) {
+                    case 'ArrowUp':
+                    case 'w':
+                    case 'W':
+                        if (direction !== 'down') nextDirection = 'up';
+                        break;
+                    case 'ArrowDown':
+                    case 's':
+                    case 'S':
+                        if (direction !== 'up') nextDirection = 'down';
+                        break;
+                    case 'ArrowLeft':
+                    case 'a':
+                    case 'A':
+                        if (direction !== 'right') nextDirection = 'left';
+                        break;
+                    case 'ArrowRight':
+                    case 'd':
+                    case 'D':
+                        if (direction !== 'left') nextDirection = 'right';
+                        break;
+                }
+            });
+            
+            // Event listeners untuk tombol di layar
+            upBtn.addEventListener('click', () => {
+                if (direction !== 'down') nextDirection = 'up';
+            });
+            
+            downBtn.addEventListener('click', () => {
+                if (direction !== 'up') nextDirection = 'down';
+            });
+            
+            leftBtn.addEventListener('click', () => {
+                if (direction !== 'right') nextDirection = 'left';
+            });
+            
+            rightBtn.addEventListener('click', () => {
+                if (direction !== 'left') nextDirection = 'right';
+            });
+            
+            startBtn.addEventListener('click', startGame);
+            
+            resetBtn.addEventListener('click', () => {
+                clearInterval(gameInterval);
+                gameRunning = false;
+                initGame();
+                draw();
+                gameOverScreen.style.display = 'none';
+                
+                // Reset animasi tombol start
+                startBtn.style.transform = 'scale(1.05)';
+            });
+            
+            restartBtn.addEventListener('click', startGame);
+            
+            // Inisialisasi gambar awal
+            initGame();
+            draw();
+        });
+    </script>
+</body>
+</html>
