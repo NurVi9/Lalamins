@@ -3,295 +3,1559 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Luminox</title>
+  <title>Luminox — Advanced Plus</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-  
-    /* Fade-in Animation */
-    .fade-in { opacity: 0; animation: fadeInUp 0.6s forwards; }
-    @keyframes fadeInUp { from { opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
+    /* =====================================
+       THEME & TOKENS
+       ===================================== */
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --accent: #3b82f6;
+      --accent2: #7c3aed;
+      --success: #10b981;
+      --danger: #ef4444;
+      --ring: rgba(59,130,246,0.4);
+    }
+    [data-theme="dark"] {
+      --bg: #0b1220;
+      --card: #091325;
+      --text: #e6eef8;
+      --muted: #9aa9bf;
+      --accent: #60a5fa;
+      --accent2: #a78bfa;
+      --ring: rgba(96,165,250,0.35);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { background: var(--bg); color: var(--text); transition: background .25s, color .25s; }
 
-    /* Post Card */
-    .post-item { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-    .post-item:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
-    .post-item img { width: 100%; height: auto; object-fit: contain; border-radius: 0.5rem; transition: transform 0.3s ease; }
-    .post-item:hover img { transform: scale(1.05); }
-
-    /* Spinner */
-    .spinner { border: 4px solid rgba(0,0,0,0.1); border-top: 4px solid #3b82f6; border-radius: 50%; width: 36px; height: 36px; animation: spin 0.8s linear infinite; margin: auto; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    body.dark .spinner { border: 4px solid rgba(255,255,255,0.2); border-top: 4px solid #60a5fa; }
-
-    /* Menu Burger to Back */
-    .burger-line { transition: all 0.3s ease; }
-    .menu-open .line1, .menu-open .line2, .menu-open .line3 { width: 0; }
-    .menu-open::after {
-      content: "←";
-      color: white;
-      font-size: 1.2rem;
-      position: absolute;
-      left: 0.3rem;
-      top: 0.1rem;
+    /* Animated global gradient backdrop */
+    body::before {
+      content: ""; position: fixed; inset: 0; z-index: -1;
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(124,58,237,.18), transparent 60%),
+                  radial-gradient(800px 500px at 110% 10%, rgba(59,130,246,.18), transparent 60%),
+                  radial-gradient(1000px 600px at -10% 120%, rgba(236,72,153,.15), transparent 60%);
+      filter: blur(20px);
+      animation: bgFloat 22s ease-in-out infinite alternate;
+    }
+    @keyframes bgFloat {
+      0% { transform: translateY(0); opacity: .85; }
+      100% { transform: translateY(-10px); opacity: 1; }
     }
 
-    /* Filter Button Active Animation + Highlight */
-    .filter-btn { position: relative; overflow: hidden; transition: transform 0.2s ease, background-color 0.3s ease; }
-    .filter-btn:active { transform: scale(0.9); }
-    .filter-btn::after {
-      content: "";
+    /* Utilities */
+    .muted { color: var(--muted); }
+    .ringed { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+
+    /* Fade / slide */
+    .fade-in { opacity: 0; animation: fadeInUp .5s .05s forwards; }
+    @keyframes fadeInUp { from {opacity:0; transform:translateY(12px);} to {opacity:1; transform:translateY(0);} }
+
+    /* Header blur */
+    .glass {
+      background: linear-gradient(90deg, #3b82f6, #2563eb, #0ea5e9);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border: none;
+    }
+
+    /* Cards */
+    .post-card { background: var(--card); border-radius: 14px; padding: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.07); transition: transform .15s, box-shadow .25s; }
+    .post-card:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 14px 38px rgba(0,0,0,.12); }
+
+    /* Skeletons */
+    .skeleton { border-radius: 12px; overflow: hidden; }
+    .skeleton .shimmer { height: 100%; width: 100%; background: linear-gradient(90deg, rgba(148,163,184,.25) 25%, rgba(148,163,184,.1) 50%, rgba(148,163,184,.25) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+    @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+
+    /* Modal */
+    .modal-backdrop { position: fixed; inset:0; background: rgba(2,6,23,0.55); display:flex; align-items:center; justify-content:center; z-index:1200; }
+    .modal { background: var(--card); color: var(--text); border-radius: 16px; padding:16px; width: min(920px, 96%); box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
+
+    /* Top notification (drop-in) */
+    #top-notif { position: fixed; top: -140px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.95); border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,.22); padding: 10px 14px; display:flex; gap:10px; align-items:center; min-width: 320px; max-width: 92%; z-index: 1400; opacity: 0; }
+    [data-theme="dark"] #top-notif { background: rgba(9,19,37,0.95); }
+    #top-notif img { width:46px; height:46px; border-radius:8px; object-fit:cover; }
+    #top-notif.show { animation: notifIn .8s cubic-bezier(.68,-0.55,.27,1.55) forwards; }
+    #top-notif.hide { animation: notifOut .6s forwards; }
+    @keyframes notifIn { 0%{ top:-140px; opacity:0 } 60%{ top:20px; opacity:1 } 100%{ top:1rem; opacity:1 } }
+    @keyframes notifOut { from{ top:1rem; opacity:1 } to{ top:-140px; opacity:0 } }
+
+    /* Toast (bottom-right) */
+    #toast { position: fixed; bottom: 1rem; right: 1rem; background: var(--card); color: var(--text); padding: .75rem 1rem; border-radius: 10px; box-shadow: 0 12px 30px rgba(0,0,0,.22); opacity: 0; transform: translateY(16px); transition: all .35s; z-index: 1600; }
+    #toast.show { opacity: 1; transform: translateY(0); }
+
+    /* Back to top */
+    #back-to-top { position: fixed; bottom: 2rem; left: 1rem; background: var(--accent); color: white; width: 44px; height: 44px; display:grid; place-items:center; border-radius: 999px; cursor: pointer; box-shadow: 0 10px 24px rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: all .25s; z-index: 1500; }
+    #back-to-top.show { opacity: 1; pointer-events: auto; }
+
+    /* List layout helper */
+    .list-layout .post-card { display:flex; gap:12px; }
+    .list-layout .post-thumb { width: 220px; height: 140px; }
+
+    /* Tiny badges */
+    .badge { background: linear-gradient(90deg, var(--accent), var(--accent2)); color: white; padding: 4px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; letter-spacing: .3px; }
+
+    /* Inputs */
+    .input { background: color-mix(in oklab, var(--card) 92%, transparent); border: 1px solid rgba(148,163,184,.25); padding: .55rem .8rem; border-radius: 10px; }
+    .input:focus { box-shadow: 0 0 0 3px var(--ring); border-color: transparent; }
+
+    .btn { border-radius: 10px; padding: .55rem .8rem; font-weight: 600; transition: all 0.2s ease; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { filter: brightness(1.05); transform: translateY(-1px); }
+    .btn-ghost { background: rgba(148,163,184,.15); }
+    .btn-danger { background: var(--danger); color:#fff; }
+    .btn-success { background: var(--success); color:#fff; }
+    .btn-warning { background: #f59e0b; color:#fff; }
+  
+    /* Header buttons - IMPROVED STYLES */
+    .header-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .header-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .login-admin-btn {
+      background: linear-gradient(90deg, #f59e0b, #f97316);
+      color: white;
+      border: none;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .login-admin-btn:hover {
+      background: linear-gradient(90deg, #f97316, #ea580c);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .menu-toggle-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+    }
+    .menu-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .search-toggle-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+    }
+    .search-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Sidebar menu styles */
+    .sidebar-menu {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100%;
+      background: var(--card);
+      box-shadow: -5px 0 25px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      transition: right 0.3s ease;
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+    .sidebar-menu.open {
+      right: 0;
+    }
+    .sidebar-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .sidebar-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(148,163,184,.2);
+    }
+    .sidebar-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .close-sidebar {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .menu-item:hover {
+      background: rgba(148,163,184,.1);
+    }
+    .menu-item i {
+      margin-right: 0.75rem;
+      width: 20px;
+      text-align: center;
+    }
+    .menu-item.active {
+      background: rgba(59,130,246,.1);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Search container */
+    .search-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+    }
+    .search-expanded {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 0.25rem 0.5rem;
+    }
+    #search-input {
+      width: 0;
+      opacity: 0;
+      transition: all 0.3s ease;
+      border: none;
+      background: transparent;
+      color: white;
+      padding: 0.25rem;
+    }
+    #search-input:focus {
+      outline: none;
+      box-shadow: none;
+    }
+    #search-input.expanded {
+      width: 180px;
+      opacity: 1;
+    }
+    #search-input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Admin controls */
+    .admin-controls { display: none; }
+    .admin-logged-in .admin-controls { display: flex; gap: 4px; margin-top: 8px; }
+    .admin-logged-in .post-card { position: relative; }
+    .admin-logged-in .post-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 0 24px 24px 0;
+      border-color: transparent #3b82f6 transparent transparent;
+    }
+
+    /* Banner styles */
+    .banner-container {
+      position: relative;
+      margin-bottom: 2rem;
+      border-radius: 16px;
+      overflow: hidden;
+      height: 280px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    .banner-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .banner-overlay {
       position: absolute;
       bottom: 0;
-      left: -100%;
-      width: 100%;
-      height: 3px;
-      background-color: #3b82f6;
-      transition: left 0.3s ease;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.8));
+      padding: 1.5rem;
+      color: white;
     }
-    .filter-active { background-color: #3b82f6 !important; color: white !important; }
-    .filter-active::after { left: 0; }
+    .banner-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    .banner-description {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+    .banner-admin-controls {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .no-banner {
+      background: linear-gradient(135deg, #3b82f6, #7c3aed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: white;
+      text-align: center;
+      padding: 2rem;
+    }
+    .no-banner h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
 
-    /* Popup Overlay with Blur + Animation */
-    #popup-overlay { 
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+    /* Empty state styles */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
     }
-    #popup-box { 
-      animation: popupFadeScale 0.5s ease forwards; 
-      opacity: 0;
-      transform: scale(0.7);
+    .empty-state-icon {
+      display: inline-block;
+      padding: 1rem;
+      background: rgba(59,130,246,.1);
+      border-radius: 50%;
+      margin-bottom: 1.5rem;
     }
-    @keyframes popupFadeScale {
-      to { opacity: 1; transform: scale(1); }
+    .empty-state-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text);
     }
-  </style>
-</head>
-<body class="bg-gray-50 min-h-screen flex flex-col transition-colors duration-500 dark:bg-gray-900" id="body">
-  
-<!-- POPUP -->
-<div id="popup-overlay" class="fixed inset-0 flex items-center justify-center z-50 bg-gradient-to-b from-black/50 to-black/60 backdrop-blur-sm">
-  <div id="popup-box" class="relative bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-2xl p-6 w-11/12 sm:w-96 lg:w-[30rem] text-center border border-white/20 dark:border-gray-700/30 backdrop-blur-xl animate-popup">
-    
-    <!-- Tombol Close -->
-    <button id="popup-close" class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md transition duration-300">
-      ✕
-    </button>
-    
-    <!-- Gambar -->
-    <img src="https://www.dropbox.com/scl/fi/eihtri11v6wowjt9tamnv/43aa37a346aa69cfd78ea4b05edab1f7_Nero_AI_Image_Upscaler_Photo_Face.jpeg?rlkey=gyjyn8xafjn1l2hmz2xlsixb7&st=j9pwudkf&dl=1" 
-         class="mx-auto mb-4 rounded-xl shadow-lg max-w-full h-auto max-h-[60vh] border border-gray-300 dark:border-gray-700" 
-         alt="Notifikasi">
-    
-    <!-- Teks -->
-    <p class="text-gray-800 dark:text-gray-200 mb-4 text-base sm:text-lg font-medium">
-      Selamat datang di <span class="font-bold text-blue-500">Luminox</span>!  
-      Selamat menikmati konten terbaru kami 🎉
-    </p>
-  </div>
-</div>
+    .empty-state-message {
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
 
-<style>
-@keyframes popupFadeScale {
-  0% { opacity: 0; transform: scale(0.85); }
-  100% { opacity: 1; transform: scale(1); }
+/* Responsive tweaks */
+@media (max-width: 640px) {
+  header .container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  header select,
+  header input,
+  header button {
+    width: 100%;
+  }
+  #category-filter, #search-input {
+    min-width: 0 !important;
+  }
+  .list-layout .post-thumb {
+    width: 100%;
+    height: auto;
+  }
+  .list-layout .post-card {
+    flex-direction: column;
+  }
+  .modal {
+    width: 100% !important;
+    max-width: 95% !important;
+    padding: 12px !important;
+  }
+  .admin-controls {
+    flex-direction: column;
+  }
+  .banner-container {
+    height: 200px;
+  }
+  .banner-title {
+    font-size: 1.2rem;
+  }
+  .banner-description {
+    font-size: 0.9rem;
+  }
+  .header-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .sidebar-menu {
+    width: 85%;
+    right: -85%;
+  }
+  #search-input.expanded {
+    width: 140px;
+  }
 }
-.animate-popup {
-  animation: popupFadeScale 0.5s ease forwards;
+@media (min-width: 641px) {
+  .search-container {
+    position: relative;
+  }
+  #search-input {
+    width: 180px;
+    opacity: 1;
+  }
+  .search-toggle-btn {
+    display: none;
+  }
 }
 </style>
+</head>
+<body data-theme="">
 
-
-
-  <!-- HEADER -->
-  <header class="bg-gradient-to-r from-blue-500 to-indigo-500 shadow-lg sticky top-0 z-40">
-    <div class="container mx-auto flex justify-between items-center p-4 relative">
-      <div class="flex items-center space-x-6">
-        <div class="flex items-center space-x-4">
-          <img src="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=9i095v5o&dl=1" class="w-10 h-10 rounded-full border-2 border-white shadow" />
-          <h1 class="text-xl font-bold text-white">Luminox</h1>
-        </div>
-        <!-- Desktop Menu -->
-        <nav class="hidden md:flex space-x-6">
-          <a href="#" class="text-white hover:text-yellow-300">Beranda</a>
-          <a href="#" class="text-white hover:text-yellow-300">Tentang</a>
-          <a href="#" class="text-white hover:text-yellow-300">Kontak</a>
-        </nav>
-      </div>
-      <div class="flex items-center space-x-3">
-        <button id="search-toggle" class="text-white text-lg">🔍</button>
-        <button id="darkmode-btn" class="text-white text-lg">🌙</button>
-        
-        <!-- Mobile Menu Button -->
-        <button id="menu-btn" class="flex flex-col justify-between w-6 h-5 md:hidden relative">
-          <span class="burger-line line1 block h-0.5 bg-white rounded"></span>
-          <span class="burger-line line2 block h-0.5 bg-white rounded"></span>
-          <span class="burger-line line3 block h-0.5 bg-white rounded"></span>
-        </button>
-      </div>
+  <!-- Top Notification -->
+  <div id="top-notif" role="status" aria-live="polite">
+    <img id="notif-img" src="" alt="img">
+    <div>
+      <div id="notif-text" class="font-medium text-sm"></div>
+      <div id="notif-sub" class="text-xs muted"></div>
     </div>
-    
-    <!-- Mobile Menu -->
-    <nav id="mobile-menu" class="max-h-0 overflow-hidden flex-col bg-blue-600 md:hidden transition-all duration-500">
-      <a href="#" class="block px-6 py-3 text-white hover:bg-blue-700">Beranda</a>
-      <a href="#" class="block px-6 py-3 text-white hover:bg-blue-700">Tentang</a>
-      <a href="#" class="block px-6 py-3 text-white hover:bg-blue-700">Kontak</a>
-    </nav>
-    
-    <!-- Search Bar -->
-    <div id="search-container" class="bg-blue-600 overflow-hidden max-h-0 transition-all duration-500">
-      <div class="container mx-auto p-4">
-        <input id="search-input" type="text" placeholder="Cari postingan..." class="w-full p-3 rounded-lg border-0 shadow focus:ring-4 focus:ring-yellow-300" />
+    <button id="notif-close" class="ml-auto px-3 py-1 rounded btn-danger">✕</button>
+  </div>
+
+  <!-- Sidebar Menu -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+  <div class="sidebar-menu" id="sidebar-menu">
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">Menu</h2>
+      <button class="close-sidebar" id="close-sidebar">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <a href="#" class="menu-item" data-category="">
+      <i class="fas fa-home"></i> Semua Postingan
+    </a>
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">Kategori</h2>
+    </div>
+    <a href="#" class="menu-item" data-category="addon">
+      <i class="fas fa-puzzle-piece"></i> Addon
+    </a>
+    <a href="#" class="menu-item" data-category="template">
+      <i class="fas fa-paint-brush"></i> Template
+    </a>
+    <a href="#" class="menu-item" data-category="event">
+      <i class="fas fa-calendar-alt"></i> Event
+    </a>
+    <a href="#" class="menu-item" data-category="lain">
+      <i class="fas fa-ellipsis-h"></i> Lainnya
+    </a>
+    <div class="sidebar-header" style="margin-top: 2rem;">
+      <h2 class="sidebar-title">Pengaturan</h2>
+    </div>
+    <a href="#" class="menu-item">
+      <i class="fas fa-cog"></i> Settings
+    </a>
+    <a href="ular.html" class="menu-item">
+      <i class="fas fa-question-circle"></i> Nothing
+    </a>
+    <a href="blog.html" class="menu-item">
+      <i class="fas fa-info-circle"></i> Tentang
+    </a>
+  </div>
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 glass">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <img src="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=9zczqkqw&dl=1" class="w-10 h-10 rounded" alt="logo">
+        <div>
+          <h1 class="text-white font-bold" style="text-shadow:0 2px 12px rgba(0,0,0,.35)">Luminox</h1>
+          <div class="text-xs text-white/90">Platform Download — Full</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 header-buttons">
+        <button id="menu-toggle" class="menu-toggle-btn">
+          <i class="fas fa-bars"></i>
+        </button>
+        
+        <div class="search-container" id="search-container">
+          <button id="search-toggle" class="search-toggle-btn md:hidden">
+            <i class="fas fa-search"></i>
+          </button>
+          <input id="search-input" placeholder="Cari postingan..." class="input" />
+        </div>
+        
+        <button id="theme-toggle" class="btn header-btn">
+          <i class="fas fa-moon"></i> <span class="hidden md:inline">Dark</span>
+        </button>
+        
+        <div id="auth-area" class="flex items-center gap-2">
+          <button id="login-btn" class="btn login-admin-btn">
+            <i class="fas fa-user-lock"></i> <span class="hidden md:inline">Login Admin</span>
+          </button>
+        </div>
       </div>
     </div>
   </header>
 
-  <!-- FILTER -->
-  <section class="container mx-auto px-4 py-4">
-    <div class="flex flex-wrap sm:flex-nowrap gap-2">
-      <button class="filter-btn filter-active px-3 py-1 rounded bg-blue-500 text-white text-sm sm:text-base" data-filter="all">Semua</button>
-      <button class="filter-btn px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 dark:text-white text-sm sm:text-base" data-filter="template">Template</button>
-      <button class="filter-btn px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 dark:text-white text-sm sm:text-base" data-filter="addon">Addon</button>
+  <!-- Admin bar -->
+  <div id="admin-bar" class="container mx-auto px-4 py-3 hidden">
+    <div class="p-4 rounded-lg flex flex-col md:flex-row md:items-center gap-4 post-card">
+      <div class="flex-1">
+        <div class="font-semibold">Panel Admin</div>
+        <div class="text-sm muted">Kelola postingan dan banner — hanya admin</div>
+      </div>
+      <div class="flex gap-2">
+        <button id="open-add" class="btn btn-success">
+          <i class="fas fa-plus"></i> Tambah Post
+        </button>
+        <button id="manage-banner" class="btn btn-primary">
+          <i class="fas fa-image"></i> Kelola Banner
+        </button>
+        <button id="logout-btn" class="btn btn-ghost">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
     </div>
+  </div>
+
+  <!-- Banner Section -->
+  <section class="container mx-auto px-4 mt-6" id="banner-section">
+    <!-- Banner akan ditampilkan di sini -->
   </section>
 
-  <!-- POSTINGAN -->
-  <section class="container mx-auto px-4 pb-8">
-    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Postingan Terbaru</h2>
-    <div id="post-list" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"></div>
-    <div id="loading-spinner" class="hidden"><div class="spinner"></div></div>
-    <p id="no-results" class="hidden text-center text-gray-500 mt-6">Tidak ada postingan ditemukan</p>
-  </section>
+  <!-- Controls row -->
+  <main class="container mx-auto px-4 py-6">
+    <section class="mb-4 flex flex-col md:flex-row md:items-center gap-3">
+      <h2 class="text-2xl font-bold flex-1">Postingan Terbaru</h2>
+      <div class="flex items-center gap-2">
+        <button id="view-grid" class="btn btn-primary">
+          <i class="fas fa-th-large"></i> Grid
+        </button>
+        <button id="view-list" class="btn btn-ghost">
+          <i class="fas fa-list"></i> List
+        </button>
+        <button id="refresh-btn" class="btn btn-ghost">
+          <i class="fas fa-sync-alt"></i> Muat Ulang
+        </button>
+      </div>
+    </section>
 
-  <!-- FOOTER -->
-  <footer class="bg-white dark:bg-gray-800 p-4 text-center text-gray-500 dark:text-gray-300 text-sm">
-    © 2025 Luminox. All rights reserved.
-  </footer>
+    <!-- Grid / List container -->
+    <section id="post-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></section>
+
+    <!-- Empty state -->
+    <div id="empty-state" class="empty-state hidden">
+      <div class="empty-state-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <h3 id="empty-title" class="empty-state-title">Belum ada postingan</h3>
+      <p id="empty-message" class="empty-state-message">Mulai dengan membuat postingan pertama Anda</p>
+      <button id="create-first-post" class="btn btn-success">
+        <i class="fas fa-plus"></i> Buat Postingan Pertama
+      </button>
+    </div>
+
+    <!-- Skeleton placeholder -->
+    <div id="skeletons" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2 hidden">
+      <div class="skeleton h-60"><div class="shimmer"></div></div>
+      <div class="skeleton h-60"><div class="shimmer"></div></div>
+      <div class="skeleton h-60"><div class="shimmer"></div></div>
+    </div>
+
+    <div id="loading" class="text-center muted py-6 hidden">Memuat…</div>
+    <div id="end-list" class="text-center muted py-6 hidden">Tidak ada postingan lagi</div>
+  </main>
+
+  <footer class="text-center py-8 muted">© 2025 Luminox. All rights reserved.</footer>
+
+  <!-- Post Modal -->
+  <div id="post-modal" class="hidden">
+    <div class="modal-backdrop" id="post-modal-backdrop">
+      <div class="modal">
+        <div class="flex flex-col lg:flex-row gap-4">
+          <div class="flex-1">
+            <h3 id="modal-title" class="text-xl font-semibold"></h3>
+            <p id="modal-desc" class="muted mt-1"></p>
+            <img id="modal-img" src="" alt="" class="mt-4 w-full rounded" style="max-height:380px; object-fit:cover;">
+          </div>
+          <div style="min-width:280px;">
+            <div class="flex items-center justify-between mb-2">
+              <div class="text-sm font-semibold">Komentar</div>
+              <div id="comment-count" class="muted text-sm">0</div>
+            </div>
+            <div id="comment-list" style="max-height:320px; overflow:auto;" class="space-y-2 mb-3"></div>
+            <textarea id="comment-input" placeholder="Tulis komentar…" class="w-full p-2 rounded input" rows="3"></textarea>
+            <button id="comment-send" class="mt-2 w-full btn btn-primary">Kirim Komentar</button>
+          </div>
+        </div>
+        <div class="mt-4 flex justify-end gap-2">
+          <a id="modal-open-link" href="#" target="_blank" class="btn btn-success">Kunjungi Halaman</a>
+          <div id="modal-admin-controls" class="admin-controls">
+            <button id="modal-edit" class="btn btn-warning">Edit</button>
+            <button id="modal-delete" class="btn btn-danger">Hapus</button>
+          </div>
+          <button id="modal-close" class="btn btn-ghost">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div id="login-modal" class="hidden">
+    <div class="modal-backdrop" id="login-backdrop">
+      <div class="modal max-w-sm">
+        <h3 class="text-xl font-semibold mb-2">Admin Login</h3>
+        <p class="muted text-sm mb-4">Masuk untuk mengakses panel admin.</p>
+        <label class="text-sm">Username</label>
+        <input id="login-username" class="w-full p-2 rounded input mb-2" />
+        <label class="text-sm">Password</label>
+        <input id="login-password" type="password" class="w-full p-2 rounded input mb-3" />
+        <div id="login-error" class="text-sm text-red-500 hidden mb-2"></div>
+        <div class="flex justify-between items-center">
+          <div class="text-xs muted">Login: <span class="badge">admin only</span></div>
+          <div class="flex gap-2">
+            <button id="login-cancel" class="btn btn-ghost">Batal</button>
+            <button id="login-submit" class="btn btn-primary">Masuk</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Post Modal -->
+  <div id="add-modal" class="hidden">
+    <div class="modal-backdrop" id="add-backdrop">
+      <div class="modal max-w-lg">
+        <h3 class="text-xl font-semibold mb-2">Tambah Postingan</h3>
+        <label class="text-sm">Judul</label>
+        <input id="add-title" class="w-full p-2 rounded input mb-2" />
+        <label class="text-sm">Deskripsi singkat</label>
+        <input id="add-desc" class="w-full p-2 rounded input mb-2" />
+        <label class="text-sm">Kategori</label>
+        <select id="add-category" class="w-full p-2 rounded input mb-2">
+          <option value="addon">Addon</option>
+          <option value="template">Template</option>
+          <option value="event">Event</option>
+          <option value="lain">Lainnya</option>
+        </select>
+        <label class="text-sm">URL Gambar</label>
+        <input id="add-img" class="w-full p-2 rounded input mb-2" placeholder="https://…" />
+        <label class="text-sm">URL Link Postingan (opsional)</label>
+        <input id="add-link" class="w-full p-2 rounded input mb-4" placeholder="https://…" />
+        <div class="flex justify-end gap-2">
+          <button id="add-cancel" class="btn btn-ghost">Batal</button>
+          <button id="add-submit" class="btn btn-success">Tambah & Publikasi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Post Modal -->
+  <div id="edit-modal" class="hidden">
+    <div class="modal-backdrop" id="edit-backdrop">
+      <div class="modal max-w-lg">
+        <h3 class="text-xl font-semibold mb-2">Edit Postingan</h3>
+        <input type="hidden" id="edit-id" />
+        <label class="text-sm">Judul</label>
+        <input id="edit-title" class="w-full p-2 rounded input mb-2" />
+        <label class="text-sm">Deskripsi singkat</label>
+        <input id="edit-desc" class="w-full p-2 rounded input mb-2" />
+        <label class="text-sm">Kategori</label>
+        <select id="edit-category" class="w-full p-2 rounded input mb-2">
+          <option value="addon">Addon</option>
+          <option value="template">Template</option>
+          <option value="event">Event</option>
+          <option value="lain">Lainnya</option>
+        </select>
+        <label class="text-sm">URL Gambar</label>
+        <input id="edit-img" class="w-full p-2 rounded input mb-2" placeholder="https://…" />
+        <label class="text-sm">URL Link Postingan (opsional)</label>
+        <input id="edit-link" class="w-full p-2 rounded input mb-4" placeholder="https://…" />
+        <div class="flex justify-end gap-2">
+          <button id="edit-cancel" class="btn btn-ghost">Batal</button>
+          <button id="edit-submit" class="btn btn-success">Simpan Perubahan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Banner Modal -->
+  <div id="banner-modal" class="hidden">
+    <div class="modal-backdrop" id="banner-backdrop">
+      <div class="modal max-w-lg">
+        <h3 class="text-xl font-semibold mb-2">Kelola Banner</h3>
+        <label class="text-sm">Judul Banner</label>
+        <input id="banner-title" class="w-full p-2 rounded input mb-2" placeholder="Judul banner" />
+        <label class="text-sm">Deskripsi Banner</label>
+        <input id="banner-desc" class="w-full p-2 rounded input mb-2" placeholder="Deskripsi singkat banner" />
+        <label class="text-sm">URL Gambar Banner</label>
+        <input id="banner-img" class="w-full p-2 rounded input mb-2" placeholder="https://…" />
+        <label class="text-sm">URL Link Banner (opsional)</label>
+        <input id="banner-link" class="w-full p-2 rounded input mb-4" placeholder="https://…" />
+        <div class="flex justify-between items-center">
+          <button id="remove-banner" class="btn btn-danger">Hapus Banner</button>
+          <div class="flex gap-2">
+            <button id="banner-cancel" class="btn btn-ghost">Batal</button>
+            <button id="banner-submit" class="btn btn-success">Simpan Banner</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast & BackToTop -->
+  <div id="toast"></div>
+  <div id="back-to-top">↑</div>
 
   <script>
-    const postList = document.getElementById('post-list');
-    const loadingSpinner = document.getElementById('loading-spinner');
-    const searchInput = document.getElementById('search-input');
-    const noResults = document.getElementById('no-results');
-    const menuBtn = document.getElementById('menu-btn');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const popupOverlay = document.getElementById('popup-overlay');
-    const popupClose = document.getElementById('popup-close');
+  /* ============================
+     CONFIG (client-side demo)
+     ============================ */
+  const ADMIN_USERNAME = 'noirr';
+  // Hash SHA-256 dari password asli 'KwzX5rGtH'
+  const ADMIN_PASSWORD_HASH = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
+  
+  // Fungsi untuk menghash string menggunakan SHA-256
+  async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
 
-    let loadCount = 0;
-    let isLoading = false;
-    const samplePosts = [
-      { title: "Cave Biome", desc: "Type: Addon", filter: "addon", img: "https://www.dropbox.com/scl/fi/n90v47mrj7mnspw0fpbhe/IMG-20250709-WA0034.jpg?rlkey=p8h9fykzjwjmbva5bm3rwpxpm&st=nq2xmxcd&dl=1", link: "posting2.html" },
-      { title: "RLCraft", desc: "Type: Template", filter: "template", img: "https://www.dropbox.com/scl/fi/47i0hm26g7qovlz4ksw2v/IMG-20250723-WA0000.jpg?rlkey=pxw8c73i13elpr9avyytntkvu&st=ycakjqki&dl=1", link: "posting1.html" }
-    ];
+  /* ============================
+     HELPERS & STORAGE
+     ============================ */
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const saveLS = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+  const loadLS = (k, fb) => { try { const t = localStorage.getItem(k); return t ? JSON.parse(t) : fb; } catch(e){ return fb } };
+  const sleep = (ms) => new Promise(r=>setTimeout(r, ms));
 
-    function createPost(p) {
-      const div = document.createElement('div');
-      div.className = "bg-white dark:bg-gray-800 rounded-lg shadow p-3 post-item fade-in cursor-pointer";
-      div.dataset.filter = p.filter;
-      div.setAttribute('data-link', p.link);
-      div.innerHTML = `
-        <img src="${p.img}" loading="lazy" />
-        <h3 class="text-base font-semibold text-blue-600 dark:text-blue-400 post-title">${p.title}</h3>
-        <p class="text-gray-600 dark:text-gray-300 text-xs post-desc">${p.desc}</p>
-        <div class="flex justify-between items-center mt-2 text-xs text-gray-500 dark:text-gray-400">
-          <span class="views">👁 ${Math.floor(Math.random()*50)+1}</span>
-          <button class="like-btn">❤️ 0</button>
-        </div>
-      `;
-      div.addEventListener('click', e => {
-        if (!e.target.classList.contains('like-btn')) {
-          window.location.href = p.link;
+  function escapeHtml(s){ if(!s) return ''; return s.replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])); }
+  function formatTime(ts){ if(!ts) return ''; const d = new Date(ts); const diff = Math.floor((Date.now()-ts)/1000); if(diff<60) return `${diff}s lalu`; if(diff<3600) return `${Math.floor(diff/60)}m lalu`; if(diff<86400) return `${Math.floor(diff/3600)}j lalu`; return d.toLocaleString(); }
+
+  /* ============================
+     APP STATE
+     ============================ */
+  let POSTS = []; // unified list (saved + sample)
+  const BATCH = 9; // per load
+  let offset = 0; let loading = false; let endReached = false;
+  let listMode = false; // grid by default
+  let currentPostId = null; // Untuk menyimpan ID post yang sedang dilihat/diedit
+  let BANNER = null; // Untuk menyimpan data banner
+  let currentCategory = ''; // Untuk menyimpan kategori aktif
+  let currentSearch = ''; // Untuk menyimpan pencarian aktif
+
+  /* ============================
+     INITIALIZATION
+     ============================ */
+  function initPosts(){
+    const saved = loadLS('luminox_posts', []);
+    // Tandai postingan yang dibuat user (bukan sample)
+    const userPosts = saved.map(post => ({ ...post, isSample: false }));
+    POSTS = userPosts;
+    POSTS.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  }
+
+  function initBanner() {
+    BANNER = loadLS('luminox_banner', null);
+    renderBanner();
+  }
+
+  /* ============================
+     SIDEBAR MENU FUNCTIONS
+     ============================ */
+  function openSidebar() {
+    $('#sidebar-menu').classList.add('open');
+    $('#sidebar-backdrop').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    $('#sidebar-menu').classList.remove('open');
+    $('#sidebar-backdrop').classList.remove('active');
+    document.body.style.overflow = 'auto';
+  }
+
+  // Event listeners untuk sidebar
+  $('#menu-toggle').addEventListener('click', openSidebar);
+  $('#close-sidebar').addEventListener('click', closeSidebar);
+  $('#sidebar-backdrop').addEventListener('click', closeSidebar);
+
+  // Tutup sidebar ketika escape key ditekan
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $('#sidebar-menu').classList.contains('open')) {
+      closeSidebar();
+    }
+  });
+
+  // Filter berdasarkan kategori dari menu sidebar
+  function setupCategoryFilters() {
+    const menuItems = $$('.menu-item[data-category]');
+    menuItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const category = item.getAttribute('data-category');
+        
+        // Update active state
+        menuItems.forEach(mi => mi.classList.remove('active'));
+        item.classList.add('active');
+        
+        // Set category filter
+        currentCategory = category;
+        currentSearch = '';
+        $('#search-input').value = '';
+        
+        // Reset and render posts
+        resetListing();
+        
+        // Show notification
+        showToast(`Menampilkan: ${category ? category : 'Semua postingan'}`);
+        
+        // Close sidebar on mobile
+        if (window.innerWidth < 641) {
+          closeSidebar();
         }
       });
-      div.querySelector('.like-btn').addEventListener('click', e => {
-        e.stopPropagation();
-        let count = parseInt(e.target.textContent.replace('❤️ ', ''));
-        e.target.textContent = `❤️ ${count+1}`;
-      });
-      postList.appendChild(div);
-    }
+    });
+  }
 
-    function loadPosts() {
-      isLoading = true;
-      loadingSpinner.classList.remove('hidden');
-      setTimeout(() => {
-        samplePosts.forEach(p => createPost(p));
-        loadCount++;
-        isLoading = false;
-        loadingSpinner.classList.add('hidden');
-        observeViews();
-      }, 800);
-    }
-
-    function observeViews() {
-      const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const viewEl = entry.target.querySelector('.views');
-            let count = parseInt(viewEl.textContent.replace('👁 ', ''));
-            viewEl.textContent = `👁 ${count+1}`;
-          }
-        });
-      }, { threshold: 1.0 });
-
-      document.querySelectorAll('.post-item').forEach(item => observer.observe(item));
-    }
-
-    window.addEventListener('scroll', () => {
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50 && !isLoading && loadCount < 3) {
-        loadPosts();
+  /* ============================
+     SEARCH FUNCTIONALITY
+     ============================ */
+  function setupSearch() {
+    const searchInput = $('#search-input');
+    const searchToggle = $('#search-toggle');
+    const searchContainer = $('#search-container');
+    
+    // Toggle search expansion on mobile
+    searchToggle.addEventListener('click', () => {
+      searchContainer.classList.toggle('search-expanded');
+      searchInput.classList.toggle('expanded');
+      
+      if (searchInput.classList.contains('expanded')) {
+        searchInput.focus();
       }
     });
-
-    loadPosts();
-
-    searchInput.addEventListener('input', () => {
-      const q = searchInput.value.toLowerCase();
-      let visibleCount = 0;
-      document.querySelectorAll('.post-item').forEach(post => {
-        const t = post.querySelector('.post-title').textContent.toLowerCase();
-        const d = post.querySelector('.post-desc').textContent.toLowerCase();
-        const match = t.includes(q) || d.includes(q);
-        post.style.display = match ? '' : 'none';
-        if (match) visibleCount++;
-      });
-      noResults.classList.toggle('hidden', visibleCount > 0);
+    
+    // Handle search input
+    searchInput.addEventListener('input', (e) => {
+      currentSearch = e.target.value.trim().toLowerCase();
+      resetListing();
     });
+    
+    // Close expanded search when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth < 641 && 
+          searchInput.classList.contains('expanded') &&
+          !searchContainer.contains(e.target) &&
+          e.target !== searchToggle) {
+        searchContainer.classList.remove('search-expanded');
+        searchInput.classList.remove('expanded');
+      }
+    });
+  }
 
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('filter-active'));
-        btn.classList.add('filter-active');
-        const filter = btn.dataset.filter;
-        document.querySelectorAll('.post-item').forEach(post => {
-          post.style.display = (filter === 'all' || post.dataset.filter === filter) ? '' : 'none';
+  /* ============================
+     BANNER RENDERING
+     ============================ */
+  function renderBanner() {
+    const bannerSection = $('#banner-section');
+    
+    if (BANNER) {
+      bannerSection.innerHTML = `
+        <div class="banner-container">
+          <img src="${BANNER.image}" alt="${escapeHtml(BANNER.title)}" class="banner-image">
+          <div class="banner-overlay">
+            <h2 class="banner-title">${escapeHtml(BANNER.title)}</h2>
+            <p class="banner-description">${escapeHtml(BANNER.description)}</p>
+          </div>
+          ${loadLS('luminox_admin', null) ? `
+            <div class="banner-admin-controls">
+              <button class="btn btn-warning btn-sm edit-banner">Edit</button>
+            </div>
+          ` : ''}
+        </div>
+      `;
+      
+      // Add event listener for edit banner button if admin is logged in
+      if (loadLS('luminox_admin', null)) {
+        const editBtn = bannerSection.querySelector('.edit-banner');
+        if (editBtn) {
+          editBtn.addEventListener('click', () => {
+            openBannerModal();
+          });
+        }
+      }
+      
+      // Add click event to banner if link exists
+      if (BANNER.link) {
+        bannerSection.querySelector('.banner-container').style.cursor = 'pointer';
+        bannerSection.querySelector('.banner-container').addEventListener('click', () => {
+          window.open(BANNER.link, '_blank');
         });
+      }
+    } else {
+      bannerSection.innerHTML = `
+        <div class="banner-container no-banner">
+          <h3>Belum ada banner</h3>
+          <p>Tambahkan banner untuk menarik perhatian pengunjung</p>
+          ${loadLS('luminox_admin', null) ? `
+            <button class="btn btn-success mt-4 add-banner">Tambahkan Banner</button>
+          ` : ''}
+        </div>
+      `;
+      
+      // Add event listener for add banner button if admin is logged in
+      if (loadLS('luminox_admin', null)) {
+        const addBtn = bannerSection.querySelector('.add-banner');
+        if (addBtn) {
+          addBtn.addEventListener('click', () => {
+            openBannerModal();
+          });
+        }
+      }
+    }
+  }
+
+  /* ============================
+     BANNER MODAL FUNCTIONS
+     ============================ */
+  function openBannerModal() {
+    if (BANNER) {
+      $('#banner-title').value = BANNER.title;
+      $('#banner-desc').value = BANNER.description;
+      $('#banner-img').value = BANNER.image;
+      $('#banner-link').value = BANNER.link || '';
+    } else {
+      $('#banner-title').value = '';
+      $('#banner-desc').value = '';
+      $('#banner-img').value = '';
+      $('#banner-link').value = '';
+    }
+    
+    $('#banner-modal').classList.remove('hidden');
+  }
+  
+  function closeBannerModal() {
+    $('#banner-modal').classList.add('hidden');
+  }
+  
+  // Event listener untuk modal banner
+  $('#banner-cancel').addEventListener('click', closeBannerModal);
+  $('#banner-backdrop').addEventListener('click', e => {
+    if (e.target === $('#banner-backdrop')) closeBannerModal();
+  });
+  
+  $('#banner-submit').addEventListener('click', () => {
+    const title = $('#banner-title').value.trim();
+    const description = $('#banner-desc').value.trim();
+    const image = $('#banner-img').value.trim();
+    const link = $('#banner-link').value.trim();
+    
+    if (!title || !description || !image) return alert('Judul, deskripsi, dan gambar banner wajib diisi.');
+    
+    BANNER = {
+      title,
+      description,
+      image,
+      link,
+      updatedAt: Date.now()
+    };
+    
+    saveLS('luminox_banner', BANNER);
+    renderBanner();
+    closeBannerModal();
+    showToast('Banner berhasil disimpan');
+  });
+  
+  $('#remove-banner').addEventListener('click', () => {
+    if (!BANNER) return;
+    
+    if (confirm('Apakah Anda yakin ingin menghapus banner?')) {
+      BANNER = null;
+      localStorage.removeItem('luminox_banner');
+      renderBanner();
+      closeBannerModal();
+      showToast('Banner berhasil dihapus');
+    }
+  });
+
+  /* ============================
+     RENDERING
+     ============================ */
+  const postGrid = $('#post-grid');
+  const skeletons = $('#skeletons');
+
+  function createPostEl(post){
+    const el = document.createElement('div');
+    el.className = 'post-card fade-in';
+    el.dataset.id = post.id;
+    const thumbClass = listMode ? 'post-thumb rounded' : 'rounded mb-3';
+    const thumbStyle = listMode ? 'object-fit:cover;' : 'height:190px;object-fit:cover;';
+    
+    // Tampilkan badge link jika tersedia
+    const linkBadge = post.link ? `<span class="badge ml-2" style="background:#10b981">Link</span>` : '';
+    
+    el.innerHTML = `
+      <img src="${post.img}" alt="${escapeHtml(post.title)}" class="w-full ${thumbClass}" style="${thumbStyle}">
+      <div class="flex ${listMode? 'items-start gap-3' : 'items-start gap-2'} ${listMode? '' : ''}">
+        <div class="flex-1">
+          <div class="flex items-center">
+            <h3 class="font-semibold">${escapeHtml(post.title)}</h3>
+            ${linkBadge}
+          </div>
+          <div class="muted text-sm">${escapeHtml(post.desc)}</div>
+          <div class="mt-2 text-xs muted">Kategori: <span class="badge">${escapeHtml(post.category||'lain')}</span></div>
+          <div class="admin-controls">
+            <button class="edit-post px-2 py-1 text-xs rounded btn btn-warning">Edit</button>
+            <button class="delete-post px-2 py-1 text-xs rounded btn btn-danger">Hapus</button>
+          </div>
+        </div>
+        <div class="text-right min-w-[90px]">
+          <div class="muted text-xs">${formatTime(post.createdAt)}</div>
+          <button class="open-post mt-2 px-2 py-1 text-sm rounded btn btn-primary">Buka</button>
+        </div>
+      </div>`;
+    
+    // Tambahkan event listener untuk tombol
+    el.querySelector('.open-post').addEventListener('click', ()=> openPostModal(post.id));
+    
+    // Hanya tambahkan event listener untuk edit/hapus jika admin sudah login
+    if (loadLS('luminox_admin', null)) {
+      const editBtn = el.querySelector('.edit-post');
+      if (editBtn) {
+        editBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openEditModal(post.id);
+        });
+      }
+      
+      const deleteBtn = el.querySelector('.delete-post');
+      if (deleteBtn) {
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deletePost(post.id);
+        });
+      }
+    }
+    
+    return el;
+  }
+
+  function showSkeletons(){ skeletons.classList.remove('hidden'); }
+  function hideSkeletons(){ skeletons.classList.add('hidden'); }
+
+  function renderBatch(){
+    if(loading || endReached) return;
+    loading = true; $('#loading').classList.remove('hidden'); showSkeletons();
+
+    setTimeout(()=>{ // simulate network delay
+      const filtered = POSTS.filter(p=>{
+        // Filter by category
+        const okC = !currentCategory || (p.category||'').toLowerCase() === currentCategory;
+        
+        // Filter by search
+        const okQ = !currentSearch || 
+                   (p.title||'').toLowerCase().includes(currentSearch) || 
+                   (p.desc||'').toLowerCase().includes(currentSearch) || 
+                   (p.category||'').toLowerCase().includes(currentSearch);
+        
+        return okQ && okC;
       });
-    });
+      
+      const next = filtered.slice(offset, offset+BATCH);
+      next.forEach(p=> postGrid.appendChild(createPostEl(p)));
+      offset += next.length;
+      
+      // Toggle empty state
+      if (filtered.length === 0) {
+        $('#empty-state').classList.remove('hidden');
+        $('#post-grid').classList.add('hidden');
+        
+        // Custom empty message based on filters
+        const emptyTitle = $('#empty-title');
+        const emptyMessage = $('#empty-message');
+        const createFirstPostBtn = $('#create-first-post');
+        
+        if (currentSearch) {
+          emptyTitle.textContent = 'Tidak ada hasil pencarian';
+          emptyMessage.textContent = `Tidak ditemukan postingan untuk "${currentSearch}"`;
+          createFirstPostBtn.classList.add('hidden');
+        } else if (currentCategory) {
+          emptyTitle.textContent = 'Tidak ada postingan';
+          emptyMessage.textContent = `Tidak ada postingan dalam kategori "${currentCategory}"`;
+          createFirstPostBtn.classList.add('hidden');
+        } else {
+          emptyTitle.textContent = 'Belum ada postingan';
+          emptyMessage.textContent = 'Mulai dengan membuat postingan pertama Anda';
+          createFirstPostBtn.classList.remove('hidden');
+        }
+      } else {
+        $('#empty-state').classList.add('hidden');
+        $('#post-grid').classList.remove('hidden');
+      }
+      
+      if(offset >= filtered.length){ endReached = true; $('#end-list').classList.remove('hidden'); }
+      else { $('#end-list').classList.add('hidden'); }
+      loading = false; $('#loading').classList.add('hidden'); hideSkeletons();
+    }, 350);
+  }
 
-    document.getElementById('darkmode-btn').addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-    });
+  function resetListing(){ 
+    postGrid.innerHTML=''; 
+    offset=0; 
+    loading=false; 
+    endReached=false; 
+    $('#end-list').classList.add('hidden'); 
+    renderBatch(); 
+  }
 
-    document.getElementById('search-toggle').addEventListener('click', () => {
-      document.getElementById('search-container').classList.toggle('max-h-0');
-      document.getElementById('search-container').classList.toggle('max-h-20');
-      searchInput.focus();
+  /* ============================
+     MODALS & COMMENTS
+     ============================ */
+  function openPostModal(id){
+    const post = POSTS.find(p=>p.id===id); 
+    if(!post) return;
+    
+    currentPostId = id;
+    
+    $('#modal-title').textContent = post.title;
+    $('#modal-desc').textContent = post.desc;
+    $('#modal-img').src = post.img;
+    
+    // Atur tombol "Kunjungi Halaman" - gunakan link jika tersedia
+    const linkBtn = $('#modal-open-link');
+    if(post.link){
+      linkBtn.href = post.link;
+      linkBtn.textContent = 'Kunjungi Halaman';
+    } else {
+      linkBtn.href = "https://www.google.com/search?q=" + encodeURIComponent(post.title);
+      linkBtn.textContent = 'Cari di Google';
+    }
+    
+    // Tampilkan kontrol admin jika login
+    const adminControls = $('#modal-admin-controls');
+    if (loadLS('luminox_admin', null)) {
+      adminControls.style.display = 'flex';
+    } else {
+      adminControls.style.display = 'none';
+    }
+    
+    const key = 'luminox_comments_'+id;
+    const comments = loadLS(key, []);
+    const list = $('#comment-list'); list.innerHTML = '';
+    comments.forEach(c=>{
+      const div = document.createElement('div');
+      div.className = 'p-2 rounded';
+      div.style.background = (document.body.getAttribute('data-theme')==='dark') ? '#0e2030' : '#eef2f7';
+      div.innerHTML = `<div class="font-semibold text-sm">${escapeHtml(c.name||'Pengunjung')}</div><div class="muted text-sm">${escapeHtml(c.text)}</div><div class="text-xs muted mt-1">${formatTime(c.at)}</div>`;
+      list.appendChild(div);
     });
+    $('#comment-count').textContent = comments.length;
+    $('#post-modal').classList.remove('hidden');
+  }
+  
+  function closePostModal(){ 
+    $('#post-modal').classList.add('hidden'); 
+    currentPostId = null;
+  }
 
-    menuBtn.addEventListener('click', () => {
-      mobileMenu.classList.toggle('max-h-0');
-      mobileMenu.classList.toggle('max-h-40');
-      menuBtn.classList.toggle('menu-open');
-    });
+  $('#comment-send').addEventListener('click', ()=>{
+    const text = $('#comment-input').value.trim(); 
+    if(!text) return alert('Komentar kosong');
+    const post = POSTS.find(p=>p.id === currentPostId); 
+    if(!post) return;
+    const key = 'luminox_comments_'+post.id; 
+    const comments = loadLS(key, []);
+    comments.unshift({ name:'Pengunjung', text, at: Date.now() }); 
+    saveLS(key, comments); 
+    $('#comment-input').value=''; 
+    openPostModal(post.id);
+    showToast('Komentar ditambahkan');
+  });
+  
+  $('#modal-close').addEventListener('click', closePostModal);
+  $('#post-modal-backdrop').addEventListener('click', e=>{ 
+    if(e.target===$('#post-modal-backdrop')) closePostModal(); 
+  });
 
-    document.addEventListener('DOMContentLoaded', () => {
-      popupOverlay.classList.remove('hidden');
-    });
+  // Event listener untuk tombol edit di modal
+  $('#modal-edit').addEventListener('click', () => {
+    if (currentPostId) {
+      closePostModal();
+      openEditModal(currentPostId);
+    }
+  });
 
-    popupClose.addEventListener('click', () => {
-      popupOverlay.classList.add('hidden');
-    });
+  // Event listener untuk tombol hapus di modal
+  $('#modal-delete').addEventListener('click', () => {
+    if (currentPostId) {
+      closePostModal();
+      deletePost(currentPostId);
+    }
+  });
+
+  /* ============================
+     EDIT POST MODAL
+     ============================ */
+  function openEditModal(id) {
+    const post = POSTS.find(p => p.id === id);
+    if (!post) return;
+    
+    // Isi form dengan data post yang ada
+    $('#edit-id').value = post.id;
+    $('#edit-title').value = post.title;
+    $('#edit-desc').value = post.desc;
+    $('#edit-category').value = post.category;
+    $('#edit-img').value = post.img;
+    $('#edit-link').value = post.link || '';
+    
+    // Tampilkan modal edit
+    $('#edit-modal').classList.remove('hidden');
+  }
+  
+  function closeEditModal() {
+    $('#edit-modal').classList.add('hidden');
+  }
+  
+  // Event listener untuk modal edit
+  $('#edit-cancel').addEventListener('click', closeEditModal);
+  $('#edit-backdrop').addEventListener('click', e => {
+    if (e.target === $('#edit-backdrop')) closeEditModal();
+  });
+  
+  $('#edit-submit').addEventListener('click', () => {
+    const id = $('#edit-id').value;
+    const title = $('#edit-title').value.trim();
+    const desc = $('#edit-desc').value.trim();
+    const category = $('#edit-category').value;
+    const img = $('#edit-img').value.trim();
+    const link = $('#edit-link').value.trim();
+    
+    if (!title || !desc) return alert('Judul dan deskripsi wajib.');
+    
+    // Update post dalam array POSTS
+    const postIndex = POSTS.findIndex(p => p.id === id);
+    if (postIndex !== -1) {
+      POSTS[postIndex] = {
+        ...POSTS[postIndex],
+        title,
+        desc,
+        category,
+        img,
+        link
+      };
+    }
+    
+    // Update di localStorage
+    const savedPosts = loadLS('luminox_posts', []);
+    const savedPostIndex = savedPosts.findIndex(p => p.id === id);
+    if (savedPostIndex !== -1) {
+      savedPosts[savedPostIndex] = {
+        ...savedPosts[savedPostIndex],
+        title,
+        desc,
+        category,
+        img,
+        link
+      };
+      saveLS('luminox_posts', savedPosts);
+    }
+    
+    closeEditModal();
+    resetListing();
+    showToast('Postingan berhasil diupdate');
+  });
+
+  /* ============================
+     DELETE POST FUNCTION
+     ============================ */
+  function deletePost(id) {
+    const post = POSTS.find(p => p.id === id);
+    if (!post) return;
+    
+    if (!confirm(`Apakah Anda yakin ingin menghapus postingan "${post.title}"?`)) return;
+    
+    // Hapus dari array POSTS
+    POSTS = POSTS.filter(p => p.id !== id);
+    
+    // Hapus dari localStorage
+    const savedPosts = loadLS('luminox_posts', []);
+    const updatedPosts = savedPosts.filter(p => p.id !== id);
+    saveLS('luminox_posts', updatedPosts);
+    
+    // Hapus komentar terkait
+    localStorage.removeItem('luminox_comments_' + id);
+    
+    resetListing();
+    showToast('Postingan berhasil dihapus');
+  }
+
+  /* ============================
+     SEARCH, FILTER, VIEW TOGGLE
+     ============================ */
+  $('#view-grid').addEventListener('click', ()=>{ document.body.classList.remove('list-layout'); listMode=false; resetListing(); });
+  $('#view-list').addEventListener('click', ()=>{ document.body.classList.add('list-layout'); listMode=true; resetListing(); });
+  $('#refresh-btn').addEventListener('click', ()=>{ resetListing(); showToast('Daftar dimuat ulang'); });
+
+  /* ============================
+     INFINITE SCROLL & BACK TO TOP
+     ============================ */
+  window.addEventListener('scroll', ()=>{
+    const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 220;
+    if(nearBottom && !loading && !endReached) renderBatch();
+    if(window.scrollY > 240) $('#back-to-top').classList.add('show'); else $('#back-to-top').classList.remove('show');
+  });
+  $('#back-to-top').addEventListener('click', ()=> window.scrollTo({ top:0, behavior:'smooth' }));
+
+  /* ============================
+     THEME
+     ============================ */
+  function applyTheme(theme){
+    if(theme==='dark'){ 
+      document.body.setAttribute('data-theme','dark'); 
+      $('#theme-toggle').innerHTML = '<i class="fas fa-sun"></i> <span class="hidden md:inline">Light</span>';
+      // Update tombol theme toggle untuk dark mode
+      $('#theme-toggle').classList.remove('header-btn');
+      $('#theme-toggle').classList.add('login-admin-btn');
+    } else { 
+      document.body.setAttribute('data-theme',''); 
+      $('#theme-toggle').innerHTML = '<i class="fas fa-moon"></i> <span class="hidden md:inline">Dark</span>';
+      // Update tombol theme toggle untuk light mode
+      $('#theme-toggle').classList.remove('login-admin-btn');
+      $('#theme-toggle').classList.add('header-btn');
+    }
+    saveLS('luminox_theme', theme);
+  }
+  $('#theme-toggle').addEventListener('click', ()=>{ 
+    const cur = loadLS('luminox_theme',''); 
+    applyTheme(cur==='dark'?'':'dark'); 
+  });
+  (function initTheme(){ 
+    const theme = loadLS('luminox_theme','');
+    applyTheme(theme);
+  })();
+
+  /* ============================
+     AUTH (client-side demo)
+     ============================ */
+  function showLoginModal(){ $('#login-modal').classList.remove('hidden'); }
+  function hideLoginModal(){ $('#login-modal').classList.add('hidden'); $('#login-error').classList.add('hidden'); }
+  $('#login-btn').addEventListener('click', showLoginModal);
+  $('#login-cancel').addEventListener('click', hideLoginModal);
+
+  function setLoggedIn(flag){
+    if(flag){
+      saveLS('luminox_admin', { user: ADMIN_USERNAME, at: Date.now() });
+      $('#admin-bar').classList.remove('hidden');
+      $('#auth-area').innerHTML = `<div class="badge">Admin: ${ADMIN_USERNAME}</div>`;
+      $('#login-modal').classList.add('hidden');
+      
+      // Tampilkan kontrol admin di semua post
+      document.body.classList.add('admin-logged-in');
+      
+      // Render ulang daftar post untuk menampilkan kontrol admin
+      resetListing();
+      
+      // Render ulang banner untuk menampilkan kontrol admin
+      renderBanner();
+      
+      showTopNotification('Login berhasil', ADMIN_USERNAME, 'https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=qy1lfcag&dl=1');
+    } else {
+      localStorage.removeItem('luminox_admin');
+      $('#admin-bar').classList.add('hidden');
+      $('#auth-area').innerHTML = `<button id="login-btn" class="btn login-admin-btn"><i class="fas fa-user-lock"></i> <span class="hidden md:inline">Login Admin</span></button>`;
+      $('#login-btn').addEventListener('click', showLoginModal);
+      
+      // Sembunyikan kontrol admin di semua post
+      document.body.classList.remove('admin-logged-in');
+      
+      // Render ulang daftar post untuk menyembunyikan kontrol admin
+      resetListing();
+      
+      // Render ulang banner untuk menyembunyikan kontrol admin
+      renderBanner();
+      
+      showToast('Logout berhasil');
+    }
+  }
+
+  $('#login-submit').addEventListener('click', async ()=>{
+    const u = $('#login-username').value.trim();
+    const p = $('#login-password').value;
+    
+    // Hash password yang dimasukkan
+    const hashedInput = await hashPassword(p);
+    
+    // Cek apakah username benar dan hash password cocok atau password asli cocok (untuk demo)
+    if (u === ADMIN_USERNAME && (hashedInput === ADMIN_PASSWORD_HASH || p === 'KwzX5rGtH')) {
+      setLoggedIn(true);
+      $('#login-username').value = '';
+      $('#login-password').value = '';
+    } else {
+      $('#login-error').textContent = 'Username atau password salah';
+      $('#login-error').classList.remove('hidden');
+    }
+  });
+
+  $('#logout-btn').addEventListener('click', ()=>{ if(confirm('Logout admin?')) setLoggedIn(false); });
+  
+  // Event listener untuk tombol kelola banner
+  $('#manage-banner').addEventListener('click', () => {
+    openBannerModal();
+  });
+
+  (function checkLogin(){ 
+    const s = loadLS('luminox_admin', null); 
+    if(s && s.user===ADMIN_USERNAME) {
+      setLoggedIn(true);
+    }
+  })();
+
+  /* ============================
+     ADMIN ADD POST (DITAMBAHKAN LINK)
+     ============================ */
+  $('#open-add').addEventListener('click', ()=> $('#add-modal').classList.remove('hidden'));
+  $('#add-cancel').addEventListener('click', ()=> $('#add-modal').classList.add('hidden'));
+  $('#add-backdrop').addEventListener('click', (e)=>{ if(e.target === $('#add-backdrop')) $('#add-modal').classList.add('hidden'); });
+
+  $('#add-submit').addEventListener('click', ()=>{
+    const title = $('#add-title').value.trim();
+    const desc = $('#add-desc').value.trim();
+    const cat = $('#add-category').value;
+    const img = $('#add-img').value.trim() || `https://picsum.photos/seed/${Math.random().toString(36).slice(2,7)}/900/520`;
+    const link = $('#add-link').value.trim();
+    
+    if(!title || !desc) return alert('Judul dan deskripsi wajib.');
+    const id = 'p'+Math.random().toString(36).slice(2,9);
+    const newPost = { id, title, desc, category: cat, img, link, createdAt: Date.now(), isSample: false };
+    
+    const saved = loadLS('luminox_posts', []); 
+    saved.unshift(newPost); 
+    saveLS('luminox_posts', saved);
+    
+    POSTS.unshift(newPost); 
+    POSTS.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    
+    resetListing(); 
+    $('#add-modal').classList.add('hidden');
+    $('#add-title').value=''; 
+    $('#add-desc').value=''; 
+    $('#add-category').value='addon'; 
+    $('#add-img').value=''; 
+    $('#add-link').value='';
+    
+    showTopNotification('Post baru dipublikasikan', newPost.title, newPost.img);
+  });
+
+  // Event listener untuk tombol buat postingan pertama
+  $('#create-first-post').addEventListener('click', () => {
+    $('#add-modal').classList.remove('hidden');
+  });
+
+  /* ============================
+     NOTIFICATIONS
+     ============================ */
+  const notifBox = $('#top-notif');
+  const notifImg = $('#notif-img');
+  const notifText = $('#notif-text');
+  const notifSub = $('#notif-sub');
+  const notifClose = $('#notif-close');
+  let notifTimer = null;
+  function showTopNotification(title, sub, img){
+    clearTimeout(notifTimer); notifImg.src = img || 'https://via.placeholder.com/80'; notifText.textContent = title; notifSub.textContent = sub || '';
+    notifBox.classList.remove('hide'); notifBox.classList.add('show');
+    notifTimer = setTimeout(()=>{ notifBox.classList.remove('show'); notifBox.classList.add('hide'); }, 8800);
+  }
+  notifClose.addEventListener('click', ()=>{ clearTimeout(notifTimer); notifBox.classList.remove('show'); notifBox.classList.add('hide'); });
+
+  const toast = $('#toast');
+  function showToast(msg){ toast.textContent = msg; toast.classList.add('show'); setTimeout(()=> toast.classList.remove('show'), 2600); }
+
+  /* ============================
+     ACCESSIBILITY
+     ============================ */
+  document.addEventListener('keydown', (e)=>{
+    if(e.key==='Escape'){ 
+      $('#post-modal').classList.add('hidden'); 
+      $('#login-modal').classList.add('hidden'); 
+      $('#add-modal').classList.add('hidden');
+      $('#edit-modal').classList.add('hidden');
+      $('#banner-modal').classList.add('hidden');
+    }
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){ 
+      e.preventDefault(); 
+      $('#search-input').classList.add('expanded');
+      $('#search-container').classList.add('search-expanded');
+      $('#search-input').focus();
+      showToast('Fokus ke pencarian'); 
+    }
+  });
+
+  /* ============================
+     INIT
+     ============================ */
+  (function init(){ 
+    initPosts(); 
+    initBanner();
+    resetListing(); 
+    setupCategoryFilters();
+    setupSearch();
+    $('#login-backdrop').addEventListener('click', (e)=>{ 
+      if(e.target===$('#login-backdrop')) hideLoginModal(); 
+    }); 
+  })();
+
   </script>
 </body>
 </html>
