@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Tebak-Tebakan Laut</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a2a43 0%, #1a4b6d 50%, #0a2a43 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Dekorasi latar belakang */
+        .ocean-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 200%;
+            height: 15%;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" fill="%230c3550"><path d="M0 0v46.29c47.79 22.2 103.59 32.17 158 28 70.36-5.37 136.33-33.31 206.8-37.5 73.84-4.36 147.54 16.88 218.2 35.26 69.27 18 138.3 24.88 209.4 13.08 36.15-6 69.85-17.84 104.45-29.34C989.49 25 1113-14.29 1200 52.47V0z" /></svg>');
+            background-size: 1200px 100%;
+            animation: wave 18s linear infinite;
+            opacity: 0.6;
+        }
+        
+        .wave:nth-child(2) {
+            animation-delay: -5s;
+            animation-duration: 25s;
+            opacity: 0.4;
+            height: 12%;
+        }
+        
+        .wave:nth-child(3) {
+            animation-delay: -2s;
+            animation-duration: 20s;
+            opacity: 0.2;
+            height: 10%;
+        }
+        
+        @keyframes wave {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-25%); }
+            100% { transform: translateX(-50%); }
+        }
+        
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            animation: float 15s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        .fish {
+            position: absolute;
+            font-size: 2rem;
+            animation: swim 20s infinite linear;
+            opacity: 0.7;
+        }
+        
+        @keyframes swim {
+            0% {
+                left: -50px;
+                transform: translateY(0) scaleX(1);
+            }
+            25% {
+                transform: translateY(-30px) scaleX(1);
+            }
+            50% {
+                transform: translateY(0) scaleX(1);
+            }
+            51% {
+                transform: scaleX(-1);
+            }
+            75% {
+                transform: translateY(-30px) scaleX(-1);
+            }
+            100% {
+                left: 100%;
+                transform: translateY(0) scaleX(-1);
+            }
+        }
+        
+        /* Splash Screen */
+        #splash-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            animation: fadeIn 1.5s ease-out;
+        }
+        
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #00ffaa;
+            text-shadow: 0 0 20px rgba(0, 255, 170, 0.7);
+            animation: pulse 2s infinite;
+        }
+        
+        .game-title {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #00b7ff, #00ffaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(0, 183, 255, 0.5);
+        }
+        
+        .start-btn {
+            padding: 18px 50px;
+            background: linear-gradient(135deg, #00b7ff 0%, #00ffaa 100%);
+            color: #0a2a43;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 25px rgba(0, 183, 255, 0.6);
+            animation: pulse 2s infinite;
+        }
+        
+        .start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 183, 255, 0.8);
+            animation: none;
+        }
+        
+        /* Game Selection */
+        #game-selection-screen {
+            display: none;
+            width: 100%;
+            max-width: 1000px;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 183, 255, 0.2);
+            color: #00b7ff;
+            border: 1px solid rgba(0, 183, 255, 0.5);
+            border-radius: 50px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(0, 183, 255, 0.3);
+            transform: translateY(-3px);
+        }
+        
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .game-card {
+            background: rgba(14, 53, 82, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(0, 183, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: #00b7ff;
+        }
+        
+        .game-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            color: #00ffaa;
+        }
+        
+        .game-name {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #00b7ff;
+        }
+        
+        .game-desc {
+            color: #8ec5fc;
+            font-size: 0.9rem;
+        }
+        
+        /* Game Container */
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(10, 42, 67, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 183, 255, 0.2);
+            padding: 30px;
+            margin-top: 20px;
+            border: 1px solid rgba(0, 183, 255, 0.3);
+            animation: fadeIn 1s ease-out;
+            position: relative;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #00b7ff, #00ffaa, #00b7ff);
+            border-radius: 5px 5px 0 0;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: slideDown 0.8s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h1 {
+            color: #fff;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 183, 255, 0.7);
+            background: linear-gradient(45deg, #00b7ff, #00ffaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #00b7ff, #00ffaa);
+            border-radius: 3px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #8ec5fc;
+            margin-top: 10px;
+        }
+        
+        .game-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            animation: fadeIn 1s ease-out 0.3s both;
+        }
+        
+        .game-btn {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #00b7ff 0%, #00ffaa 100%);
+            color: #0a2a43;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 183, 255, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .game-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 183, 255, 0.6);
+        }
+        
+        .game-btn:active {
+            transform: translateY(0) scale(1);
+        }
+        
+        .game-container {
+            background: rgba(14, 53, 82, 0.6);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid rgba(0, 183, 255, 0.2);
+            animation: scaleIn 0.5s ease-out;
+        }
+        
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .game-title {
+            color: #00ffaa;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8rem;
+            text-shadow: 0 0 5px rgba(0, 255, 170, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .game-instructions {
+            background: rgba(0, 183, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: left;
+            border-left: 4px solid #00b7ff;
+        }
+        
+        .game-instructions p {
+            color: #8ec5fc;
+            line-height: 1.6;
+        }
+        
+        .game-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        input[type="text"], input[type="number"] {
+            padding: 15px 25px;
+            width: 100%;
+            max-width: 300px;
+            border: 2px solid rgba(0, 183, 255, 0.3);
+            border-radius: 50px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(14, 53, 82, 0.8);
+            color: white;
+        }
+        
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #00b7ff;
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 183, 255, 0.5);
+        }
+        
+        .submit-btn {
+            padding: 15px 35px;
+            background: linear-gradient(135deg, #00b7ff 0%, #00ffaa 100%);
+            color: #0a2a43;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 183, 255, 0.4);
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 183, 255, 0.6);
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .success {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.5);
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+        }
+        
+        .error {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.5);
+            box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
+        }
+        
+        .hint {
+            margin-top: 10px;
+            font-style: italic;
+            color: #8ec5fc;
+            text-align: center;
+        }
+        
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(14, 53, 82, 0.6);
+            border-radius: 15px;
+            font-weight: bold;
+            border: 1px solid rgba(0, 183, 255, 0.2);
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .score-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #00b7ff;
+        }
+        
+        .score-value {
+            font-size: 1.8rem;
+            color: #00ffaa;
+            text-shadow: 0 0 5px rgba(0, 255, 170, 0.5);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .image-container {
+            width: 300px;
+            height: 200px;
+            background: rgba(14, 53, 82, 0.8);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 15px;
+            border: 2px solid rgba(0, 183, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .blurred-image {
+            filter: blur(15px);
+            transition: filter 0.5s ease;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .reveal-btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: rgba(0, 183, 255, 0.2);
+            color: #00b7ff;
+            border: 1px solid rgba(0, 183, 255, 0.5);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .reveal-btn:hover {
+            background: rgba(0, 183, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .timer {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #00ffaa;
+            margin: 10px 0;
+            text-shadow: 0 0 5px rgba(0, 255, 170, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .clue-container {
+            background: rgba(0, 183, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: left;
+            border-left: 4px solid #00b7ff;
+        }
+        
+        .clue-item {
+            margin: 10px 0;
+            color: #8ec5fc;
+        }
+        
+        .scrambled-text {
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            color: #00ffaa;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            font-family: monospace;
+        }
+        
+        @media (max-width: 600px) {
+            .game-selection {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .game-btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+            
+            .image-container {
+                width: 250px;
+                height: 150px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .game-title {
+                font-size: 1.5rem;
+            }
+            
+            .game-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ocean-background">
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+    
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <div class="logo">
+            <i class="fas fa-fish"></i>
+        </div>
+        <h1 class="game-title">Game Tebak-Tebakan Laut</h1>
+        <p class="subtitle">Tantang pengetahuan Anda dengan berbagai tebakan seru!</p>
+        <button class="start-btn" onclick="showGameSelection()">
+            <i class="fas fa-play"></i> Mulai Bermain
+        </button>
+    </div>
+    
+    <!-- Game Selection Screen -->
+    <div id="game-selection-screen">
+        <button class="back-btn" onclick="showSplashScreen()">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </button>
+        
+        <header>
+            <h1>Pilih Game</h1>
+            <p class="subtitle">Pilih salah satu game untuk mulai bermain</p>
+        </header>
+        
+        <div class="game-grid">
+            <div class="game-card" onclick="showGame('number')">
+                <div class="game-icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <h3 class="game-name">Tebak Angka</h3>
+                <p class="game-desc">Tebak angka antara 1-100 dengan bantuan petunjuk</p>
+            </div>
+            
+            <div class="game-card" onclick="showGame('word')">
+                <div class="game-icon">
+                    <i class="fas fa-font"></i>
+                </div>
+                <h3 class="game-name">Tebak Kata</h3>
+                <p class="game-desc">Tebak kata berdasarkan clue yang diberikan</p>
+            </div>
+            
+            <div class="game-card" onclick="showGame('image')">
+                <div class="game-icon">
+                    <i class="fas fa-image"></i>
+                </div>
+                <h3 class="game-name">Tebak Gambar</h3>
+                <p class="game-desc">Tebak objek dalam gambar yang diburamkan</p>
+            </div>
+            
+            <div class="game-card" onclick="showGame('whoami')">
+                <div class="game-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h3 class="game-name">Siapakah Aku?</h3>
+                <p class="game-desc">Tebak tokoh berdasarkan clue yang diberikan</p>
+            </div>
+            
+            <div class="game-card" onclick="showGame('sentence')">
+                <div class="game-icon">
+                    <i class="fas fa-quote-right"></i>
+                </div>
+                <h3 class="game-name">Tebak Kalimat</h3>
+                <p class="game-desc">Tebak kalimat dari kata-kata yang diacak</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Game Container -->
+    <div class="container" id="game-container">
+        <button class="back-btn" onclick="showGameSelection()">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </button>
+        
+        <!-- Game Tebak Angka -->
+        <div id="number-game" class="game-container hidden">
+            <h2 class="game-title"><i class="fas fa-calculator"></i> Tebak Angka</h2>
+            <div class="game-instructions">
+                <p><strong>Cara Bermain:</strong> Saya akan memilih angka antara 1 sampai 100. Anda harus menebak angka tersebut. Setiap kali menebak, saya akan memberi petunjuk apakah tebakan Anda terlalu tinggi atau terlalu rendah.</p>
+            </div>
+            <button id="start-number" class="start-btn" onclick="startNumberGame()">Mulai Game</button>
+            <div id="number-content" class="game-content hidden">
+                <p>Saya sedang memikirkan angka antara 1 sampai 100. Bisakah Anda menebaknya?</p>
+                <input type="number" id="number-input" min="1" max="100" placeholder="Masukkan angka">
+                <button class="submit-btn" onclick="checkNumber()">Tebak!</button>
+                <div id="number-result" class="result"></div>
+                <div id="number-hint" class="hint"></div>
+            </div>
+        </div>
+        
+        <!-- Game Tebak Kata -->
+        <div id="word-game" class="game-container hidden">
+            <h2 class="game-title"><i class="fas fa-font"></i> Tebak Kata</h2>
+            <div class="game-instructions">
+                <p><strong>Cara Bermain:</strong> Saya akan memberikan petunjuk tentang sebuah kata. Anda harus menebak kata berdasarkan petunjuk yang diberikan. Gunakan pengetahuan umum Anda!</p>
+            </div>
+            <button id="start-word" class="start-btn" onclick="startWordGame()">Mulai Game</button>
+            <div id="word-content" class="game-content hidden">
+                <p id="word-clue">Clue: </p>
+                <input type="text" id="word-input" placeholder="Masukkan kata">
+                <button class="submit-btn" onclick="checkWord()">Tebak!</button>
+                <div id="word-result" class="result"></div>
+                <button class="reveal-btn" onclick="revealWord()">Lihat Jawaban</button>
+            </div>
+        </div>
+        
+        <!-- Game Tebak Gambar -->
+        <div id="image-game" class="game-container hidden">
+            <h2 class="game-title"><i class="fas fa-image"></i> Tebak Gambar</h2>
+            <div class="game-instructions">
+                <p><strong>Cara Bermain:</strong> Saya akan menampilkan gambar yang diburamkan. Anda harus menebak apa yang ada dalam gambar. Jika kesulitan, Anda dapat melihat gambar aslinya.</p>
+            </div>
+            <button id="start-image" class="start-btn" onclick="startImageGame()">Mulai Game</button>
+            <div id="image-content" class="game-content hidden">
+                <p>Apa yang ada dalam gambar ini?</p>
+                <div class="image-container">
+                    <img id="blurred-img" class="blurred-image" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMTIzNDU2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zNWVtIj5JYWthbiBMYXV0PC90ZXh0Pjwvc3ZnPg==" alt="Gambar tebakan">
+                </div>
+                <input type="text" id="image-input" placeholder="Masukkan tebakan">
+                <button class="submit-btn" onclick="checkImage()">Tebak!</button>
+                <div id="image-result" class="result"></div>
+                <button class="reveal-btn" onclick="revealImage()">Lihat Gambar</button>
+            </div>
+        </div>
+        
+        <!-- Game Siapakah Aku -->
+        <div id="whoami-game" class="game-container hidden">
+            <h2 class="game-title"><i class="fas fa-user"></i> Siapakah Aku?</h2>
+            <div class="game-instructions">
+                <p><strong>Cara Bermain:</strong> Saya akan memberikan beberapa clue tentang seorang tokoh. Anda harus menebak siapa tokoh tersebut berdasarkan clue yang diberikan.</p>
+            </div>
+            <button id="start-whoami" class="start-btn" onclick="startWhoAmIGame()">Mulai Game</button>
+            <div id="whoami-content" class="game-content hidden">
+                <p>Tebaklah siapa tokoh yang saya deskripsikan!</p>
+                <div class="clue-container">
+                    <div id="whoami-clues">
+                        <!-- Clue akan dimuat di sini oleh JavaScript -->
+                    </div>
+                </div>
+                <input type="text" id="whoami-input" placeholder="Masukkan nama tokoh">
+                <button class="submit-btn" onclick="checkWhoAmI()">Tebak!</button>
+                <div id="whoami-result" class="result"></div>
+                <button class="reveal-btn" onclick="revealWhoAmI()">Lihat Jawaban</button>
+            </div>
+        </div>
+        
+        <!-- Game Tebak Kalimat -->
+        <div id="sentence-game" class="game-container hidden">
+            <h2 class="game-title"><i class="fas fa-quote-right"></i> Tebak Kalimat</h2>
+            <div class="game-instructions">
+                <p><strong>Cara Bermain:</strong> Saya akan menampilkan kata-kata yang diacak dari sebuah kalimat. Anda harus menebak kalimat aslinya dengan menyusun kata-kata tersebut dengan benar.</p>
+            </div>
+            <button id="start-sentence" class="start-btn" onclick="startSentenceGame()">Mulai Game</button>
+            <div id="sentence-content" class="game-content hidden">
+                <p>Susunlah kata-kata berikut menjadi sebuah kalimat yang benar!</p>
+                <div class="scrambled-text" id="scrambled-words">
+                    <!-- Kata-kata acak akan dimuat di sini oleh JavaScript -->
+                </div>
+                <input type="text" id="sentence-input" placeholder="Masukkan kalimat yang benar">
+                <button class="submit-btn" onclick="checkSentence()">Tebak!</button>
+                <div id="sentence-result" class="result"></div>
+                <button class="reveal-btn" onclick="revealSentence()">Lihat Jawaban</button>
+            </div>
+        </div>
+        
+        <div class="score-board">
+            <div class="score-item">
+                <div>Percobaan</div>
+                <div class="score-value" id="attempts">0</div>
+            </div>
+            <div class="score-item">
+                <div>Berhasil</div>
+                <div class="score-value" id="success">0</div>
+            </div>
+            <div class="score-item">
+                <div>Gagal</div>
+                <div class="score-value" id="fail">0</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variabel global
+        let currentGame = null;
+        let randomNumber = Math.floor(Math.random() * 100) + 1;
+        let attempts = 0;
+        let successCount = 0;
+        let failCount = 0;
+        let gameActive = false;
+        let timerInterval = null;
+        let timeLeft = 0;
+        
+        // Daftar kata untuk game tebak kata
+        const wordList = [
+            { word: "komputer", clue: "Alat elektronik untuk mengolah data" },
+            { word: "indonesia", clue: "Nama negara kepulauan di Asia Tenggara" },
+            { word: "website", clue: "Kumpulan halaman dalam internet yang dapat diakses" },
+            { word: "programmer", clue: "Orang yang membuat dan menulis kode program" },
+            { word: "internet", clue: "Jaringan global yang menghubungkan komputer di seluruh dunia" },
+            { word: "laut", clue: "Kumpulan air asin yang sangat luas di permukaan bumi" },
+            { word: "ikan", clue: "Hewan air yang bernapas dengan insang dan berenang dengan sirip" },
+            { word: "terumbu", clue: "Struktur karang di laut yang menjadi habitat banyak biota laut" }
+        ];
+        
+        // Daftar tokoh untuk game Siapakah Aku
+        const whoAmIList = [
+            {
+                name: "Christopher Columbus",
+                clues: [
+                    "Saya adalah penjelajah dan navigator Italia",
+                    "Saya melakukan empat pelayaran melintasi Samudra Atlantik",
+                    "Saya tiba di benua Amerika pada tahun 1492",
+                    "Pelayaran saya didanai oleh Ratu Isabella dari Spanyol"
+                ]
+            },
+            {
+                name: "Albert Einstein",
+                clues: [
+                    "Saya adalah fisikawan teoretis kelahiran Jerman",
+                    "Saya mengembangkan teori relativitas",
+                    "Saya menerima Penghargaan Nobel dalam Fisika pada tahun 1921",
+                    "Rumus paling terkenal saya adalah E = mc²"
+                ]
+            },
+            {
+                name: "William Shakespeare",
+                clues: [
+                    "Saya adalah pujangga, dramawan, dan aktor Inggris",
+                    "Saya dianggap sebagai penulis berbahasa Inggris terhebat sepanjang masa",
+                    "Karya saya termasuk Romeo dan Juliet, Hamlet, dan Macbeth",
+                    "Saya menulis sekitar 38 sandiwara dan 154 soneta"
+                ]
+            },
+            {
+                name: "Cleopatra",
+                clues: [
+                    "Saya adalah ratu Mesir Kuno terakhir",
+                    "Saya adalah anggota dinasti Ptolemeus",
+                    "Saya terkenal karena hubungan saya dengan Julius Caesar dan Mark Antony",
+                    "Saya meninggal dengan digigit ular asp"
+                ]
+            }
+        ];
+        
+        // Daftar kalimat untuk game Tebak Kalimat
+        const sentenceList = [
+            "Laut adalah sumber kehidupan bagi banyak makhluk hidup",
+            "Indonesia dikenal sebagai negara maritim dengan laut yang luas",
+            "Ikan bernapas dengan insang dan hidup di air",
+            "Terumbu karang adalah ekosistem penting di laut tropis",
+            "Pencemaran laut mengancam kelangsungan hidup biota laut"
+        ];
+        
+        let currentWord = null;
+        let currentWhoAmI = null;
+        let currentSentence = null;
+        
+        // Buat gelembung udara
+        function createBubbles() {
+            const oceanBackground = document.querySelector('.ocean-background');
+            for (let i = 0; i < 20; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                
+                // Ukuran acak
+                const size = Math.random() * 30 + 10;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Posisi acak
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.bottom = `${Math.random() * 20}%`;
+                
+                // Animasi dengan delay acak
+                bubble.style.animationDelay = `${Math.random() * 15}s`;
+                bubble.style.animationDuration = `${15 + Math.random() * 15}s`;
+                
+                oceanBackground.appendChild(bubble);
+            }
+        }
+        
+        // Buat ikan
+        function createFishes() {
+            const oceanBackground = document.querySelector('.ocean-background');
+            const fishEmojis = ['🐠', '🐟', '🐡', '🦈', '🐬'];
+            
+            for (let i = 0; i < 5; i++) {
+                const fish = document.createElement('div');
+                fish.classList.add('fish');
+                fish.textContent = fishEmojis[Math.floor(Math.random() * fishEmojis.length)];
+                
+                // Posisi acak
+                fish.style.top = `${Math.random() * 80}%`;
+                
+                // Animasi dengan delay dan durasi acak
+                fish.style.animationDelay = `${Math.random() * 10}s`;
+                fish.style.animationDuration = `${20 + Math.random() * 20}s`;
+                
+                oceanBackground.appendChild(fish);
+            }
+        }
+        
+        // Tampilkan splash screen
+        function showSplashScreen() {
+            document.getElementById('splash-screen').style.display = 'flex';
+            document.getElementById('game-selection-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'none';
+        }
+        
+        // Tampilkan game selection
+        function showGameSelection() {
+            document.getElementById('splash-screen').style.display = 'none';
+            document.getElementById('game-selection-screen').style.display = 'block';
+            document.getElementById('game-container').style.display = 'none';
+        }
+        
+        // Tampilkan game yang dipilih
+        function showGame(gameType) {
+            document.getElementById('game-selection-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            
+            // Sembunyikan semua game
+            document.getElementById('number-game').classList.add('hidden');
+            document.getElementById('word-game').classList.add('hidden');
+            document.getElementById('image-game').classList.add('hidden');
+            document.getElementById('whoami-game').classList.add('hidden');
+            document.getElementById('sentence-game').classList.add('hidden');
+            
+            // Tampilkan game yang dipilih
+            document.getElementById(`${gameType}-game`).classList.remove('hidden');
+            currentGame = gameType;
+            
+            // Reset status game
+            gameActive = false;
+            
+            // Tampilkan tombol mulai dan sembunyikan konten game
+            document.getElementById('start-number').classList.remove('hidden');
+            document.getElementById('start-word').classList.remove('hidden');
+            document.getElementById('start-image').classList.remove('hidden');
+            document.getElementById('start-whoami').classList.remove('hidden');
+            document.getElementById('start-sentence').classList.remove('hidden');
+            
+            document.getElementById('number-content').classList.add('hidden');
+            document.getElementById('word-content').classList.add('hidden');
+            document.getElementById('image-content').classList.add('hidden');
+            document.getElementById('whoami-content').classList.add('hidden');
+            document.getElementById('sentence-content').classList.add('hidden');
+        }
+        
+        // Mulai game tebak angka
+        function startNumberGame() {
+            document.getElementById('start-number').classList.add('hidden');
+            document.getElementById('number-content').classList.remove('hidden');
+            
+            initNumberGame();
+            gameActive = true;
+            startTimer(120); // 2 menit untuk tebak angka
+        }
+        
+        // Mulai game tebak kata
+        function startWordGame() {
+            document.getElementById('start-word').classList.add('hidden');
+            document.getElementById('word-content').classList.remove('hidden');
+            
+            initWordGame();
+            gameActive = true;
+            startTimer(90); // 1.5 menit untuk tebak kata
+        }
+        
+        // Mulai game tebak gambar
+        function startImageGame() {
+            document.getElementById('start-image').classList.add('hidden');
+            document.getElementById('image-content').classList.remove('hidden');
+            
+            initImageGame();
+            gameActive = true;
+            startTimer(60); // 1 menit untuk tebak gambar
+        }
+        
+        // Mulai game Siapakah Aku
+        function startWhoAmIGame() {
+            document.getElementById('start-whoami').classList.add('hidden');
+            document.getElementById('whoami-content').classList.remove('hidden');
+            
+            initWhoAmIGame();
+            gameActive = true;
+            startTimer(120); // 2 menit untuk tebak tokoh
+        }
+        
+        // Mulai game Tebak Kalimat
+        function startSentenceGame() {
+            document.getElementById('start-sentence').classList.add('hidden');
+            document.getElementById('sentence-content').classList.remove('hidden');
+            
+            initSentenceGame();
+            gameActive = true;
+            startTimer(120); // 2 menit untuk tebak kalimat
+        }
+        
+        // Inisialisasi game tebak angka
+        function initNumberGame() {
+            randomNumber = Math.floor(Math.random() * 100) + 1;
+            document.getElementById('number-input').value = '';
+            document.getElementById('number-result').className = 'result';
+            document.getElementById('number-result').textContent = '';
+            document.getElementById('number-hint').textContent = '';
+        }
+        
+        // Inisialisasi game tebak kata
+        function initWordGame() {
+            // Pilih kata acak dari daftar
+            const randomIndex = Math.floor(Math.random() * wordList.length);
+            currentWord = wordList[randomIndex];
+            document.getElementById('word-clue').textContent = `Clue: ${currentWord.clue}`;
+            document.getElementById('word-input').value = '';
+            document.getElementById('word-result').className = 'result';
+            document.getElementById('word-result').textContent = '';
+        }
+        
+        // Inisialisasi game tebak gambar
+        function initImageGame() {
+            document.getElementById('blurred-img').style.filter = 'blur(15px)';
+            document.getElementById('image-input').value = '';
+            document.getElementById('image-result').className = 'result';
+            document.getElementById('image-result').textContent = '';
+        }
+        
+        // Inisialisasi game Siapakah Aku
+        function initWhoAmIGame() {
+            // Pilih tokoh acak dari daftar
+            const randomIndex = Math.floor(Math.random() * whoAmIList.length);
+            currentWhoAmI = whoAmIList[randomIndex];
+            
+            // Tampilkan clue
+            const cluesContainer = document.getElementById('whoami-clues');
+            cluesContainer.innerHTML = '';
+            
+            currentWhoAmI.clues.forEach((clue, index) => {
+                const clueElement = document.createElement('div');
+                clueElement.className = 'clue-item';
+                clueElement.innerHTML = `<strong>Clue ${index + 1}:</strong> ${clue}`;
+                cluesContainer.appendChild(clueElement);
+            });
+            
+            document.getElementById('whoami-input').value = '';
+            document.getElementById('whoami-result').className = 'result';
+            document.getElementById('whoami-result').textContent = '';
+        }
+        
+        // Inisialisasi game Tebak Kalimat
+        function initSentenceGame() {
+            // Pilih kalimat acak dari daftar
+            const randomIndex = Math.floor(Math.random() * sentenceList.length);
+            currentSentence = sentenceList[randomIndex];
+            
+            // Acak kata-kata dalam kalimat
+            const words = currentSentence.split(' ');
+            for (let i = words.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [words[i], words[j]] = [words[j], words[i]];
+            }
+            
+            // Tampilkan kata-kata yang diacak
+            document.getElementById('scrambled-words').textContent = words.join(' ');
+            document.getElementById('sentence-input').value = '';
+            document.getElementById('sentence-result').className = 'result';
+            document.getElementById('sentence-result').textContent = '';
+        }
+        
+        // Fungsi timer
+        function startTimer(seconds) {
+            // Hentikan timer sebelumnya jika ada
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            timeLeft = seconds;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(function() {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (gameActive) {
+                        // Waktu habis
+                        const resultDiv = document.getElementById(`${currentGame}-result`);
+                        resultDiv.textContent = 'Waktu habis! Anda tidak berhasil menebak dalam waktu yang ditentukan.';
+                        resultDiv.className = 'result error';
+                        failCount++;
+                        document.getElementById('fail').textContent = failCount;
+                        gameActive = false;
+                    }
+                }
+            }, 1000);
+        }
+        
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            
+            // Cari elemen timer di game yang aktif
+            let timerDiv;
+            if (currentGame === 'number') timerDiv = document.getElementById('number-content');
+            else if (currentGame === 'word') timerDiv = document.getElementById('word-content');
+            else if (currentGame === 'image') timerDiv = document.getElementById('image-content');
+            else if (currentGame === 'whoami') timerDiv = document.getElementById('whoami-content');
+            else if (currentGame === 'sentence') timerDiv = document.getElementById('sentence-content');
+            
+            // Hapus timer sebelumnya jika ada
+            const oldTimer = timerDiv.querySelector('.timer');
+            if (oldTimer) {
+                oldTimer.remove();
+            }
+            
+            // Buat elemen timer baru
+            const timerElement = document.createElement('div');
+            timerElement.className = 'timer';
+            timerElement.innerHTML = `<i class="fas fa-clock"></i> Waktu: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            
+            // Sisipkan timer di atas konten game
+            timerDiv.insertBefore(timerElement, timerDiv.firstChild);
+        }
+        
+        // Cek tebakan angka
+        function checkNumber() {
+            if (!gameActive) return;
+            
+            const guess = parseInt(document.getElementById('number-input').value);
+            const resultDiv = document.getElementById('number-result');
+            const hintDiv = document.getElementById('number-hint');
+            
+            if (isNaN(guess) || guess < 1 || guess > 100) {
+                resultDiv.textContent = 'Masukkan angka antara 1 dan 100!';
+                resultDiv.className = 'result error';
+                return;
+            }
+            
+            attempts++;
+            document.getElementById('attempts').textContent = attempts;
+            
+            if (guess === randomNumber) {
+                resultDiv.textContent = `Selamat! Anda berhasil menebak angka ${randomNumber} dalam ${attempts} percobaan.`;
+                resultDiv.className = 'result success';
+                successCount++;
+                document.getElementById('success').textContent = successCount;
+                gameActive = false;
+                clearInterval(timerInterval);
+                setTimeout(() => showGameSelection(), 3000);
+            } else {
+                resultDiv.textContent = 'Tebakan Anda ' + (guess > randomNumber ? 'terlalu tinggi' : 'terlalu rendah');
+                resultDiv.className = 'result error';
+                failCount++;
+                document.getElementById('fail').textContent = failCount;
+                
+                // Beri hint setelah beberapa percobaan
+                if (attempts === 3) {
+                    hintDiv.textContent = `Hint: Angka ini adalah ${randomNumber % 2 === 0 ? 'genap' : 'ganjil'}`;
+                } else if (attempts === 5) {
+                    hintDiv.textContent = `Hint: Angka ini antara ${Math.max(1, randomNumber-10)} dan ${Math.min(100, randomNumber+10)}`;
+                }
+            }
+        }
+        
+        // Cek tebakan kata
+        function checkWord() {
+            if (!gameActive) return;
+            
+            const guess = document.getElementById('word-input').value.toLowerCase().trim();
+            const resultDiv = document.getElementById('word-result');
+            
+            if (!guess) {
+                resultDiv.textContent = 'Masukkan tebakan Anda!';
+                resultDiv.className = 'result error';
+                return;
+            }
+            
+            attempts++;
+            document.getElementById('attempts').textContent = attempts;
+            
+            if (guess === currentWord.word) {
+                resultDiv.textContent = `Tebakan benar! Kata tersebut adalah "${currentWord.word}"`;
+                resultDiv.className = 'result success';
+                successCount++;
+                document.getElementById('success').textContent = successCount;
+                gameActive = false;
+                clearInterval(timerInterval);
+                setTimeout(() => showGameSelection(), 3000);
+            } else {
+                resultDiv.textContent = 'Tebakan salah! Coba lagi.';
+                resultDiv.className = 'result error';
+                failCount++;
+                document.getElementById('fail').textContent = failCount;
+            }
+        }
+        
+        // Cek tebakan gambar
+        function checkImage() {
+            if (!gameActive) return;
+            
+            const guess = document.getElementById('image-input').value.toLowerCase().trim();
+            const resultDiv = document.getElementById('image-result');
+            
+            if (!guess) {
+                resultDiv.textContent = 'Masukkan tebakan Anda!';
+                resultDiv.className = 'result error';
+                return;
+            }
+            
+            attempts++;
+            document.getElementById('attempts').textContent = attempts;
+            
+            // Untuk contoh, kita asumsikan gambar adalah "ikan"
+            if (guess === 'ikan' || guess === 'fish') {
+                resultDiv.textContent = 'Tebakan benar! Gambar tersebut adalah ikan.';
+                resultDiv.className = 'result success';
+                successCount++;
+                document.getElementById('success').textContent = successCount;
+                document.getElementById('blurred-img').style.filter = 'blur(0)';
+                gameActive = false;
+                clearInterval(timerInterval);
+                setTimeout(() => showGameSelection(), 3000);
+            } else {
+                resultDiv.textContent = 'Tebakan salah! Coba lagi.';
+                resultDiv.className = 'result error';
+                failCount++;
+                document.getElementById('fail').textContent = failCount;
+            }
+        }
+        
+        // Cek tebakan Siapakah Aku
+        function checkWhoAmI() {
+            if (!gameActive) return;
+            
+            const guess = document.getElementById('whoami-input').value.toLowerCase().trim();
+            const resultDiv = document.getElementById('whoami-result');
+            
+            if (!guess) {
+                resultDiv.textContent = 'Masukkan tebakan Anda!';
+                resultDiv.className = 'result error';
+                return;
+            }
+            
+            attempts++;
+            document.getElementById('attempts').textContent = attempts;
+            
+            if (guess === currentWhoAmI.name.toLowerCase()) {
+                resultDiv.textContent = `Tebakan benar! Tokoh tersebut adalah "${currentWhoAmI.name}"`;
+                resultDiv.className = 'result success';
+                successCount++;
+                document.getElementById('success').textContent = successCount;
+                gameActive = false;
+                clearInterval(timerInterval);
+                setTimeout(() => showGameSelection(), 3000);
+            } else {
+                resultDiv.textContent = 'Tebakan salah! Coba lagi.';
+                resultDiv.className = 'result error';
+                failCount++;
+                document.getElementById('fail').textContent = failCount;
+            }
+        }
+        
+        // Cek tebakan Kalimat
+        function checkSentence() {
+            if (!gameActive) return;
+            
+            const guess = document.getElementById('sentence-input').value.toLowerCase().trim();
+            const resultDiv = document.getElementById('sentence-result');
+            
+            if (!guess) {
+                resultDiv.textContent = 'Masukkan tebakan Anda!';
+                resultDiv.className = 'result error';
+                return;
+            }
+            
+            attempts++;
+            document.getElementById('attempts').textContent = attempts;
+            
+            if (guess === currentSentence.toLowerCase()) {
+                resultDiv.textContent = `Tebakan benar! Kalimat tersebut adalah "${currentSentence}"`;
+                resultDiv.className = 'result success';
+                successCount++;
+                document.getElementById('success').textContent = successCount;
+                gameActive = false;
+                clearInterval(timerInterval);
+                setTimeout(() => showGameSelection(), 3000);
+            } else {
+                resultDiv.textContent = 'Tebakan salah! Coba lagi.';
+                resultDiv.className = 'result error';
+                failCount++;
+                document.getElementById('fail').textContent = failCount;
+            }
+        }
+        
+        // Tampilkan jawaban untuk tebak kata
+        function revealWord() {
+            if (!gameActive) return;
+            
+            const resultDiv = document.getElementById('word-result');
+            resultDiv.textContent = `Jawabannya adalah: "${currentWord.word}"`;
+            resultDiv.className = 'result';
+            failCount++;
+            document.getElementById('fail').textContent = failCount;
+            gameActive = false;
+            clearInterval(timerInterval);
+            setTimeout(() => showGameSelection(), 3000);
+        }
+        
+        // Tampilkan gambar asli
+        function revealImage() {
+            if (!gameActive) return;
+            
+            document.getElementById('blurred-img').style.filter = 'blur(0)';
+            const resultDiv = document.getElementById('image-result');
+            resultDiv.textContent = 'Gambar tersebut adalah ikan.';
+            resultDiv.className = 'result';
+            failCount++;
+            document.getElementById('fail').textContent = failCount;
+            gameActive = false;
+            clearInterval(timerInterval);
+            setTimeout(() => showGameSelection(), 3000);
+        }
+        
+        // Tampilkan jawaban untuk Siapakah Aku
+        function revealWhoAmI() {
+            if (!gameActive) return;
+            
+            const resultDiv = document.getElementById('whoami-result');
+            resultDiv.textContent = `Jawabannya adalah: "${currentWhoAmI.name}"`;
+            resultDiv.className = 'result';
+            failCount++;
+            document.getElementById('fail').textContent = failCount;
+            gameActive = false;
+            clearInterval(timerInterval);
+            setTimeout(() => showGameSelection(), 3000);
+        }
+        
+        // Tampilkan jawaban untuk Tebak Kalimat
+        function revealSentence() {
+            if (!gameActive) return;
+            
+            const resultDiv = document.getElementById('sentence-result');
+            resultDiv.textContent = `Jawabannya adalah: "${currentSentence}"`;
+            resultDiv.className = 'result';
+            failCount++;
+            document.getElementById('fail').textContent = failCount;
+            gameActive = false;
+            clearInterval(timerInterval);
+            setTimeout(() => showGameSelection(), 3000);
+        }
+        
+        // Inisialisasi saat halaman dimuat
+        window.onload = function() {
+            createBubbles();
+            createFishes();
+            showSplashScreen();
+        };
+    </script>
+</body>
+</html>

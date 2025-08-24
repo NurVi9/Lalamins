@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudinary Uploader</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .header-container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .back-btn {
+            background: linear-gradient(to right, #4a6fc7, #3b5998);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(59, 89, 152, 0.3);
+            text-decoration: none;
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 89, 152, 0.4);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            margin-top: 10px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .upload-container {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+            background: #f8f9ff;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-container::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+            z-index: -1;
+            border-radius: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .upload-container:hover, .upload-container.dragover {
+            background: #eef0ff;
+            border-color: #764ba2;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(118, 75, 162, 0.15);
+        }
+        
+        .upload-container:hover::before {
+            opacity: 0.05;
+        }
+        
+        .upload-icon {
+            font-size: 50px;
+            color: #667eea;
+            margin-bottom: 15px;
+            transition: transform 0.3s;
+        }
+        
+        .upload-container:hover .upload-icon {
+            transform: scale(1.1);
+        }
+        
+        .upload-container p {
+            margin-bottom: 15px;
+            color: #666;
+        }
+        
+        .browse-btn {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+        }
+        
+        .browse-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
+        }
+        
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .status {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .results-container {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .results-container h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.4rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+        
+        .result-item {
+            background: linear-gradient(to right, #e3f2fd, #bbdefb);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s;
+        }
+        
+        .result-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-thumbnail {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 15px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .result-info h4 {
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .result-url {
+            font-size: 0.85rem;
+            color: #1a56db;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.4;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 8px rgba(118, 75, 162, 0.3);
+        }
+        
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            background: linear-gradient(to right, #4caf50, #2e7d32);
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .notification.error {
+            background: linear-gradient(to right, #f44336, #c62828);
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .header-container {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .result-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .result-thumbnail {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .copy-btn {
+                margin-left: 0;
+                margin-top: 10px;
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header dengan tombol kembali -->
+    <div class="header-container">
+        <a href="https://www.example.com" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Kembali </a>
+        <h2>Cloudinary Uploader</h2>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1>Unggah File Anda</h1>
+            <p>Unggah foto dan video dengan mudah ke cloud</p>
+        </header>
+        
+        <div class="upload-container" id="uploadContainer">
+            <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <p>Seret dan lepas file Anda di sini atau klik untuk memilih</p>
+            <button class="browse-btn" id="browseBtn">Jelajahi File</button>
+        </div>
+        
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            <div class="status" id="statusText">Menunggu unggahan...</div>
+        </div>
+        
+        <div class="results-container" id="resultsContainer">
+            <h3>Hasil Unggahan</h3>
+            <div id="resultsList"></div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span>URL berhasil disalin!</span>
+    </div>
+    
+    <!-- Load Cloudinary widget SDK -->
+    <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elemen DOM
+            const uploadContainer = document.getElementById('uploadContainer');
+            const browseBtn = document.getElementById('browseBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const statusText = document.getElementById('statusText');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsList = document.getElementById('resultsList');
+            const notification = document.getElementById('notification');
+            
+            // Konfigurasi Cloudinary - GANTI DENGAN KONFIGURASI ANDA SENDIRI
+            const cloudName = 'do3yj5r1m'; // Ganti dengan cloud name Anda
+            const uploadPreset = 'norevtu'; // Ganti dengan upload preset Anda
+            
+            // Inisialisasi Cloudinary widget
+            const myWidget = cloudinary.createUploadWidget({
+                cloudName: cloudName,
+                uploadPreset: uploadPreset,
+                sources: ['local', 'camera', 'url'],
+                multiple: true,
+                showAdvancedOptions: false,
+                cropping: false,
+                multiple: false,
+                defaultSource: 'local',
+                styles: {
+                    palette: {
+                        window: "#FFFFFF",
+                        sourceBg: "#f4f4f5",
+                        windowBorder: "#90a0b3",
+                        tabIcon: "#000000",
+                        inactiveTabIcon: "#555a5f",
+                        menuIcons: "#555a5f",
+                        link: "#843bec",
+                        action: "#339933",
+                        inProgress: "#843bec",
+                        complete: "#339933",
+                        error: "#cc0000",
+                        textDark: "#000000",
+                        textLight: "#FFFFFF"
+                    }
+                }
+            }, (error, result) => {
+                if (!error && result && result.event === 'success') {
+                    // Ketika upload berhasil
+                    console.log('Upload berhasil! Info: ', result.info);
+                    addUploadResult(result.info);
+                    progressContainer.style.display = 'none';
+                } else if (result && result.event === 'progress') {
+                    // Menampilkan progress upload
+                    const progress = result.info;
+                    progressBar.style.width = `${progress}%`;
+                    statusText.textContent = `Mengunggah: ${Math.round(progress)}%`;
+                    progressContainer.style.display = 'block';
+                } else if (error) {
+                    // Menangani error
+                    console.error('Error uploading:', error);
+                    showNotification('Terjadi kesalahan saat mengunggah', 'error');
+                    progressContainer.style.display = 'none';
+                }
+            });
+            
+            // Event listeners
+            browseBtn.addEventListener('click', () => {
+                myWidget.open();
+            });
+            
+            uploadContainer.addEventListener('click', () => {
+                myWidget.open();
+            });
+            
+            // Fungsi untuk menambahkan hasil upload ke daftar
+            function addUploadResult(data) {
+                resultsContainer.style.display = 'block';
+                
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                
+                const isImage = data.resource_type === 'image';
+                
+                const thumbnail = document.createElement(isImage ? 'img' : 'video');
+                thumbnail.className = 'result-thumbnail';
+                thumbnail.src = data.secure_url;
+                if (!isImage) {
+                    thumbnail.controls = true;
+                }
+                
+                const resultInfo = document.createElement('div');
+                resultInfo.className = 'result-info';
+                
+                const title = document.createElement('h4');
+                title.textContent = data.original_filename || 'File';
+                
+                const url = document.createElement('p');
+                url.className = 'result-url';
+                url.textContent = data.secure_url;
+                
+                resultInfo.appendChild(title);
+                resultInfo.appendChild(url);
+                
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.innerHTML = '<i class="fas fa-copy"></i> Salin';
+                copyBtn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(data.secure_url)
+                        .then(() => {
+                            showNotification('URL berhasil disalin!');
+                        })
+                        .catch(err => {
+                            console.error('Gagal menyalin URL: ', err);
+                            showNotification('Gagal menyalin URL', 'error');
+                        });
+                });
+                
+                resultItem.appendChild(thumbnail);
+                resultItem.appendChild(resultInfo);
+                resultItem.appendChild(copyBtn);
+                
+                resultsList.appendChild(resultItem);
+            }
+            
+            // Fungsi untuk menampilkan notifikasi
+            function showNotification(message, type = 'success') {
+                const icon = notification.querySelector('i');
+                const text = notification.querySelector('span');
+                
+                text.textContent = message;
+                
+                if (type === 'error') {
+                    notification.classList.add('error');
+                    icon.className = 'fas fa-exclamation-circle';
+                } else {
+                    notification.classList.remove('error');
+                    icon.className = 'fas fa-check-circle';
+                }
+                
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
