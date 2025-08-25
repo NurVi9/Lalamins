@@ -328,9 +328,9 @@
 <body>
     <!-- Header dengan tombol kembali -->
     <div class="header-container">
-        <a href="https://www.example.com" class="back-btn">
+        <a href="index.html" class="back-btn">
             <i class="fas fa-arrow-left"></i> Kembali </a>
-        <h2>Cloudinary Uploader</h2>
+        <h2>Luminox Uploader</h2>
     </div>
     
     <div class="container">
@@ -513,5 +513,122 @@
             }
         });
     </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ... [kode sebelumnya tetap sama] ...
+        
+        // Inisialisasi Cloudinary widget
+        const myWidget = cloudinary.createUploadWidget({
+            cloudName: cloudName,
+            uploadPreset: uploadPreset,
+            sources: ['local', 'camera', 'url'],
+            multiple: true,
+            showAdvancedOptions: false,
+            cropping: false,
+            multiple: false,
+            defaultSource: 'local',
+            styles: {
+                palette: {
+                    window: "#FFFFFF",
+                    sourceBg: "#f4f4f5",
+                    windowBorder: "#90a0b3",
+                    tabIcon: "#000000",
+                    inactiveTabIcon: "#555a5f",
+                    menuIcons: "#555a5f",
+                    link: "#843bec",
+                    action: "#339933",
+                    inProgress: "#843bec",
+                    complete: "#339933",
+                    error: "#cc0000",
+                    textDark: "#000000",
+                    textLight: "#FFFFFF"
+                }
+            }
+        }, (error, result) => {
+            if (!error && result && result.event === 'success') {
+                // Ketika upload berhasil
+                console.log('Upload berhasil! Info: ', result.info);
+                addUploadResult(result.info);
+                progressContainer.style.display = 'none';
+                statusText.textContent = 'Unggahan selesai!';
+            } else if (result && result.event === 'progress') {
+                // Menampilkan progress upload
+                const progress = result.info;
+                progressBar.style.width = `${progress}%`;
+                statusText.textContent = `Mengunggah: ${Math.round(progress)}%`;
+                progressContainer.style.display = 'block';
+            } else if (error) {
+                // Menangani error
+                console.error('Error uploading:', error);
+                showNotification('Terjadi kesalahan saat mengunggah', 'error');
+                progressContainer.style.display = 'none';
+                statusText.textContent = 'Unggahan gagal!';
+            }
+            
+            // Tambahkan penanganan untuk event lainnya
+            if (result && result.event === 'close') {
+                progressContainer.style.display = 'none';
+            }
+            
+            if (result && result.event === 'display-changed') {
+                console.log('Widget status changed:', result.info);
+            }
+        });
+        
+        // ... [kode lainnya tetap sama] ...
+        
+        // Fungsi untuk menambahkan hasil upload ke daftar
+        function addUploadResult(data) {
+            resultsContainer.style.display = 'block';
+            
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+            
+            const isImage = data.resource_type === 'image';
+            
+            const thumbnail = document.createElement(isImage ? 'img' : 'video');
+            thumbnail.className = 'result-thumbnail';
+            thumbnail.src = data.secure_url;
+            if (!isImage) {
+                thumbnail.controls = true;
+            }
+            
+            const resultInfo = document.createElement('div');
+            resultInfo.className = 'result-info';
+            
+            const title = document.createElement('h4');
+            title.textContent = data.original_filename || 'File';
+            
+            const url = document.createElement('p');
+            url.className = 'result-url';
+            url.textContent = data.secure_url;
+            
+            resultInfo.appendChild(title);
+            resultInfo.appendChild(url);
+            
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-btn';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Salin';
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(data.secure_url)
+                    .then(() => {
+                        showNotification('URL berhasil disalin!');
+                    })
+                    .catch(err => {
+                        console.error('Gagal menyalin URL: ', err);
+                        showNotification('Gagal menyalin URL', 'error');
+                    });
+            });
+            
+            resultItem.appendChild(thumbnail);
+            resultItem.appendChild(resultInfo);
+            resultItem.appendChild(copyBtn);
+            
+            resultsList.appendChild(resultItem);
+        }
+        
+        // ... [kode lainnya tetap sama] ...
+    });
+</script>
 </body>
 </html>
