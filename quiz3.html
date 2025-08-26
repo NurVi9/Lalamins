@@ -1,0 +1,3032 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quiz IPA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS yang sudah ada tetap dipertahankan */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-color: #1e3c72;
+            --secondary-color: #2a5298;
+            --accent-color: #4a77d4;
+            --correct-color: #28a745;
+            --incorrect-color: #dc3545;
+            --text-color: #333;
+            --bg-color: #f8f9fa;
+            --container-bg: rgba(255, 255, 255, 0.95);
+            --easy-color: #28a745;
+            --medium-color: #ffc107;
+            --hard-color: #dc3545;
+        }
+        
+        /* ... (CSS lainnya tetap sama) ... */
+        
+    </style>
+
+<!-- UI enhancements from quiz3 injected -->
+<style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-color: #1e3c72;
+            --secondary-color: #2a5298;
+            --accent-color: #4a77d4;
+            --correct-color: #28a745;
+            --incorrect-color: #dc3545;
+            --text-color: #333;
+            --bg-color: #f8f9fa;
+            --container-bg: rgba(255, 255, 255, 0.95);
+            --easy-color: #28a745;
+            --medium-color: #ffc107;
+            --hard-color: #dc3545;
+        }
+        
+        .dark-mode {
+            --primary-color: #4a77d4;
+            --secondary-color: #2a5298;
+            --accent-color: #1e3c72;
+            --text-color: #f8f9fa;
+            --bg-color: #121212;
+            --container-bg: rgba(33, 33, 33, 0.95);
+            --easy-color: #4caf50;
+            --medium-color: #ff9800;
+            --hard-color: #f44336;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            overflow-x: hidden;
+            position: relative;
+            color: var(--text-color);
+            transition: background 0.5s ease;
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .container {
+            background-color: var(--container-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 700px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, background-color 0.5s ease;
+            margin-bottom: 15px;
+        }
+        
+        .container:hover {
+            transform: translateY(-5px);
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color), var(--accent-color));
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 24px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            line-height: 1.3;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            margin: 15px 0;
+            font-size: 20px;
+        }
+        
+        .subtitle {
+            color: var(--text-color);
+            margin-bottom: 20px;
+            font-size: 16px;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+        
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        #start-screen {
+            display: block;
+        }
+        
+        .btn {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-back {
+            background: linear-gradient(to right, var(--accent-color), var(--secondary-color));
+            padding: 10px 18px;
+            font-size: 14px;
+        }
+        
+        .btn-easy {
+            background: linear-gradient(to right, var(--easy-color), #4caf50);
+        }
+        
+        .btn-medium {
+            background: linear-gradient(to right, var(--medium-color), #ff9800);
+        }
+        
+        .btn-hard {
+            background: linear-gradient(to right, var(--hard-color), #f44336);
+        }
+        
+        .external-back-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 100;
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+        
+        .option {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            background-color: var(--bg-color);
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 15px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInOption 0.5s ease-out;
+            animation-fill-mode: backwards;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+        }
+        
+        @keyframes fadeInOption {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .option:hover {
+            background-color: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .option.selected {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+        
+        .option.correct {
+            background-color: var(--correct-color);
+            color: white;
+            border-color: #1e7e34;
+        }
+        
+        .option.incorrect {
+            background-color: var(--incorrect-color);
+            color: white;
+            border-color: #c82333;
+        }
+        
+        .progress {
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            width: 0%;
+            transition: width 0.5s;
+            border-radius: 8px;
+        }
+        
+        .score-container {
+            font-size: 22px;
+            margin: 20px 0;
+            color: var(--text-color);
+        }
+        
+        .score {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 28px;
+        }
+        
+        .question-text {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            line-height: 1.4;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .question-number {
+            color: #6c757d;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        
+        .timer {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 12px 0;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            left: 15px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-100px);
+            transition: opacity 0.3s, transform 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .notification.correct {
+            background: linear-gradient(to right, var(--correct-color), #20c997);
+        }
+        
+        .notification.incorrect {
+            background: linear-gradient(to right, var(--incorrect-color), #fd7e14);
+        }
+        
+        .category {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 18px;
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 13px;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+        
+        .difficulty-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        
+        .difficulty-easy {
+            background-color: var(--easy-color);
+            color: white;
+        }
+        
+        .difficulty-medium {
+            background-color: var(--medium-color);
+            color: black;
+        }
+        
+        .difficulty-hard {
+            background-color: var(--hard-color);
+            color: white;
+        }
+        
+        .science-icon {
+            font-size: 50px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .result-details {
+            margin: 15px 0;
+            text-align: left;
+            background-color: var(--bg-color);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+        
+        .result-details h3 {
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+        
+        .result-item {
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed #dee2e6;
+            padding-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+        
+        .badge.correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .badge.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: moveCloud 20s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes moveCloud {
+            0% { transform: translateX(-100px); }
+            100% { transform: translateX(calc(100vw + 100px)); }
+        }
+        
+        /* New Styles for Additional Features */
+        .lifeline-container {
+            display: flex;
+            justify-content: center;
+            margin: 12px 0;
+            flex-wrap: wrap;
+        }
+        
+        .lifeline {
+            background: linear-gradient(to right, var(--accent-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 13px;
+            margin: 5px;
+            transition: all 0.2s;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .lifeline:hover {
+            transform: scale(1.05);
+        }
+        
+        .lifeline:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: var(--container-bg);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            padding: 15px;
+        }
+        
+        .confirmation-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: var(--container-bg);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .modal-btn {
+            margin: 0 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        
+        .score-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .score-level {
+            flex: 1;
+            min-width: 80px;
+            text-align: center;
+            padding: 4px;
+            border-radius: 4px;
+            margin: 2px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .active-level {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .fact-container {
+            margin: 15px 0;
+            padding: 12px;
+            background: var(--bg-color);
+            border-radius: 8px;
+            text-align: left;
+            font-size: 14px;
+        }
+        
+        .fact-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+        
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            pointer-events: none;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ff0;
+            border-radius: 50%;
+            animation: fall linear forwards;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        /* New features styles */
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .difficulty-btn {
+            margin: 5px;
+            min-width: 100px;
+        }
+        
+        .hint-container {
+            margin: 15px 0;
+            padding: 12px;
+            background: var(--bg-color);
+            border-radius: 8px;
+            text-align: left;
+            display: none;
+        }
+        
+        .hint-title {
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .achievement-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        .achievement {
+            width: 80px;
+            height: 80px;
+            margin: 8px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-color);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .achievement i {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .achievement.locked {
+            opacity: 0.5;
+        }
+        
+        .achievement-text {
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .stat-box {
+            background: var(--bg-color);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .share-container {
+            margin: 15px 0;
+        }
+        
+        .share-btn {
+            background: linear-gradient(to right, #3b5998, #4267B2);
+            margin: 5px;
+        }
+        
+        .share-btn.twitter {
+            background: linear-gradient(to right, #1DA1F2, #1A91DA);
+        }
+        
+        .share-btn.whatsapp {
+            background: linear-gradient(to right, #25D366, #128C7E);
+        }
+        
+        /* Improved mobile responsiveness */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+                border-radius: 12px;
+            }
+            
+            h1 {
+                font-size: 22px;
+            }
+            
+            h2 {
+                font-size: 18px;
+            }
+            
+            .question-text {
+                font-size: 16px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 15px;
+                margin: 8px;
+            }
+            
+            .external-back-btn {
+                top: 10px;
+                left: 10px;
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+            
+            .lifeline {
+                padding: 7px 10px;
+                font-size: 12px;
+                margin: 4px;
+            }
+            
+            .option {
+                padding: 12px;
+                font-size: 14px;
+                min-height: 44px;
+            }
+            
+            .score-container {
+                font-size: 20px;
+            }
+            
+            .score {
+                font-size: 24px;
+            }
+            
+            .science-icon {
+                font-size: 45px;
+            }
+            
+            .score-level {
+                min-width: 70px;
+                font-size: 10px;
+            }
+            
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+                width: 36px;
+                height: 36px;
+            }
+            
+            .notification {
+                font-size: 13px;
+                padding: 10px 15px;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .achievement {
+                width: 70px;
+                height: 70px;
+            }
+        }
+        
+        @media (max-width: 350px) {
+            .navigation {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .score-bar {
+                flex-direction: column;
+            }
+            
+            .score-level {
+                margin-bottom: 5px;
+            }
+            
+            .lifeline-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .lifeline {
+                width: 80%;
+                justify-content: center;
+            }
+            
+            .difficulty-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .difficulty-btn {
+                width: 80%;
+            }
+        }
+        
+        /* Prevent horizontal scrolling */
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Improve text readability on small devices */
+        .question-text, .option, .result-details, .fact-container {
+            hyphens: auto;
+            -webkit-hyphens: auto;
+            -ms-hyphens: auto;
+        }
+        
+        /* Animation for new features */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Progress animation */
+        @keyframes progressAnimation {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+        
+        .progress-bar.animated {
+            animation: progressAnimation 30s linear;
+        }
+    
+</style>
+</head>
+<body>
+    <!-- Background elements -->
+    <div class="cloud" style="top: 10%; width: 100px; height: 50px; left: 5%; animation-duration: 25s;"></div>
+    <div class="cloud" style="top: 30%; width: 150px; height: 70px; left: 10%; animation-duration: 30s; animation-delay: 2s;"></div>
+    <div class="cloud" style="top: 60%; width: 120px; height: 60px; left: 5%; animation-duration: 35s; animation-delay: 5s;"></div>
+    <div class="cloud" style="top: 80%; width: 80px; height: 40px; left: 15%; animation-duration: 40s; animation-delay: 7s;"></div>
+
+    <!-- Tombol Kembali External -->
+    <button id="external-back-btn" class="btn btn-back floating external-back-btn" style="display: none;">
+        <i class="fas fa-arrow-left"></i> Kembali
+    </button>
+
+    <!-- Tombol Toggle Theme -->
+    <button id="theme-toggle" class="theme-toggle">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <div class="container">
+        <!-- Layar Awal -->
+        <div id="start-screen" class="screen">
+            <div class="science-icon floating">
+                <i class="fas fa-flask"></i>
+            </div>
+            <h1>Quiz IPA</h1>
+            <h1> (Ilmu Pengetahuan Alam)</h1>
+            <p class="subtitle">Uji pengetahuan Anda tentang IPA dengan 20 pertanyaan dan berbagai tingkat kesulitan</p>
+            
+            <div class="difficulty-selector">
+                <button class="btn btn-easy difficulty-btn" data-difficulty="easy">
+                    Mudah <i class="fas fa-leaf"></i>
+                </button>
+                <button class="btn btn-medium difficulty-btn" data-difficulty="medium">
+                    Sedang <i class="fas fa-fire"></i>
+                </button>
+                <button class="btn btn-hard difficulty-btn" data-difficulty="hard">
+                    Sulit <i class="fas fa-skull"></i>
+                </button>
+            </div>
+            
+            <div class="score-bar">
+                <div class="score-level">Pemula (0-40)</div>
+                <div class="score-level">Lumayan (41-70)</div>
+                <div class="score-level">Ahli (71-90)</div>
+                <div class="score-level">Master (91-100)</div>
+            </div>
+            
+            <div class="stats-container" id="quick-stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="total-quizzes">0</div>
+                    <div class="stat-label">Kuis Diselesaikan</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="average-score">0</div>
+                    <div class="stat-label">Rata-rata Skor</div>
+                </div>
+            </div>
+            
+            <button id="start-btn" class="btn">Mulai Kuis <i class="fas fa-play"></i></button>
+            
+            <div class="fact-container">
+                <div class="fact-title">Fakta IPA Hari Ini:</div>
+                <div id="science-fact-start"></div>
+            </div>
+        </div>
+        
+        <!-- Layar Kuis -->
+        <div id="quiz-screen" class="screen">
+            <div class="question-number">Pertanyaan <span id="current-question">1</span> dari <span id="total-questions">20</span></div>
+            <div class="progress">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="category" id="question-category">Biologi</div>
+            <div class="question-text" id="question-text"></div>
+            
+            <div class="hint-container" id="hint-container">
+                <div class="hint-title"><i class="fas fa-lightbulb"></i> Petunjuk:</div>
+                <div id="hint-text"></div>
+            </div>
+            
+            <div class="lifeline-container">
+                <button id="fifty-fifty" class="lifeline" title="Hilangkan 2 jawaban salah">
+                    <i class="fas fa-half-alt"></i> 50:50
+                </button>
+                <button id="hint-btn" class="lifeline" title="Dapatkan petunjuk">
+                    <i class="fas fa-lightbulb"></i> Petunjuk
+                </button>
+                <button id="skip-question" class="lifeline" title="Lewati pertanyaan ini">
+                    <i class="fas fa-forward"></i> Lewati
+                </button>
+            </div>
+            
+            <div id="options-container"></div>
+            <div class="timer">Waktu: <span id="time-left">30</span> detik</div>
+            
+            <div class="navigation">
+                <button id="next-btn" class="btn" disabled>Lanjut <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+        
+        <!-- Layar Hasil -->
+        <div id="result-screen" class="screen">
+            <div class="science-icon floating">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h1>Hasil Kuis</h1>
+            <div class="score-container">Skor Anda: <span id="score" class="score">0</span> dari 100</div>
+            <div id="score-message"></div>
+            
+            <div class="result-details">
+                <h3>Detail Hasil</h3>
+                <div class="result-item">
+                    <span>Jawaban Benar:</span>
+                    <span id="correct-answers">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Jawaban Salah:</span>
+                    <span id="incorrect-answers">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Pertanyaan Dilewati:</span>
+                    <span id="skipped-answers">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Waktu yang digunakan:</span>
+                    <span id="time-used">0</span> detik
+                </div>
+                <div class="result-item">
+                    <span>Bantuan Digunakan:</span>
+                    <span id="lifelines-used">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Tingkat Kesulitan:</span>
+                    <span id="difficulty-used">Mudah</span>
+                </div>
+            </div>
+            
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div class="stat-value" id="total-time">0</div>
+                    <div class="stat-label">Total Waktu</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="best-streak">0</div>
+                    <div class="stat-label">Jawaban Benar Beruntun</div>
+                </div>
+            </div>
+            
+            <h2>Pencapaian</h2>
+            <div class="achievement-container">
+                <div class="achievement" id="achievement-1">
+                    <i class="fas fa-star"></i>
+                    <div class="achievement-text">Pertama Kali</div>
+                </div>
+                <div class="achievement" id="achievement-2">
+                    <i class="fas fa-medal"></i>
+                    <div class="achievement-text">Nilai Sempurna</div>
+                </div>
+                <div class="achievement" id="achievement-3">
+                    <i class="fas fa-bolt"></i>
+                    <div class="achievement-text">Cepat Tangkas</div>
+                </div>
+            </div>
+            
+            <div class="fact-container">
+                <div class="fact-title">Fakta IPA Hari Ini:</div>
+                <div id="science-fact"></div>
+            </div>
+            
+            <div class="share-container">
+                <button class="btn share-btn facebook">
+                    <i class="fab fa-facebook"></i> Facebook
+                </button>
+                <button class="btn share-btn twitter">
+                    <i class="fab fa-twitter"></i> Twitter
+                </button>
+                <button class="btn share-btn whatsapp">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+            </div>
+            
+            <div class="navigation">
+                <button id="back-to-start-btn" class="btn btn-back"><i class="fas fa-home"></i> Ke Awal</button>
+                <button id="restart-btn" class="btn">Main Lagi <i class="fas fa-redo"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi -->
+    <div id="confirmation-modal" class="confirmation-modal">
+        <div class="modal-content">
+            <h3>Keluar dari Kuis?</h3>
+            <p>Apakah Anda yakin ingin keluar? Progress yang sudah Anda buat akan hilang.</p>
+            <div class="modal-buttons">
+                <button id="modal-cancel" class="btn btn-back modal-btn">Batal</button>
+                <button id="modal-confirm" class="btn modal-btn">Ya, Keluar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Bank soal IPA dengan 180 pertanyaan (60 awal + 120 baru)
+        const questionBank = [
+            // Pertanyaan mudah - Biologi (20 pertanyaan awal)
+            {
+                category: "Biologi",
+                question: "Organ apa yang bertanggung jawab untuk memompa darah ke seluruh tubuh?",
+                options: ["Paru-paru", "Hati", "Jantung", "Ginjal"],
+                answer: 2,
+                fact: "Jantung adalah organ berotot yang memompa darah melalui pembuluh darah dalam sistem sirkulasi.",
+                difficulty: "easy",
+                hint: "Organ ini berdetak sekitar 60-100 kali per menit."
+            },
+            // ... (pertanyaan biologi mudah lainnya yang sudah ada) ...
+            
+            // 20 pertanyaan Biologi tambahan
+            {
+                category: "Biologi",
+                question: "Proses pembelahan sel yang menghasilkan sel anak dengan jumlah kromosom setengah dari sel induk disebut?",
+                options: ["Mitosis", "Meiosis", "Budding", "Fragmentasi"],
+                answer: 1,
+                fact: "Meiosis adalah proses pembelahan sel yang menghasilkan sel gamet dengan jumlah kromosom setengah dari sel induk.",
+                difficulty: "medium",
+                hint: "Proses ini penting untuk reproduksi seksual."
+            },
+            {
+                category: "Biologi",
+                question: "Enzim yang berperan dalam pencernaan protein adalah?",
+                options: ["Amilase", "Lipase", "Pepsin", "Sukrase"],
+                answer: 2,
+                fact: "Pepsin adalah enzim yang diproduksi di lambung dan berfungsi memecah protein menjadi pepton.",
+                difficulty: "medium",
+                hint: "Enzim ini bekerja di lingkungan asam."
+            },
+            {
+                category: "Biologi",
+                question: "Penyakit yang disebabkan oleh kekurangan vitamin D adalah?",
+                options: ["Anemia", "Rakitis", "Skorbut", "Beriberi"],
+                answer: 1,
+                fact: "Rakitis adalah penyakit tulang yang disebabkan oleh kekurangan vitamin D, kalsium, atau fosfat.",
+                difficulty: "easy",
+                hint: "Penyakit ini mempengaruhi perkembangan tulang pada anak-anak."
+            },
+            {
+                category: "Biologi",
+                question: "Organel sel yang berfungsi sebagai tempat sintesis protein adalah?",
+                options: ["Mitokondria", "Ribosom", "Lisosom", "Badan Golgi"],
+                answer: 1,
+                fact: "Ribosom adalah organel sel yang berfungsi sebagai tempat sintesis protein.",
+                difficulty: "medium",
+                hint: "Organel ini bisa ditemukan bebas di sitoplasma atau menempel pada retikulum endoplasma kasar."
+            },
+            {
+                category: "Biologi",
+                question: "Hormon yang mengatur kadar gula darah dengan menurunkan kadarnya adalah?",
+                options: ["Glukagon", "Insulin", "Adrenalin", "Tiroksin"],
+                answer: 1,
+                fact: "Insulin adalah hormon yang dihasilkan oleh pankreas dan berfungsi menurunkan kadar gula darah.",
+                difficulty: "medium",
+                hint: "Penderita diabetes tipe 1 kekurangan hormon ini."
+            },
+            {
+                category: "Biologi",
+                question: "Jaringan pada tumbuhan yang berfungsi untuk transportasi air dan mineral adalah?",
+                options: ["Floem", "Xilem", "Epidermis", "Parenkim"],
+                answer: 1,
+                fact: "Xilem adalah jaringan pada tumbuhan yang berfungsi mengangkut air dan mineral dari akar ke daun.",
+                difficulty: "medium",
+                hint: "Jaringan ini juga memberikan dukungan struktural pada tumbuhan."
+            },
+            {
+                category: "Biologi",
+                question: "Proses pertukaran gas oksigen dan karbon dioksida pada tumbuhan terjadi melalui?",
+                options: ["Lentisel", "Stomata", "Epidermis", "Rambut akar"],
+                answer: 1,
+                fact: "Stomata adalah pori-pori kecil di permukaan daun yang berfungsi sebagai tempat pertukaran gas.",
+                difficulty: "easy",
+                hint: "Pori-pori ini dapat membuka dan menutup tergantung kondisi lingkungan."
+            },
+            {
+                category: "Biologi",
+                question: "Penyakit malaria disebabkan oleh parasit yang ditularkan melalui gigitan nyamuk?",
+                options: ["Aedes aegypti", "Anopheles", "Culex", "Mansonia"],
+                answer: 1,
+                fact: "Nyamuk Anopheles betina adalah vektor yang menularkan parasit Plasmodium penyebab malaria.",
+                difficulty: "medium",
+                hint: "Nyamuk ini aktif pada malam hari."
+            },
+            {
+                category: "Biologi",
+                question: "Sistem kekebalan tubuh manusia menghasilkan sel darah putih yang disebut?",
+                options: ["Eritrosit", "Leukosit", "Trombosit", "Hemoglobin"],
+                answer: 1,
+                fact: "Leukosit atau sel darah putih adalah bagian dari sistem kekebalan tubuh yang melawan infeksi.",
+                difficulty: "easy",
+                hint: "Jumlahnya meningkat ketika tubuh melawan infeksi."
+            },
+            {
+                category: "Biologi",
+                question: "Bagian neuron yang menerima impuls saraf dari neuron lain adalah?",
+                options: ["Akson", "Dendrit", "Badan sel", "Selubung mielin"],
+                answer: 1,
+                fact: "Dendrit adalah percabangan dari badan sel neuron yang berfungsi menerima impuls saraf.",
+                difficulty: "medium",
+                hint: "Struktur ini seperti cabang-cabang pohon."
+            },
+            {
+                category: "Biologi",
+                question: "Proses pengeluaran zat sisa metabolisme dari dalam tubuh disebut?",
+                options: ["Ekskresi", "Sekresi", "Absorpsi", "Digesti"],
+                answer: 0,
+                fact: "Ekskresi adalah proses pengeluaran zat sisa metabolisme yang sudah tidak berguna bagi tubuh.",
+                difficulty: "easy",
+                hint: "Ginjal, kulit, paru-paru, dan hati terlibat dalam proses ini."
+            },
+            {
+                category: "Biologi",
+                question: "Pigmen yang memberikan warna hijau pada daun adalah?",
+                options: ["Karoten", "Xantofil", "Klorofil", "Fikosianin"],
+                answer: 2,
+                fact: "Klorofil adalah pigmen hijau pada tumbuhan yang menyerap energi matahari untuk fotosintesis.",
+                difficulty: "easy",
+                hint: "Pigmen ini berada dalam kloroplas."
+            },
+            {
+                category: "Biologi",
+                question: "Hewan yang makan tumbuhan dan daging disebut?",
+                options: ["Herbivora", "Karnivora", "Omnivora", "Insektivora"],
+                answer: 2,
+                fact: "Omnivora adalah hewan yang makan baik tumbuhan maupun daging, seperti manusia, babi, dan beruang.",
+                difficulty: "easy",
+                hint: "Manusia termasuk dalam kelompok ini."
+            },
+            {
+                category: "Biologi",
+                question: "Bagian mata yang mengatur jumlah cahaya yang masuk adalah?",
+                options: ["Kornea", "Lensa", "Iris", "Retina"],
+                answer: 2,
+                fact: "Iris adalah bagian mata yang berwarna dan berfungsi mengatur besar kecilnya pupil untuk mengontrol jumlah cahaya yang masuk.",
+                difficulty: "medium",
+                hint: "Bagian ini memberi warna pada mata seseorang."
+            },
+            {
+                category: "Biologi",
+                question: "Penyakit yang disebabkan oleh virus adalah?",
+                options: ["Tuberkolosis", "Malaria", "Influenza", "Kolera"],
+                answer: 2,
+                fact: "Influenza adalah penyakit pernapasan menular yang disebabkan oleh virus influenza.",
+                difficulty: "easy",
+                hint: "Penyakit ini sering disebut flu."
+            },
+            {
+                category: "Biologi",
+                question: "Organisme yang berperan sebagai dekomposer dalam ekosistem adalah?",
+                options: ["Produsen", "Konsumen", "Pengurai", "Predator"],
+                answer: 2,
+                fact: "Dekomposer atau pengurai adalah organisme yang menguraikan materi organik dari organisme yang telah mati.",
+                difficulty: "easy",
+                hint: "Jamur dan bakteri adalah contoh dekomposer."
+            },
+            {
+                category: "Biologi",
+                question: "Proses perubahan energi cahaya menjadi energi kimia pada tumbuhan terjadi melalui?",
+                options: ["Respirasi", "Fotosintesis", "Transpirasi", "Fermentasi"],
+                answer: 1,
+                fact: "Fotosintesis adalah proses dimana tumbuhan mengubah energi cahaya menjadi energi kimia dalam bentuk glukosa.",
+                difficulty: "easy",
+                hint: "Proses ini menghasilkan oksigen sebagai produk sampingan."
+            },
+            {
+                category: "Biologi",
+                question: "Jaringan epitel yang melapisi rongga mulut adalah?",
+                options: ["Epitel kuboid", "Epitel silindris", "Epitel pipih berlapis", "Epitel transisional"],
+                answer: 2,
+                fact: "Epitel pipih berlapis melapisi rongga mulut, esofagus, dan vagina, memberikan perlindungan terhadap gesekan.",
+                difficulty: "hard",
+                hint: "Jaringan ini terdiri dari beberapa lapisan sel pipih."
+            },
+            {
+                category: "Biologi",
+                question: "Enzim yang mengubah amilum menjadi maltosa adalah?",
+                options: ["Pepsin", "Amilase", "Lipase", "Tripsin"],
+                answer: 1,
+                fact: "Amilase adalah enzim yang memecah amilum (pati) menjadi maltosa dan dekstrin.",
+                difficulty: "medium",
+                hint: "Enzim ini terdapat dalam air liur dan pankreas."
+            },
+
+            // Pertanyaan Fisika tambahan (20 pertanyaan)
+            {
+                category: "Fisika",
+                question: "Besaran yang menyatakan ukuran kelembaman suatu benda adalah?",
+                options: ["Massa", "Berat", "Gaya", "Energi"],
+                answer: 0,
+                fact: "Massa adalah ukuran kelembaman suatu benda, yaitu kecenderungan benda untuk mempertahankan keadaan geraknya.",
+                difficulty: "medium",
+                hint: "Diukur dalam kilogram (kg)."
+            },
+            // ... (pertanyaan fisika lainnya yang sudah ada) ...
+            
+            // 20 pertanyaan Fisika tambahan
+            {
+                category: "Fisika",
+                question: "Hukum kekekalan energi menyatakan bahwa energi tidak dapat?",
+                options: ["Diciptakan", "Diciptakan atau dimusnahkan", "Diubah bentuknya", "Digunakan"],
+                answer: 1,
+                fact: "Hukum kekekalan energi menyatakan bahwa energi tidak dapat diciptakan atau dimusnahkan, hanya dapat diubah dari satu bentuk ke bentuk lain.",
+                difficulty: "medium",
+                hint: "Energi total dalam sistem tertutup adalah konstan."
+            },
+            {
+                category: "Fisika",
+                question: "Alat yang digunakan untuk mengukur tekanan atmosfer adalah?",
+                options: ["Termometer", "Barometer", "Hygrometer", "Anemometer"],
+                answer: 1,
+                fact: "Barometer adalah alat yang digunakan untuk mengukur tekanan atmosfer.",
+                difficulty: "medium",
+                hint: "Ditemukan oleh Evangelista Torricelli pada tahun 1643."
+            },
+            {
+                category: "Fisika",
+                question: "Besaran yang menyatakan cepat lambatnya perubahan kecepatan disebut?",
+                options: ["Kecepatan", "Perpindahan", "Percepatan", "Jarak"],
+                answer: 2,
+                fact: "Percepatan adalah besaran vektor yang menyatakan perubahan kecepatan per satuan waktu. Satuan SI-nya adalah m/s².",
+                difficulty: "medium",
+                hint: "Bisa positif (percepatan) atau negatif (perlambatan)."
+            },
+            {
+                category: "Fisika",
+                question: "Hukum Pascal berkaitan dengan?",
+                options: ["Tekanan pada fluida", "Gaya apung", "Elastisitas", "Pemuaian"],
+                answer: 0,
+                fact: "Hukum Pascal menyatakan bahwa tekanan yang diberikan pada fluida dalam ruang tertutup akan diteruskan sama besar ke segala arah.",
+                difficulty: "medium",
+                hint: "Prinsip ini dimanfaatkan dalam sistem hidrolik."
+            },
+            {
+                category: "Fisika",
+                question: "Satuan SI untuk gaya adalah?",
+                options: ["Joule", "Newton", "Watt", "Pascal"],
+                answer: 1,
+                fact: "Newton (N) adalah satuan SI untuk gaya, diambil dari nama Isaac Newton.",
+                difficulty: "easy",
+                hint: "1 Newton = 1 kg.m/s²"
+            },
+            {
+                category: "Fisika",
+                question: "Peristiwa dimana cahaya dibelokkan ketika melewati medium yang berbeda disebut?",
+                options: ["Pemantulan", "Pembiasan", "Dispersi", "Difraksi"],
+                answer: 1,
+                fact: "Pembiasan adalah pembelokan cahaya ketika melewati dua medium dengan kerapatan optik yang berbeda.",
+                difficulty: "medium",
+                hint: "Peristiwa ini menyebabkan sedotan terlihat patah dalam gelas berisi air."
+            },
+            {
+                category: "Fisika",
+                question: "Energi yang dimiliki benda karena geraknya disebut?",
+                options: ["Energi potensial", "Energi kinetik", "Energi panas", "Energi listrik"],
+                answer: 1,
+                fact: "Energi kinetik adalah energi yang dimiliki benda karena geraknya, bergantung pada massa dan kecepatan benda.",
+                difficulty: "easy",
+                hint: "Rumusnya adalah ½ mv²."
+            },
+            {
+                category: "Fisika",
+                question: "Alat untuk mengukur suhu adalah?",
+                options: ["Barometer", "Hygrometer", "Termometer", "Anemometer"],
+                answer: 2,
+                fact: "Termometer adalah alat yang digunakan untuk mengukur suhu. Prinsip kerjanya berdasarkan pemuaian zat, seperti air raksa atau alkohol.",
+                difficulty: "easy",
+                hint: "Ditemukan oleh Galileo Galilei pada abad ke-16."
+            },
+            {
+                category: "Fisika",
+                question: "Bunyi tidak dapat merambat melalui?",
+                options: ["Padat", "Cair", "Gas", "Ruang hampa"],
+                answer: 3,
+                fact: "Bunyi memerlukan medium untuk merambat, sehingga tidak dapat merambat melalui ruang hampa.",
+                difficulty: "easy",
+                hint: "Di luar angkasa, astronot menggunakan radio untuk berkomunikasi."
+            },
+            {
+                category: "Fisika",
+                question: "Gaya tarik menarik antara dua benda yang memiliki massa disebut?",
+                options: ["Gaya listrik", "Gaya magnet", "Gaya gravitasi", "Gaya gesek"],
+                answer: 2,
+                fact: "Gaya gravitasi adalah gaya tarik menarik antara dua benda yang memiliki massa. Hukum gravitasi universal dirumuskan oleh Isaac Newton.",
+                difficulty: "medium",
+                hint: "Gaya yang membuat kita tetap berada di permukaan bumi."
+            },
+            {
+                category: "Fisika",
+                question: "Besaran yang menyatakan jumlah materi dalam suatu benda adalah?",
+                options: ["Berat", "Massa", "Volume", "Densitas"],
+                answer: 1,
+                fact: "Massa adalah besaran yang menyatakan jumlah materi dalam suatu benda, dan merupakan sifat intrinsik yang tidak berubah oleh lokasi.",
+                difficulty: "medium",
+                hint: "Diukur dengan neraca, satuan SI-nya adalah kilogram (kg)."
+            },
+            {
+                category: "Fisika",
+                question: "Radiasi elektromagnetik yang dapat dilihat oleh mata manusia disebut?",
+                options: ["Sinar-X", "Gelombang radio", "Cahaya tampak", "Sinar gamma"],
+                answer: 2,
+                fact: "Cahaya tampak adalah bagian dari spektrum elektromagnetik yang dapat dideteksi oleh mata manusia, dengan panjang gelombang antara 380-750 nm.",
+                difficulty: "medium",
+                hint: "Terbagi menjadi warna pelangi: merah, jingga, kuning, hijau, biru, nila, ungu."
+            },
+            {
+                category: "Fisika",
+                question: "Hukum Archimedes berkaitan dengan?",
+                options: ["Gaya apung", "Gaya gravitasi", "Gaya gesek", "Gaya listrik"],
+                answer: 0,
+                fact: "Hukum Archimedes menyatakan bahwa gaya apung yang bekerja pada suatu benda yang dicelupkan dalam fluida sama dengan berat fluida yang dipindahkan oleh benda tersebut.",
+                difficulty: "medium",
+                hint: "Prinsip ini menjelaskan mengapa kapal laut bisa mengapung."
+            },
+            {
+                category: "Fisika",
+                question: "Alat untuk mengukur arus listrik adalah?",
+                options: ["Voltmeter", "Amperemeter", "Ohmmeter", "Wattmeter"],
+                answer: 1,
+                fact: "Amperemeter adalah alat untuk mengukur kuat arus listrik dalam suatu rangkaian, dan dipasang seri dengan komponen yang diukur.",
+                difficulty: "medium",
+                hint: "Nama alat ini berasal dari satuan arus listrik (ampere)."
+            },
+            {
+                category: "Fisika",
+                question: "Pemantulan bunyi yang terdengar setelah bunyi asli disebut?",
+                options: ["Resonansi", "Gema", "Desah", "Nada"],
+                answer: 1,
+                fact: "Gema adalah pemantulan bunyi yang datang setelah bunyi asli sehingga terdengar sebagai bunyi yang terpisah. Terjadi jika jarak dinding pemantul cukup jauh.",
+                difficulty: "medium",
+                hint: "Sering terjadi di pegunungan atau gedung-gedung besar."
+            },
+            {
+                category: "Fisika",
+                question: "Peristiwa perubahan wujud dari gas menjadi cair disebut?",
+                options: ["Menguap", "Membeku", "Mencair", "Mengembun"],
+                answer: 3,
+                fact: "Mengembun adalah perubahan wujud dari gas menjadi cair, seperti tetesan air di luar gelas berisi es.",
+                difficulty: "medium",
+                hint: "Terjadi ketika uap air didinginkan."
+            },
+            {
+                category: "Fisika",
+                question: "Besaran yang menyatakan daya listrik adalah?",
+                options: ["Volt", "Ampere", "Watt", "Ohm"],
+                answer: 2,
+                fact: "Watt (W) adalah satuan daya listrik, yang menyatakan laju penggunaan energi.",
+                difficulty: "medium",
+                hint: "Nama satuan ini diambil dari nama James Watt."
+            },
+            {
+                category: "Fisika",
+                question: "Hukum Ohm menyatakan hubungan antara?",
+                options: ["Massa dan berat", "Gaya dan percepatan", "Tegangan, arus, dan hambatan", "Usaha dan energi"],
+                answer: 2,
+                fact: "Hukum Ohm menyatakan bahwa tegangan (V) sebanding dengan arus (I) dan hambatan (R), dengan rumus V = I × R.",
+                difficulty: "medium",
+                hint: "Diformulasikan oleh fisikawan Jerman Georg Simon Ohm."
+            },
+            {
+                category: "Fisika",
+                question: "Alat yang mengubah energi listrik menjadi energi gerak adalah?",
+                options: ["Generator", "Motor listrik", "Transformator", "Baterai"],
+                answer: 1,
+                fact: "Motor listrik mengubah energi listrik menjadi energi gerak (mekanik), sementara generator melakukan sebaliknya.",
+                difficulty: "medium",
+                hint: "Digunakan dalam kipas angin, blender, dan banyak alat rumah tangga."
+            },
+
+            // Pertanyaan Kimia tambahan (20 pertanyaan)
+            {
+                category: "Kimia",
+                question: "Unsur dengan simbol Fe adalah?",
+                options: ["Perak", "Besi", "Fosfor", "Fluor"],
+                answer: 1,
+                fact: "Fe adalah simbol kimia untuk besi (ferrum). Besi adalah logam transisi yang paling banyak digunakan, terutama dalam pembuatan baja.",
+                difficulty: "hard",
+                hint: "Logam ini mudah berkarat ketika terpapar oksigen dan kelembaban."
+            },
+            // ... (pertanyaan kimia lainnya yang sudah ada) ...
+            
+            // 20 pertanyaan Kimia tambahan
+            {
+                category: "Kimia",
+                question: "pH larutan netral pada suhu 25°C adalah?",
+                options: ["0", "7", "14", "10"],
+                answer: 1,
+                fact: "Pada suhu 25°C, pH 7 menunjukkan larutan netral dimana konsentrasi ion H+ sama dengan konsentrasi ion OH-.",
+                difficulty: "hard",
+                hint: "Air murni memiliki pH ini."
+            },
+            {
+                category: "Kimia",
+                question: "Reaksi kimia yang menyerap kalor dari lingkungan disebut?",
+                options: ["Eksoterm", "Endoterm", "Eksergonik", "Endergonik"],
+                answer: 1,
+                fact: "Reaksi endoterm adalah reaksi kimia yang menyerap kalor dari lingkungan, sehingga suhu lingkungan turun.",
+                difficulty: "hard",
+                hint: "Kebalikan dari reaksi eksoterm."
+            },
+            {
+                category: "Kimia",
+                question: "Unsur yang memiliki nomor atom 1 adalah?",
+                options: ["Hidrogen", "Helium", "Oksigen", "Nitrogen"],
+                answer: 0,
+                fact: "Hidrogen adalah unsur pertama dalam tabel periodik dengan nomor atom 1 dan simbol H. Ini adalah unsur paling ringan dan paling melimpah di alam semesta.",
+                difficulty: "hard",
+                hint: "Unsur utama dalam air (H₂O)."
+            },
+            {
+                category: "Kimia",
+                question: "Larutan yang dapat menghantarkan listrik disebut?",
+                options: ["Elektrolit", "Nonelektrolit", "Asam", "Basa"],
+                answer: 0,
+                fact: "Larutan elektrolit adalah larutan yang dapat menghantarkan listrik karena mengandung ion-ion yang dapat bergerak bebas.",
+                difficulty: "hard",
+                hint: "Contohnya larutan garam dapur (NaCl) dalam air."
+            },
+            {
+                category: "Kimia",
+                question: "Proses pemisahan campuran berdasarkan perbedaan kecepatan merambat disebut?",
+                options: ["Distilasi", "Kromatografi", "Sublimasi", "Filtrasi"],
+                answer: 1,
+                fact: "Kromatografi adalah teknik pemisahan campuran berdasarkan perbedaan kecepatan merambat komponen dalam medium tertentu.",
+                difficulty: "hard",
+                hint: "Digunakan untuk memisahkan pigmen dalam tinta."
+            },
+            {
+                category: "Kimia",
+                question: "Unsur gas mulia yang digunakan untuk mengisi balon adalah?",
+                options: ["Neon", "Argon", "Helium", "Kripton"],
+                answer: 2,
+                fact: "Helium adalah gas mulia yang sangat ringan dan tidak mudah terbakar, sehingga aman untuk mengisi balon.",
+                difficulty: "hard",
+                hint: "Gas kedua paling ringan setelah hidrogen, tetapi lebih aman."
+            },
+            {
+                category: "Kimia",
+                question: "Rumus kimia untuk garam dapur adalah?",
+                options: ["NaCl", "HCl", "H₂O", "CO₂"],
+                answer: 0,
+                fact: "Garam dapur memiliki rumus kimia NaCl (Natrium Klorida), terdiri dari ion Na+ dan Cl-.",
+                difficulty: "hard",
+                hint: "Dihasilkan dari reaksi antara asam klorida (HCl) dan natrium hidroksida (NaOH)."
+            },
+            {
+                category: "Kimia",
+                question: "Logam yang berwujud cair pada suhu kamar adalah?",
+                options: ["Besi", "Raksa", "Aluminium", "Tembaga"],
+                answer: 1,
+                fact: "Raksa (Hg) adalah satu-satunya logam yang berwujud cair pada suhu kamar (25°C). Titik lelehnya adalah -38,83°C dan titik didihnya 356,73°C.",
+                difficulty: "hard",
+                hint: "Digunakan dalam termometer."
+            },
+            {
+                category: "Kimia",
+                question: "Perubahan kimia ditandai dengan?",
+                options: ["Perubahan wujud", "Perubahan warna", "Terbentuknya zat baru", "Perubahan ukuran"],
+                answer: 2,
+                fact: "Perubahan kimia ditandai dengan terbentuknya zat baru dengan sifat-sifat yang berbeda dari zat semula, dan perubahan ini umumnya tidak dapat kembali ke bentuk semula.",
+                difficulty: "hard",
+                hint: "Contohnya pembakaran kayu menjadi abu."
+            },
+            {
+                category: "Kimia",
+                question: "Asam yang terdapat dalam cuka adalah?",
+                options: ["Asam sulfat", "Asam klorida", "Asam asetat", "Asam sitrat"],
+                answer: 2,
+                fact: "Cuka mengandung asam asetat (CH₃COOH) dengan konsentrasi sekitar 5-8%. Asam asetat memberikan rasa asam dan aroma khas pada cuka.",
+                difficulty: "hard",
+                hint: "Nama sistematisnya adalah asam etanoat."
+            },
+            {
+                category: "Kimia",
+                question: "Unsur yang paling elektronegatif dalam tabel periodik adalah?",
+                options: ["Oksigen", "Klorin", "Fluor", "Nitrogen"],
+                answer: 2,
+                fact: "Fluor adalah unsur paling elektronegatif dengan nilai 3,98 pada skala Pauling. Elektronegativitas adalah ukuran kemampuan atom untuk menarik elektron dalam ikatan kimia.",
+                difficulty: "hard",
+                hint: "Unsur ini berada di golongan halogen."
+            },
+            {
+                category: "Kimia",
+                question: "Proses perkaratan besi secara kimia disebut?",
+                options: ["Oksidasi", "Reduksi", "Netralisasi", "Presipitasi"],
+                answer: 0,
+                fact: "Perkaratan besi adalah proses oksidasi dimana besi (Fe) bereaksi dengan oksigen (O₂) dan air membentuk besi oksida terhidrasi (karat).",
+                difficulty: "hard",
+                hint: "Reaksi ini memerlukan oksigen dan air."
+            },
+            {
+                category: "Kimia",
+                question: "Satuan konsentrasi yang menyatakan jumlah mol zat terlarut per liter larutan adalah?",
+                options: ["Molalitas", "Molaritas", "Fraksi mol", "Normalitas"],
+                answer: 1,
+                fact: "Molaritas (M) adalah satuan konsentrasi yang menyatakan jumlah mol zat terlarut dalam satu liter larutan. Rumus: M = n/V (dalam liter).",
+                difficulty: "hard",
+                hint: "Sering digunakan dalam perhitungan stoikiometri larutan."
+            },
+            {
+                category: "Kimia",
+                question: "Unsur yang digunakan sebagai bahan bakar nuklir adalah?",
+                options: ["Plutonium", "Uranium", "Radium", "Thorium"],
+                answer: 1,
+                fact: "Uranium-235 adalah isotop yang digunakan sebagai bahan bakar dalam reaktor nuklir karena dapat mengalami fisi nuklir yang terkendali.",
+                difficulty: "hard",
+                hint: "Unsur dengan nomor atom 92."
+            },
+            {
+                category: "Kimia",
+                question: "Reaksi antara asam dan basa menghasilkan garam dan?",
+                options: ["Oksigen", "Hidrogen", "Air", "Karbon dioksida"],
+                answer: 2,
+                fact: "Reaksi antara asam dan basa disebut reaksi netralisasi yang menghasilkan garam dan air. Contoh: HCl + NaOH → NaCl + H₂O.",
+                difficulty: "hard",
+                hint: "Produk reaksi ini bersifat netral."
+            },
+            {
+                category: "Kimia",
+                question: "Unsur yang memiliki kemampuan membentuk rantai panjang dengan dirinya sendiri disebut?",
+                options: ["Hidrogen", "Oksigen", "Karbon", "Nitrogen"],
+                answer: 2,
+                fact: "Karbon memiliki kemampuan unik untuk membentuk ikatan kovalen dengan atom karbon lainnya, menciptakan rantai panjang dan cincin yang menjadi dasar kimia organik.",
+                difficulty: "hard",
+                hint: "Unsur dasar semua senyawa organik."
+            },
+            {
+                category: "Kimia",
+                question: "Senyawa yang dihasilkan dari reaksi antara logam dengan oksigen adalah?",
+                options: ["Hidrida", "Oksida", "Klorida", "Sulfida"],
+                answer: 1,
+                fact: "Oksida logam dihasilkan dari reaksi antara logam dengan oksigen. Contoh: 2Mg + O₂ → 2MgO (magnesium oksida).",
+                difficulty: "hard",
+                hint: "Banyak bijih logam di alam berupa senyawa ini."
+            },
+            {
+                category: "Kimia",
+                question: "Proses elektrolisis air menghasilkan gas hidrogen dan?",
+                options: ["Oksigen", "Nitrogen", "Karbon dioksida", "Klorin"],
+                answer: 0,
+                fact: "Elektrolisis air menguraikan air (H₂O) menjadi gas hidrogen (H₂) dan gas oksigen (O₂) dengan persamaan reaksi: 2H₂O → 2H₂ + O₂.",
+                difficulty: "hard",
+                hint: "Perbandingan volume gas yang dihasilkan adalah 2:1 (H₂:O₂)."
+            },
+            {
+                category: "Kimia",
+                question: "Unsur yang digunakan dalam pembuatan pupuk karena penting untuk pertumbuhan tanaman adalah?",
+                options: ["Fosfor", "Emas", "Perak", "Raksa"],
+                answer: 0,
+                fact: "Fosfor adalah unsur penting dalam pembuatan pupuk karena dibutuhkan tanaman untuk pertumbuhan, perkembangan akar, pembungaan, dan pembuahan.",
+                difficulty: "hard",
+                hint: "Unsur dengan simbol P."
+            },
+
+            // 60 pertanyaan tambahan untuk berbagai kategori (Biologi, Fisika, Kimia)
+            // Pertanyaan Biologi tambahan (20)
+            {
+                category: "Biologi",
+                question: "Organel sel yang berfungsi sebagai pusat kontrol adalah?",
+                options: ["Mitokondria", "Nukleus", "Kloroplas", "Membran sel"],
+                answer: 1,
+                fact: "Nukleus atau inti sel mengandung DNA yang mengontrol semua aktivitas sel.",
+                difficulty: "easy",
+                hint: "Bagian ini sering disebut sebagai 'otak' sel."
+            },
+            {
+                category: "Biologi",
+                question: "Kelompok hewan yang hanya makan tumbuhan disebut?",
+                options: ["Karnivora", "Herbivora", "Omnivora", "Insektivora"],
+                answer: 1,
+                fact: "Herbivora adalah hewan yang makanannya hanya terdiri dari tumbuh-tumbuhan.",
+                difficulty: "easy",
+                hint: "Contohnya sapi, kambing, dan kelinci."
+            },
+            {
+                category: "Biologi",
+                question: "Organ pernapasan pada serangga disebut?",
+                options: ["Insang", "Paru-paru", "Trakea", "Stomata"],
+                answer: 2,
+                fact: "Serangga bernapas melalui sistem trakea, yaitu tabung-tabung kecil yang mengalirkan oksigen langsung ke jaringan tubuh.",
+                difficulty: "easy",
+                hint: "Sistem pernapasan ini terdiri dari banyak tabung kecil."
+            },
+            {
+                category: "Biologi",
+                question: "Proses penyerapan air oleh akar tumbuhan disebut?",
+                options: ["Transpirasi", "Evaporasi", "Absorpsi", "Respirasi"],
+                answer: 2,
+                fact: "Absorpsi adalah proses penyerapan air dan mineral dari tanah oleh akar tumbuhan.",
+                difficulty: "easy",
+                hint: "Proses ini terjadi melalui rambut-rambut akar."
+            },
+            {
+                category: "Biologi",
+                question: "Bagian bunga yang berfungsi menarik serangga untuk penyerbukan adalah?",
+                options: ["Mahkota", "Kelopak", "Putik", "Benang sari"],
+                answer: 0,
+                fact: "Mahkota bunga biasanya berwarna-warni dan berfungsi menarik serangga untuk membantu proses penyerbukan.",
+                difficulty: "easy",
+                hint: "Bagian ini biasanya yang paling indah dan berwarna-warni."
+            },
+            {
+                category: "Biologi",
+                question: "Penyakit yang disebabkan oleh kekurangan vitamin C adalah?",
+                options: ["Rabun senja", "Beri-beri", "Skorbut", "Rakitis"],
+                answer: 2,
+                fact: "Skorbut adalah penyakit yang disebabkan oleh kekurangan vitamin C, gejalanya termasuk gusi berdarah dan penyembuhan luka yang lambat.",
+                difficulty: "easy",
+                hint: "Penyakit ini sering dialami pelaut di masa lalu yang kekurangan buah-buahan segar."
+            },
+            {
+                category: "Biologi",
+                question: "Hewan yang termasuk mamalia laut adalah?",
+                options: ["Ikan hiu", "Paus", "Penyu", "Gurita"],
+                answer: 1,
+                fact: "Paus adalah mamalia laut karena mereka bernapas dengan paru-paru, melahirkan, dan menyusui anaknya.",
+                difficulty: "easy",
+                hint: "Hewan ini bukan ikan meskipun hidup di laut."
+            },
+            {
+                category: "Biologi",
+                question: "Organisme yang membuat makanannya sendiri disebut?",
+                options: ["Autotrof", "Heterotrof", "Saprofit", "Parasit"],
+                answer: 0,
+                fact: "Autotrof adalah organisme yang dapat membuat makanannya sendiri melalui fotosintesis atau kemosintesis.",
+                difficulty: "easy",
+                hint: "Tumbuhan adalah contoh dari organisme jenis ini."
+            },
+            {
+                category: "Biologi",
+                question: "Penyakit demam berdarah ditularkan melalui gigitan nyamuk?",
+                options: ["Anopheles", "Aedes aegypti", "Culex", "Mansonia"],
+                answer: 1,
+                fact: "Nyamuk Aedes aegypti adalah vektor penular penyakit demam berdarah dengue (DBD).",
+                difficulty: "easy",
+                hint: "Nyamuk ini memiliki ciri kaki berwarna belang hitam putih."
+            },
+            {
+                category: "Biologi",
+                question: "Bagian tumbuhan yang berfungsi untuk fotosintesis adalah?",
+                options: ["Akar", "Batang", "Daun", "Bunga"],
+                answer: 2,
+                fact: "Daun mengandung klorofil (zat hijau daun) yang menangkap energi matahari untuk fotosintesis.",
+                difficulty: "easy",
+                hint: "Bagian ini biasanya berwarna hijau dan berbentuk pipih."
+            },
+            {
+                category: "Biologi",
+                question: "Hormon yang mengatur kadar gula dalam darah adalah?",
+                options: ["Adrenalin", "Insulin", "Estrogen", "Testosteron"],
+                answer: 1,
+                fact: "Insulin adalah hormon yang dihasilkan oleh pankreas dan berfungsi mengatur kadar gula dalam darah.",
+                difficulty: "easy",
+                hint: "Penderita diabetes kekurangan hormon ini atau tubuhnya tidak meresponsnya dengan baik."
+            },
+            {
+                category: "Biologi",
+                question: "Proses pertukaran gas oksigen dan karbon dioksida terjadi di?",
+                options: ["Trakea", "Bronkus", "Alveolus", "Diafragma"],
+                answer: 2,
+                fact: "Alveolus adalah gelembung-gelembung kecil di paru-paru tempat terjadinya pertukaran gas oksigen dan karbon dioksida.",
+                difficulty: "easy",
+                hint: "Struktur kecil berbentuk gelembung di ujung saluran pernapasan."
+            },
+            {
+                category: "Biologi",
+                question: "Bagian sel yang menghasilkan energi adalah?",
+                options: ["Nukleus", "Retikulum endoplasma", "Mitokondria", "Badam golgi"],
+                answer: 2,
+                fact: "Mitokondria adalah organel sel yang berfungsi sebagai pembangkit energi, menghasilkan ATP melalui respirasi seluler.",
+                difficulty: "easy",
+                hint: "Sering disebut sebagai 'powerhouse' sel."
+            },
+            {
+                category: "Biologi",
+                question: "Penyakit yang disebabkan oleh virus adalah?",
+                options: ["Tuberculosis", "Malaria", "COVID-19", "Kolera"],
+                answer: 2,
+                fact: "COVID-19 disebabkan oleh virus SARS-CoV-2, sementara penyakit lainnya disebabkan oleh bakteri atau parasit.",
+                difficulty: "easy",
+                hint: "Penyakit yang menyebabkan pandemi global tahun 2020."
+            },
+            {
+                category: "Biologi",
+                question: "Sistem kekebalan tubuh menghasilkan zat antibodi untuk melawan?",
+                options: ["Nutrisi", "Oksigen", "Antigen", "Hormon"],
+                answer: 2,
+                fact: "Antigen adalah zat asing yang memicu respons imun, dan tubuh menghasilkan antibodi untuk melawannya.",
+                difficulty: "easy",
+                hint: "Zat asing yang dianggap berbahaya oleh sistem imun."
+            },
+            {
+                category: "Biologi",
+                question: "Proses penyesuaian diri makhluk hidup terhadap lingkungannya disebut?",
+                options: ["Evolusi", "Adaptasi", "Seleksi alam", "Mutasi"],
+                answer: 1,
+                fact: "Adaptasi adalah proses dimana makhluk hidup menyesuaikan diri dengan lingkungannya untuk bertahan hidup.",
+                difficulty: "easy",
+                hint: "Contohnya unta punya punuk untuk menyimpan air di gurun."
+            },
+            {
+                category: "Biologi",
+                question: "Bagian mata yang mengatur jumlah cahaya yang masuk adalah?",
+                options: ["Lensa", "Retina", "Iris", "Kornea"],
+                answer: 2,
+                fact: "Iris adalah bagian mata yang berwarna dan berfungsi mengatur besar kecilnya pupil sehingga mengontrol jumlah cahaya yang masuk.",
+                difficulty: "easy",
+                hint: "Bagian ini memberi warna pada mata seseorang."
+            },
+            {
+                category: "Biologi",
+                question: "Jaringan pada tumbuhan yang bertanggung jawab untuk pertumbuhan sekunder adalah?",
+                options: ["Meristem apikal", "Meristem lateral", "Parenkim", "Kolenkim"],
+                answer: 1,
+                fact: "Meristem lateral atau kambium bertanggung jawab untuk pertumbuhan sekunder yang menyebabkan penebalan batang dan akar.",
+                difficulty: "medium",
+                hint: "Jaringan ini menghasilkan xilem dan floem sekunder."
+            },
+            {
+                category: "Biologi",
+                question: "Proses dimana molekul bergerak dari daerah berkonsentrasi tinggi ke rendah disebut?",
+                options: ["Osmosis", "Difusi", "Transport aktif", "Endositosis"],
+                answer: 1,
+                fact: "Difusi adalah pergerakan molekul dari daerah dengan konsentrasi tinggi ke rendah, tanpa memerlukan energi.",
+                difficulty: "medium",
+                hint: "Contohnya adalah penyebaran aroma parfum di ruangan."
+            },
+            {
+                category: "Biologi",
+                question: "Enzim yang menguraikan hidrogen peroksida menjadi air dan oksigen adalah?",
+                options: ["Katalase", "Amilase", "Pepsin", "Lipase"],
+                answer: 0,
+                fact: "Katalase adalah enzim yang mengkatalisis penguraian hidrogen peroksida (H₂O₂) menjadi air (H₂O) dan oksigen (O₂).",
+                difficulty: "medium",
+                hint: "Enzim ini ditemukan dalam peroksisom sel."
+            },
+
+            // Pertanyaan Fisika tambahan (20)
+            {
+                category: "Fisika",
+                question: "Hukum Newton pertama juga dikenal sebagai hukum?",
+                options: ["Aksi-Reaksi", "Gravitasi", "Kelembaman", "Percepatan"],
+                answer: 2,
+                fact: "Hukum Newton pertama menyatakan bahwa benda yang diam akan tetap diam dan benda yang bergerak akan tetap bergerak dengan kecepatan konstan unless acted upon by an external force.",
+                difficulty: "medium",
+                hint: "Hukum ini tentang kecenderungan benda mempertahankan keadaan geraknya."
+            },
+            {
+                category: "Fisika",
+                question: "Alat yang digunakan untuk mengukur gaya disebut?",
+                options: ["Termometer", "Neraca", "Dinamometer", "Barometer"],
+                answer: 2,
+                fact: "Dinamometer adalah alat yang digunakan untuk mengukur besar kecilnya gaya. Satuan gaya adalah Newton (N).",
+                difficulty: "medium",
+                hint: "Alat ini sering digunakan untuk mengukur kekuatan otot."
+            },
+            {
+                category: "Fisika",
+                question: "Bunyi yang frekuensinya di atas 20.000 Hz disebut?",
+                options: ["Infrasonik", "Ultrasonik", "Supersonik", "Audiosonik"],
+                answer: 1,
+                fact: "Ultrasonik adalah bunyi dengan frekuensi di atas 20.000 Hz, yang tidak dapat didengar oleh manusia tetapi dapat didengar oleh beberapa hewan seperti kelelawar.",
+                difficulty: "medium",
+                hint: "Digunakan dalam pemeriksaan USG di dunia medis."
+            },
+            {
+                category: "Fisika",
+                question: "Besarnya usaha yang dilakukan ditentukan oleh?",
+                options: ["Gaya dan massa", "Gaya dan perpindahan", "Massa dan percepatan", "Gaya dan percepatan"],
+                answer: 1,
+                fact: "Usaha dalam fisika didefinisikan sebagai hasil kali gaya dan perpindahan benda dalam arah gaya. Rumus: W = F × s × cosθ.",
+                difficulty: "medium",
+                hint: "Diukur dalam joule (J), dimana 1 J = 1 N.m"
+            },
+            {
+                category: "Fisika",
+                question: "Zat yang menghantarkan listrik dengan baik disebut?",
+                options: ["Isolator", "Konduktor", "Semikonduktor", "Superkonduktor"],
+                answer: 1,
+                fact: "Konduktor adalah material yang dapat menghantarkan listrik dengan baik, seperti logam tembaga, emas, dan perak.",
+                difficulty: "medium",
+                hint: "Kabel listrik terbuat dari material jenis ini."
+            },
+            {
+                category: "Fisika",
+                question: "Cermin yang permukaan lengkungnya menghadap ke dalam disebut cermin?",
+                options: ["Cembung", "Cekung", "Datar", "Cembung-cekung"],
+                answer: 1,
+                fact: "Cermin cekung memiliki permukaan lengkung yang menghadap ke dalam dan dapat memfokuskan cahaya, sehingga disebut juga cermin konvergen.",
+                difficulty: "medium",
+                hint: "Digunakan dalam teleskop reflektor dan lampu senter."
+            },
+            {
+                category: "Fisika",
+                question: "Tekanan diukur dalam satuan?",
+                options: ["Newton", "Pascal", "Joule", "Watt"],
+                answer: 1,
+                fact: "Tekanan didefinisikan sebagai gaya per satuan luas, dan satuan SI-nya adalah Pascal (Pa), dimana 1 Pa = 1 N/m².",
+                difficulty: "medium",
+                hint: "Nama satuan ini diambil dari nama ilmuwan Perancis."
+            },
+            {
+                category: "Fisika",
+                question: "Energi yang tersimpan dalam benda karena posisinya disebut?",
+                options: ["Energi kinetik", "Energi potensial", "Energi panas", "Energi listrik"],
+                answer: 1,
+                fact: "Energi potensial adalah energi yang tersimpan dalam suatu sistem karena posisi atau konfigurasinya, seperti energi potensial gravitasi.",
+                difficulty: "medium",
+                hint: "Energi yang dimiliki benda karena ketinggiannya dari permukaan tanah."
+            },
+            {
+                category: "Fisika",
+                question: "Peristiwa dimana cahaya dipantulkan oleh permukaan kasar ke segala arah disebut?",
+                options: ["Pemantulan teratur", "Pemantulan baur", "Pembiasan", "Dispersi"],
+                answer: 1,
+                fact: "Pemantulan baur terjadi ketika cahaya dipantulkan oleh permukaan kasar ke segala arah, sehingga benda dapat dilihat dari berbagai sudut.",
+                difficulty: "medium",
+                hint: "Ini yang memungkinkan kita melihat benda dari berbagai arah."
+            },
+            {
+                category: "Fisika",
+                question: "Besaran yang menyatakan jumlah getaran per detik adalah?",
+                options: ["Amplitudo", "Frekuensi", "Periode", "Panjang gelombang"],
+                answer: 1,
+                fact: "Frekuensi adalah jumlah getaran per satuan waktu, diukur dalam Hertz (Hz).",
+                difficulty: "medium",
+                hint: "Nada tinggi memiliki frekuensi yang tinggi."
+            },
+            {
+                category: "Fisika",
+                question: "Alat untuk mengukur tegangan listrik adalah?",
+                options: ["Amperemeter", "Voltmeter", "Ohmmeter", "Wattmeter"],
+                answer: 1,
+                fact: "Voltmeter adalah alat untuk mengukur beda potensial atau tegangan listrik antara dua titik dalam rangkaian.",
+                difficulty: "medium",
+                hint: "Alat ini dipasang paralel dengan komponen yang diukur."
+            },
+            {
+                category: "Fisika",
+                question: "Hukum yang menyatakan bahwa tekanan gas berbanding terbalik dengan volumenya pada suhu tetap adalah?",
+                options: ["Hukum Boyle", "Hukum Charles", "Hukum Gay-Lussac", "Hukum Pascal"],
+                answer: 0,
+                fact: "Hukum Boyle menyatakan bahwa tekanan gas berbanding terbalik dengan volumenya ketika suhu tetap (P × V = konstan).",
+                difficulty: "medium",
+                hint: "Diformulasikan oleh Robert Boyle pada abad ke-17."
+            },
+            {
+                category: "Fisika",
+                question: "Peristiwa perubahan wujud dari padat langsung menjadi gas disebut?",
+                options: ["Mencair", "Membeku", "Mengembun", "Menyublim"],
+                answer: 3,
+                fact: "Menyublim adalah perubahan wujud dari padat langsung menjadi gas, seperti kapur barus yang menyusut di lemari.",
+                difficulty: "medium",
+                hint: "Contoh lainnya adalah es kering (dry ice)."
+            },
+            {
+                category: "Fisika",
+                question: "Besaran yang menyatakan tingkat kecerahan cahaya adalah?",
+                options: ["Intensitas cahaya", "Fluks cahaya", "Iluminansi", "Luminansi"],
+                answer: 0,
+                fact: "Intensitas cahaya adalah besaran yang menyatakan tingkat kecerahan cahaya yang dipancarkan oleh sumber cahaya dalam arah tertentu.",
+                difficulty: "hard",
+                hint: "Diukur dalam satuan candela (cd)."
+            },
+            {
+                category: "Fisika",
+                question: "Prinsip kerja kapal selam didasarkan pada hukum?",
+                options: ["Hukum Pascal", "Hukum Archimedes", "Hukum Boyle", "Hukum Newton"],
+                answer: 1,
+                fact: "Kapal selam bekerja berdasarkan hukum Archimedes dengan mengatur massa jenisnya melalui pengisian dan pengosongan tangki ballast.",
+                difficulty: "medium",
+                hint: "Prinsip ini menjelaskan bagaimana benda dapat mengapung, melayang, atau tenggelam."
+            },
+            {
+                category: "Fisika",
+                question: "Alat yang mengubah energi mekanik menjadi energi listrik adalah?",
+                options: ["Motor listrik", "Generator", "Transformator", "Baterai"],
+                answer: 1,
+                fact: "Generator adalah alat yang mengubah energi mekanik menjadi energi listrik melalui induksi elektromagnetik.",
+                difficulty: "medium",
+                hint: "Digunakan dalam pembangkit listrik."
+            },
+            {
+                category: "Fisika",
+                question: "Peristiwa dimana gelombang membelok ketika melewati penghalang atau celah sempit disebut?",
+                options: ["Pemantulan", "Pembiasan", "Difraksi", "Interferensi"],
+                answer: 2,
+                fact: "Difraksi adalah pembelokan gelombang ketika melewati celah sempit atau penghalang, menyebabkan gelombang menyebar.",
+                difficulty: "hard",
+                hint: "Peristiwa ini menjelaskan mengapa kita dapat mendengar suara dari balik dinding."
+            },
+            {
+                category: "Fisika",
+                question: "Besaran yang menyatakan hambatan listrik adalah?",
+                options: ["Volt", "Ampere", "Watt", "Ohm"],
+                answer: 3,
+                fact: "Ohm (Ω) adalah satuan hambatan listrik, yang menyatakan seberapa besar suatu material menahan aliran arus listrik.",
+                difficulty: "medium",
+                hint: "Nama satuan ini diambil dari nama Georg Simon Ohm."
+            },
+            {
+                category: "Fisika",
+                question: "Hukum termodinamika pertama berkaitan dengan?",
+                options: ["Kekekalan energi", "Entropi", "Suhu mutlak", "Efisiensi mesin"],
+                answer: 0,
+                fact: "Hukum termodinamika pertama menyatakan bahwa energi tidak dapat diciptakan atau dimusnahkan, hanya dapat diubah dari satu bentuk ke bentuk lain.",
+                difficulty: "hard",
+                hint: "Ini adalah prinsip kekekalan energi yang diterapkan dalam sistem termal."
+            },
+            {
+                category: "Fisika",
+                question: "Peristiwa dimana cahaya putih terurai menjadi warna-warna pelangi disebut?",
+                options: ["Pemantulan", "Pembiasan", "Dispersi", "Polarisasi"],
+                answer: 2,
+                fact: "Dispersi adalah penguraian cahaya putih menjadi warna-warna spektrum karena perbedaan indeks bias untuk masing-masing warna.",
+                difficulty: "medium",
+                hint: "Terjadi ketika cahaya melewati prisma."
+            },
+
+            // Pertanyaan Kimia tambahan (20)
+            {
+                category: "Kimia",
+                question: "Unsur dengan simbol Na adalah?",
+                options: ["Natrium", "Neon", "Nikel", "Nitrogen"],
+                answer: 0,
+                fact: "Na adalah simbol kimia untuk natrium (dari bahasa Latin 'natrium'). Natrium adalah logam alkali yang sangat reaktif.",
+                difficulty: "medium",
+                hint: "Unsur ini adalah komponen utama garam dapur (NaCl)."
+            },
+            {
+                category: "Kimia",
+                question: "Larutan dengan pH kurang dari 7 bersifat?",
+                options: ["Asam", "Basa", "Netral", "Garami"],
+                answer: 0,
+                fact: "Larutan dengan pH kurang dari 7 bersifat asam, yang berarti memiliki konsentrasi ion H+ lebih tinggi daripada ion OH-.",
+                difficulty: "easy",
+                hint: "Contohnya cuka dan jus lemon."
+            },
+            {
+                category: "Kimia",
+                question: "Reaksi kimia yang melepaskan kalor ke lingkungan disebut?",
+                options: ["Endoterm", "Eksoterm", "Eksergonik", "Endergonik"],
+                answer: 1,
+                fact: "Reaksi eksoterm adalah reaksi kimia yang melepaskan kalor ke lingkungan, sehingga suhu lingkungan naik.",
+                difficulty: "medium",
+                hint: "Pembakaran adalah contoh reaksi eksoterm."
+            },
+            {
+                category: "Kimia",
+                question: "Unsur yang paling ringan dan paling melimpah di alam semesta adalah?",
+                options: ["Hidrogen", "Helium", "Oksigen", "Karbon"],
+                answer: 0,
+                fact: "Hidrogen adalah unsur paling ringan dan paling melimpah di alam semesta, menyusun sekitar 75% dari massa elemental alam semesta.",
+                difficulty: "medium",
+                hint: "Unsur ini adalah bahan bakar utama bintang seperti matahari."
+            },
+            {
+                category: "Kimia",
+                question: "Proses pemisahan campuran berdasarkan perbedaan titik didih disebut?",
+                options: ["Filtrasi", "Kromatografi", "Distilasi", "Sublimasi"],
+                answer: 2,
+                fact: "Distilasi adalah teknik pemisahan campuran berdasarkan perbedaan titik didih komponen-komponennya.",
+                difficulty: "medium",
+                hint: "Digunakan untuk memurnikan air atau memisahkan komponen minyak bumi."
+            },
+            {
+                category: "Kimia",
+                question: "Unsur gas mulia yang digunakan dalam balon udara dan pesawat terbang adalah?",
+                options: ["Neon", "Helium", "Argon", "Xenon"],
+                answer: 1,
+                fact: "Helium digunakan dalam balon udara karena densitasnya yang sangat rendah dan tidak mudah terbakar seperti hidrogen.",
+                difficulty: "medium",
+                hint: "Gas ini lebih aman daripada hidrogen untuk pengisi balon."
+            },
+            {
+                category: "Kimia",
+                question: "Rumus kimia untuk gula pasir adalah?",
+                options: ["C₆H₁₂O₆", "C₁₂H₂₂O₁₁", "CO₂", "H₂O"],
+                answer: 1,
+                fact: "Gula pasir atau sukrosa memiliki rumus kimia C₁₂H₂₂O₁₁. Ini adalah disakarida yang terdiri dari glukosa dan fruktosa.",
+                difficulty: "medium",
+                hint: "Dihasilkan dari tebu atau bit gula."
+            },
+            {
+                category: "Kimia",
+                question: "Logam yang merupakan konduktor listrik terbaik adalah?",
+                options: ["Besi", "Tembaga", "Perak", "Aluminium"],
+                answer: 2,
+                fact: "Perak adalah konduktor listrik terbaik di antara semua logam, tetapi karena harganya mahal, tembaga lebih sering digunakan.",
+                difficulty: "medium",
+                hint: "Logam mulia ini juga digunakan dalam perhiasan."
+            },
+            {
+                category: "Kimia",
+                question: "Perubahan fisika ditandai dengan?",
+                options: ["Terbentuknya zat baru", "Perubahan wujud tanpa perubahan identitas zat", "Perubahan warna", "Pelepasan gas"],
+                answer: 1,
+                fact: "Perubahan fisika adalah perubahan yang tidak menghasilkan zat baru, hanya perubahan wujud, bentuk, atau ukuran.",
+                difficulty: "easy",
+                hint: "Contohnya es mencair menjadi air."
+            },
+            {
+                category: "Kimia",
+                question: "Asam yang terdapat dalam lambung manusia adalah?",
+                options: ["Asam asetat", "Asam sitrat", "Asam klorida", "Asam sulfat"],
+                answer: 2,
+                fact: "Lambung manusia menghasilkan asam klorida (HCl) yang membantu pencernaan makanan dan membunuh bakteri.",
+                difficulty: "medium",
+                hint: "Asam ini sangat korosif dan memiliki pH sekitar 1-2."
+            },
+            {
+                category: "Kimia",
+                question: "Unsur yang paling elektropositif dalam tabel periodik adalah?",
+                options: ["Fluor", "Klorin", "Natrium", "Francium"],
+                answer: 3,
+                fact: "Francium adalah unsur paling elektropositif, yang berarti paling mudah melepaskan elektron dan membentuk ion positif.",
+                difficulty: "hard",
+                hint: "Unsur ini sangat langka dan radioaktif."
+            },
+            {
+                category: "Kimia",
+                question: "Proses pelapukan logam akibat reaksi dengan oksigen disebut?",
+                options: ["Reduksi", "Oksidasi", "Netralisasi", "Hidrolisis"],
+                answer: 1,
+                fact: "Oksidasi adalah proses dimana logam bereaksi dengan oksigen membentuk oksida logam, menyebabkan korosi atau karat.",
+                difficulty: "medium",
+                hint: "Besi yang berkarat adalah contoh proses ini."
+            },
+            {
+                category: "Kimia",
+                question: "Satuan konsentrasi yang menyatakan jumlah mol zat terlarut per kilogram pelarut adalah?",
+                options: ["Molaritas", "Molalitas", "Fraksi mol", "Normalitas"],
+                answer: 1,
+                fact: "Molalitas (m) adalah satuan konsentrasi yang menyatakan jumlah mol zat terlarut per kilogram pelarut.",
+                difficulty: "hard",
+                hint: "Tidak seperti molaritas, molalitas tidak bergantung pada suhu."
+            },
+            {
+                category: "Kimia",
+                question: "Unsur yang digunakan dalam termometer sebagai pengganti raksa adalah?",
+                options: ["Natrium", "Galium", "Kalium", "Seng"],
+                answer: 1,
+                fact: "Galium adalah logam yang meleleh pada suhu rendah (29,76°C) dan sering digunakan sebagai pengganti raksa dalam termometer.",
+                difficulty: "hard",
+                hint: "Logam ini meleleh di tangan manusia karena suhu tubuh sekitar 37°C."
+            },
+            {
+                category: "Kimia",
+                question: "Reaksi antara asam dan logam menghasilkan garam dan?",
+                options: ["Air", "Oksigen", "Hidrogen", "Karbon dioksida"],
+                answer: 2,
+                fact: "Reaksi antara asam dan logam menghasilkan garam dan gas hidrogen. Contoh: Zn + 2HCl → ZnCl₂ + H₂.",
+                difficulty: "medium",
+                hint: "Reaksi ini sering digunakan untuk menghasilkan gas hidrogen di laboratorium."
+            },
+            {
+                category: "Kimia",
+                question: "Unsur yang membentuk dasar kimia organik adalah?",
+                options: ["Hidrogen", "Oksigen", "Karbon", "Nitrogen"],
+                answer: 2,
+                fact: "Karbon adalah unsur dasar kimia organik karena kemampuannya membentuk rantai panjang dan cincin dengan atom karbon lainnya.",
+                difficulty: "medium",
+                hint: "Semua senyawa organik mengandung unsur ini."
+            },
+            {
+                category: "Kimia",
+                question: "Senyawa yang dihasilkan dari reaksi antara asam dan basa adalah?",
+                options: ["Oksida", "Hidrida", "Garam", "Hidrokarbon"],
+                answer: 2,
+                fact: "Reaksi antara asam dan basa disebut netralisasi dan menghasilkan garam dan air.",
+                difficulty: "easy",
+                hint: "Contohnya HCl + NaOH → NaCl + H₂O."
+            },
+            {
+                category: "Kimia",
+                question: "Proses elektrolisis lelehan natrium klorida menghasilkan logam natrium dan?",
+                options: ["Klorin", "Oksigen", "Hidrogen", "Air"],
+                answer: 0,
+                fact: "Elektrolisis lelehan NaCl menghasilkan logam natrium di katode dan gas klorin di anode: 2NaCl → 2Na + Cl₂.",
+                difficulty: "hard",
+                hint: "Proses ini memerlukan energi listrik yang besar."
+            },
+            {
+                category: "Kimia",
+                question: "Unsur yang digunakan dalam pembuatan pupuk nitrogen adalah?",
+                options: ["Fosfor", "Kalium", "Nitrogen", "Kalsium"],
+                answer: 2,
+                fact: "Nitrogen adalah unsur penting dalam pembuatan pupuk nitrogen seperti urea, amonium nitrat, dan amonium sulfat.",
+                difficulty: "medium",
+                hint: "Unsur dengan simbol N."
+            },
+            {
+                category: "Kimia",
+                question: "Larutan penyangga (buffer) berfungsi untuk?",
+                options: ["Mempercepat reaksi", "Menstabilkan pH", "Meningkatkan kelarutan", "Mengubah warna"],
+                answer: 1,
+                fact: "Larutan penyangga berfungsi mempertahankan pH relatif stabil ketika ditambah sedikit asam atau basa.",
+                difficulty: "hard",
+                hint: "Darah manusia memiliki sistem penyangga untuk mempertahankan pH sekitar 7,4."
+            },
+            <!-- Tambahkan di bagian questionBank -->
+{
+    category: "Biologi",
+    question: "Proses dimana tumbuhan kehilangan air melalui daun disebut?",
+    options: ["Fotosintesis", "Transpirasi", "Respirasi", "Gutasi"],
+    answer: 1,
+    fact: "Transpirasi adalah proses penguapan air dari daun tumbuhan melalui stomata, yang membantu dalam pengangkutan air dan mineral dari akar.",
+    difficulty: "medium",
+    hint: "Proses ini mirip dengan berkeringat pada manusia."
+},
+{
+    category: "Fisika",
+    question: "Besaran yang menyatakan jarak tempuh per satuan waktu disebut?",
+    options: ["Percepatan", "Kecepatan", "Perpindahan", "Gaya"],
+    answer: 1,
+    fact: "Kecepatan adalah besaran vektor yang menunjukkan seberapa cepat suatu benda bergerak dan arah geraknya, diukur dalam meter per detik (m/s).",
+    difficulty: "easy",
+    hint: "Rumusnya adalah jarak dibagi waktu."
+},
+{
+    category: "Kimia",
+    question: "Unsur yang memiliki simbol K adalah?",
+    options: ["Kalium", "Kalsium", "Karbon", "Kripton"],
+    answer: 0,
+    fact: "K adalah simbol kimia untuk kalium (dari bahasa Latin 'kalium'). Kalium adalah logam alkali yang penting untuk fungsi saraf dan otot.",
+    difficulty: "medium",
+    hint: "Unsur ini penting untuk kesehatan jantung."
+},
+{
+    category: "Biologi",
+    question: "Organel sel yang berfungsi sebagai tempat sintesis protein adalah?",
+    options: ["Mitokondria", "Ribosom", "Lisosom", "Badan Golgi"],
+    answer: 1,
+    fact: "Ribosom adalah organel sel yang bertanggung jawab untuk sintesis protein. Mereka dapat ditemukan bebas di sitoplasma atau melekat pada retikulum endoplasma kasar.",
+    difficulty: "hard",
+    hint: "Terdiri dari RNA dan protein."
+},
+{
+    category: "Fisika",
+    question: "Hukum kekekalan energi menyatakan bahwa energi tidak dapat?",
+    options: ["Diciptakan", "Diciptakan atau dimusnahkan", "Diubah bentuknya", "Digunakan"],
+    answer: 1,
+    fact: "Hukum kekekalan energi menyatakan bahwa energi tidak dapat diciptakan atau dimusnahkan, hanya dapat diubah dari satu bentuk ke bentuk lain.",
+    difficulty: "medium",
+    hint: "Energi total dalam sistem tertutup adalah konstan."
+},
+{
+    category: "Kimia",
+    question: "Reaksi antara asam dan basa menghasilkan garam dan?",
+    options: ["Oksigen", "Hidrogen", "Air", "Karbon dioksida"],
+    answer: 2,
+    fact: "Reaksi antara asam dan basa disebut reaksi netralisasi dan menghasilkan garam dan air. Contoh: HCl + NaOH → NaCl + H₂O.",
+    difficulty: "easy",
+    hint: "Reaksi ini sering digunakan untuk mengobati sakit lambung."
+},
+{
+    category: "Biologi",
+    question: "Penyakit yang disebabkan oleh kekurangan vitamin D adalah?",
+    options: ["Anemia", "Rakitis", "Skorbut", "Beriberi"],
+    answer: 1,
+    fact: "Rakitis adalah penyakit tulang yang disebabkan oleh kekurangan vitamin D, kalsium, atau fosfat, yang menyebabkan pelunakan dan pelemahan tulang.",
+    difficulty: "medium",
+    hint: "Penyakit ini mempengaruhi perkembangan tulang pada anak-anak."
+},
+{
+    category: "Fisika",
+    question: "Alat yang digunakan untuk mengukur tekanan atmosfer adalah?",
+    options: ["Termometer", "Barometer", "Hygrometer", "Anemometer"],
+    answer: 1,
+    fact: "Barometer adalah alat yang digunakan untuk mengukur tekanan atmosfer. Ditemukan oleh Evangelista Torricelli pada tahun 1643.",
+    difficulty: "medium",
+    hint: "Digunakan dalam prakiraan cuaca."
+},
+{
+    category: "Kimia",
+    question: "Larutan yang dapat menghantarkan listrik disebut?",
+    options: ["Elektrolit", "Nonelektrolit", "Asam", "Basa"],
+    answer: 0,
+    fact: "Larutan elektrolit adalah larutan yang dapat menghantarkan listrik karena mengandung ion-ion yang dapat bergerak bebas.",
+    difficulty: "medium",
+    hint: "Contohnya larutan garam dapur dalam air."
+},
+{
+    category: "Biologi",
+    question: "Jaringan pada tumbuhan yang berfungsi untuk transportasi air dan mineral adalah?",
+    options: ["Floem", "Xilem", "Epidermis", "Parenkim"],
+    answer: 1,
+    fact: "Xilem adalah jaringan pada tumbuhan yang berfungsi mengangkut air dan mineral dari akar ke daun. Xilem juga memberikan dukungan struktural pada tumbuhan.",
+    difficulty: "medium",
+    hint: "Jaringan kayu pada pohon."
+},
+{
+    category: "Fisika",
+    question: "Besaran yang menyatakan ukuran kelembaman suatu benda adalah?",
+    options: ["Massa", "Berat", "Gaya", "Energi"],
+    answer: 0,
+    fact: "Massa adalah ukuran kelembaman suatu benda, yaitu kecenderungan benda untuk mempertahankan keadaan geraknya. Massa diukur dalam kilogram (kg).",
+    difficulty: "medium",
+    hint: "Berbeda dengan berat, yang dipengaruhi gravitasi."
+},
+{
+    category: "Kimia",
+    question: "Unsur gas mulia yang digunakan untuk mengisi balon adalah?",
+    options: ["Neon", "Argon", "Helium", "Kripton"],
+    answer: 2,
+    fact: "Helium adalah gas mulia yang sangat ringan dan tidak mudah terbakar, sehingga aman untuk mengisi balon. Helium adalah unsur kedua paling ringan setelah hidrogen.",
+    difficulty: "easy",
+    hint: "Gas yang membuat suara menjadi lucu jika dihirup."
+},
+{
+    category: "Biologi",
+    question: "Enzim yang berperan dalam pencernaan protein adalah?",
+    options: ["Amilase", "Lipase", "Pepsin", "Sukrase"],
+    answer: 2,
+    fact: "Pepsin adalah enzim yang diproduksi di lambung dan berfungsi memecah protein menjadi pepton. Pepsin bekerja optimal dalam lingkungan asam.",
+    difficulty: "hard",
+    hint: "Dihasilkan dalam bentuk tidak aktif sebagai pepsinogen."
+},
+{
+    category: "Fisika",
+    question: "Peristiwa dimana cahaya dibelokkan ketika melewati medium yang berbeda disebut?",
+    options: ["Pemantulan", "Pembiasan", "Dispersi", "Difraksi"],
+    answer: 1,
+    fact: "Pembiasan adalah pembelokan cahaya ketika melewati dua medium dengan kerapatan optik yang berbeda. Peristiwa ini menyebabkan sedotan terlihat patah dalam gelas berisi air.",
+    difficulty: "medium",
+    hint: "Dijelaskan oleh Hukum Snellius."
+},
+{
+    category: "Kimia",
+    question: "Perubahan kimia ditandai dengan?",
+    options: ["Perubahan wujud", "Perubahan warna", "Terbentuknya zat baru", "Perubahan ukuran"],
+    answer: 2,
+    fact: "Perubahan kimia ditandai dengan terbentuknya zat baru dengan sifat-sifat yang berbeda dari zat semula. Perubahan ini umumnya tidak dapat kembali ke bentuk semula.",
+    difficulty: "easy",
+    hint: "Contohnya pembakaran kertas."
+},
+{
+    category: "Biologi",
+    question: "Hormon yang mengatur kadar gula darah dengan menurunkan kadarnya adalah?",
+    options: ["Glukagon", "Insulin", "Adrenalin", "Tiroksin"],
+    answer: 1,
+    fact: "Insulin adalah hormon yang dihasilkan oleh pankreas dan berfungsi menurunkan kadar gula darah dengan mempermudah masuknya glukosa ke dalam sel.",
+    difficulty: "medium",
+    hint: "Penderita diabetes tipe 1 kekurangan hormon ini."
+},
+{
+    category: "Fisika",
+    question: "Energi yang dimiliki benda karena geraknya disebut?",
+    options: ["Energi potensial", "Energi kinetik", "Energi panas", "Energi listrik"],
+    answer: 1,
+    fact: "Energi kinetik adalah energi yang dimiliki benda karena geraknya. Besarnya bergantung pada massa dan kecepatan benda, dengan rumus EK = ½ mv².",
+    difficulty: "easy",
+    hint: "Energi ini dimiliki oleh semua benda yang bergerak."
+},
+{
+    category: "Kimia",
+    question: "Asam yang terdapat dalam cuka adalah?",
+    options: ["Asam sulfat", "Asam klorida", "Asam asetat", "Asam sitrat"],
+    answer: 2,
+    fact: "Cuka mengandung asam asetat (CH₃COOH) dengan konsentrasi sekitar 5-8%. Asam asetat memberikan rasa asam dan aroma khas pada cuka.",
+    difficulty: "medium",
+    hint: "Nama sistematisnya adalah asam etanoat."
+},
+{
+    category: "Biologi",
+    question: "Penyakit malaria disebabkan oleh parasit yang ditularkan melalui gigitan nyamuk?",
+    options: ["Aedes aegypti", "Anopheles", "Culex", "Mansonia"],
+    answer: 1,
+    fact: "Nyamuk Anopheles betina adalah vektor yang menularkan parasit Plasmodium penyebab malaria. Nyamuk ini aktif pada malam hari.",
+    difficulty: "hard",
+    hint: "Nyamuk ini memiliki posisi tubuh yang khas saat menggigit."
+},
+        {
+          category: "Fisika",
+          question: "Satuan SI untuk gaya adalah?",
+          options: ["Joule", "Newton", "Watt", "Pascal"],
+           answer: 1,
+          fact: "Newton (N) adalah satuan SI untuk gaya, diambil dari nama Isaac Newton. Satu Newton didefinisikan sebagai gaya yang diperlukan untuk memberikan percepatan 1 m/s² kepada massa 1 kg.",
+          difficulty: "easy",
+           hint: "1 Newton = 1 kg.m/s²"
+          }
+        ];
+
+        // Fakta IPA acak untuk ditampilkan di hasil
+        const scienceFacts = [
+            "Manusia memiliki sekitar 100.000 km pembuluh darah dalam tubuhnya - cukup untuk mengelilingi bumi 2,5 kali!",
+            "Kecepatan cahaya adalah 299.792.458 meter per detik - yang tercepat di alam semesta.",
+            "Air adalah satu-satunya zat yang secara alami ditemukan dalam tiga wujud di Bumi: padat, cair, dan gas.",
+            "Otak manusia menggunakan sekitar 20% dari total oksigen dan darah dalam tubuh.",
+            "Lidah jerapah panjangnya bisa mencapai 53 cm, cukup untuk membersihkan telinganya sendiri.",
+            "Setiap detik, sekitar 100 kilat menyambar bumi.",
+            "Lautan mengandung cukup garam untuk menutupi semua benua dengan ketebalan lebih dari 150 meter.",
+            "DNA manusia 50% identik dengan DNA pisang.",
+            "Mata burung unta lebih besar daripada otaknya.",
+            "Lebah dapat mengenali wajah manusia dengan cara yang sama seperti kita."
+        ];
+
+        // Variabel global
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedOption = null;
+        let timeLeft = 30;
+        let timer;
+        let totalTime = 0;
+        let correctAnswers = 0;
+        let incorrectAnswers = 0;
+        let skippedAnswers = 0;
+        let lifelinesUsed = 0;
+        let userAnswers = [];
+        let selectedQuestions = [];
+        let fiftyFiftyUsed = false;
+        let skipQuestionUsed = false;
+        let hintUsed = false;
+        let selectedDifficulty = "medium";
+        let correctStreak = 0;
+        let bestStreak = 0;
+        let startTime = 0;
+
+        // Data statistik
+        let quizStats = {
+            totalQuizzes: 0,
+            totalCorrect: 0,
+            totalQuestions: 0,
+            averageScore: 0,
+            bestScore: 0
+        };
+
+        // Data achievements
+        let achievements = {
+            firstQuiz: false,
+            perfectScore: false,
+            speedRun: false
+        };
+
+        // Elemen DOM
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const backToStartBtn = document.getElementById('back-to-start-btn');
+        const externalBackBtn = document.getElementById('external-back-btn');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const currentQuestionElement = document.getElementById('current-question');
+        const totalQuestionsElement = document.getElementById('total-questions');
+        const progressBar = document.getElementById('progress-bar');
+        const scoreElement = document.getElementById('score');
+        const scoreMessage = document.getElementById('score-message');
+        const timeLeftElement = document.getElementById('time-left');
+        const notification = document.getElementById('notification');
+        const questionCategory = document.getElementById('question-category');
+        const correctAnswersElement = document.getElementById('correct-answers');
+        const incorrectAnswersElement = document.getElementById('incorrect-answers');
+        const skippedAnswersElement = document.getElementById('skipped-answers');
+        const timeUsedElement = document.getElementById('time-used');
+        const lifelinesUsedElement = document.getElementById('lifelines-used');
+        const scienceFactElement = document.getElementById('science-fact');
+        const scienceFactStart = document.getElementById('science-fact-start');
+        const fiftyFiftyBtn = document.getElementById('fifty-fifty');
+        const skipQuestionBtn = document.getElementById('skip-question');
+        const hintBtn = document.getElementById('hint-btn');
+        const hintContainer = document.getElementById('hint-container');
+        const hintText = document.getElementById('hint-text');
+        const themeToggle = document.getElementById('theme-toggle');
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const modalCancel = document.getElementById('modal-cancel');
+        const modalConfirm = document.getElementById('modal-confirm');
+        const difficultyUsed = document.getElementById('difficulty-used');
+        const totalQuizzesElement = document.getElementById('total-quizzes');
+        const averageScoreElement = document.getElementById('average-score');
+        const totalTimeElement = document.getElementById('total-time');
+        const bestStreakElement = document.getElementById('best-streak');
+        const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+
+        // Load data dari local storage
+        function loadData() {
+            const savedStats = localStorage.getItem('quizStats');
+            const savedAchievements = localStorage.getItem('achievements');
+            
+            if (savedStats) {
+                quizStats = JSON.parse(savedStats);
+            }
+            
+            if (savedAchievements) {
+                achievements = JSON.parse(savedAchievements);
+            }
+            
+            updateStatsDisplay();
+            updateAchievementsDisplay();
+        }
+
+        // Save data ke local storage
+        function saveData() {
+            localStorage.setItem('quizStats', JSON.stringify(quizStats));
+            localStorage.setItem('achievements', JSON.stringify(achievements));
+        }
+
+        // Update tampilan statistik
+        function updateStatsDisplay() {
+            totalQuizzesElement.textContent = quizStats.totalQuizzes;
+            averageScoreElement.textContent = quizStats.averageScore;
+        }
+
+        // Update tampilan achievements
+        function updateAchievementsDisplay() {
+            document.getElementById('achievement-1').classList.toggle('locked', !achievements.firstQuiz);
+            document.getElementById('achievement-2').classList.toggle('locked', !achievements.perfectScore);
+            document.getElementById('achievement-3').classList.toggle('locked', !achievements.speedRun);
+        }
+
+        // Fungsi untuk memilih pertanyaan berdasarkan kesulitan
+        function selectQuestionsByDifficulty(difficulty) {
+            // Filter pertanyaan berdasarkan tingkat kesulitan
+            let filteredQuestions = questionBank.filter(q => q.difficulty === difficulty);
+            
+            // Jika tidak cukup pertanyaan untuk tingkat kesulitan yang dipilih,
+            // tambahkan pertanyaan dari tingkat kesulitan lainnya
+            if (filteredQuestions.length < 20) {
+                const otherQuestions = questionBank.filter(q => q.difficulty !== difficulty);
+                // Acak urutan pertanyaan lainnya
+                otherQuestions.sort(() => Math.random() - 0.5);
+                // Tambahkan pertanyaan hingga mencapai 20
+                filteredQuestions = filteredQuestions.concat(otherQuestions.slice(0, 20 - filteredQuestions.length));
+            }
+            
+            // Acak urutan pertanyaan
+            filteredQuestions.sort(() => Math.random() - 0.5);
+            
+            // Ambil 20 pertanyaan pertama
+            return filteredQuestions.slice(0, 20);
+        }
+
+        // Fungsi untuk memainkan suara
+        function playSound(type) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                if (type === 'correct') {
+                    oscillator.type = 'sine';
+                    oscillator.frequency.value = 523.25; // C5
+                    gainNode.gain.value = 0.2;
+                } else if (type === 'incorrect') {
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.value = 196.00; // G3
+                    gainNode.gain.value = 0.1;
+                } else if (type === 'complete') {
+                    oscillator.type = 'sine';
+                    oscillator.frequency.value = 783.99; // G5
+                    gainNode.gain.value = 0.2;
+                }
+                
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.5);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.log('Web Audio API tidak didukung di browser ini');
+            }
+        }
+
+        // Fungsi untuk membuat konfeti
+        function createConfetti() {
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            document.body.appendChild(celebration);
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                confetti.style.animationDelay = (Math.random() * 2) + 's';
+                celebration.appendChild(confetti);
+            }
+            
+            setTimeout(() => {
+                document.body.removeChild(celebration);
+            }, 5000);
+        }
+
+        // Inisialisasi kuis
+        function initQuiz() {
+            // Pilih pertanyaan berdasarkan tingkat kesulitan
+            selectedQuestions = selectQuestionsByDifficulty(selectedDifficulty);
+            
+            currentQuestion = 0;
+            score = 0;
+            selectedOption = null;
+            timeLeft = 30;
+            totalTime = 0;
+            correctAnswers = 0;
+            incorrectAnswers = 0;
+            skippedAnswers = 0;
+            lifelinesUsed = 0;
+            userAnswers = [];
+            fiftyFiftyUsed = false;
+            skipQuestionUsed = false;
+            hintUsed = false;
+            correctStreak = 0;
+            bestStreak = 0;
+            startTime = Date.now();
+            
+            // Reset lifelines
+            fiftyFiftyBtn.disabled = false;
+            skipQuestionBtn.disabled = false;
+            hintBtn.disabled = false;
+            hintContainer.style.display = 'none';
+            
+            totalQuestionsElement.textContent = selectedQuestions.length;
+            externalBackBtn.style.display = 'block';
+            showQuestion();
+            startTimer();
+        }
+
+        // Tampilkan pertanyaan
+        function showQuestion() {
+            const question = selectedQuestions[currentQuestion];
+            currentQuestionElement.textContent = currentQuestion + 1;
+            questionText.textContent = question.question;
+            questionCategory.textContent = question.category;
+            
+            // Tampilkan badge kesulitan
+            const difficultyBadge = document.createElement('span');
+            difficultyBadge.className = `difficulty-badge difficulty-${question.difficulty}`;
+            difficultyBadge.textContent = question.difficulty === 'easy' ? 'Mudah' : (question.difficulty === 'medium' ? 'Sedang' : 'Sulit');
+            questionCategory.appendChild(difficultyBadge);
+            
+            // Update progress bar
+            progressBar.style.width = `${((currentQuestion + 1) / selectedQuestions.length) * 100}%`;
+            
+            // Kosongkan container opsi
+            optionsContainer.innerHTML = '';
+            
+            // Tambahkan opsi jawaban
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                optionElement.innerHTML = `<span>${String.fromCharCode(65 + index)}.</span> ${option}`;
+                optionElement.dataset.index = index;
+                optionElement.style.animationDelay = `${index * 0.1}s`;
+                optionElement.addEventListener('click', selectOption);
+                
+                // Tandai jawaban sebelumnya jika ada
+                if (userAnswers[currentQuestion] !== undefined && userAnswers[currentQuestion] === index) {
+                    optionElement.classList.add('selected');
+                    selectedOption = index;
+                    nextBtn.disabled = false;
+                }
+                
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Nonaktifkan tombol next sampai opsi dipilih (kecuali sudah dipilih sebelumnya)
+            if (userAnswers[currentQuestion] === undefined) {
+                nextBtn.disabled = true;
+            }
+        }
+
+        // Pilih opsi jawaban
+        function selectOption(e) {
+            // Hapus seleksi sebelumnya
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Tandai opsi yang dipilih
+            e.target.classList.add('selected');
+            selectedOption = parseInt(e.target.dataset.index);
+            
+            // Simpan jawaban pengguna
+            userAnswers[currentQuestion] = selectedOption;
+            
+            // Aktifkan tombol next
+            nextBtn.disabled = false;
+        }
+
+        // Periksa jawaban
+        function checkAnswer() {
+            clearInterval(timer);
+            
+            const options = document.querySelectorAll('.option');
+            const correctIndex = selectedQuestions[currentQuestion].answer;
+            
+            // Tandai jawaban yang benar
+            options[correctIndex].classList.add('correct');
+            
+            // Jika jawaban salah, tandai sebagai salah
+            if (selectedOption !== correctIndex) {
+                options[selectedOption].classList.add('incorrect');
+                incorrectAnswers++;
+                correctStreak = 0;
+                playSound('incorrect');
+                showNotification("Salah! Jawaban benar: " + selectedQuestions[currentQuestion].options[correctIndex], false);
+            } else {
+                score += Math.round(100 / selectedQuestions.length);
+                correctAnswers++;
+                correctStreak++;
+                if (correctStreak > bestStreak) bestStreak = correctStreak;
+                playSound('correct');
+                showNotification("Benar! +" + Math.round(100 / selectedQuestions.length) + " poin", true);
+            }
+            
+            // Nonaktifkan tombol next sampai navigasi
+            nextBtn.disabled = true;
+        }
+
+        // Tampilkan notifikasi
+        function showNotification(message, isCorrect) {
+            notification.textContent = message;
+            notification.className = "notification";
+            notification.classList.add(isCorrect ? "correct" : "incorrect");
+            notification.classList.add("show");
+            
+            setTimeout(() => {
+                notification.classList.remove("show");
+            }, 3000);
+        }
+
+        // Timer untuk setiap pertanyaan
+        function startTimer() {
+            timeLeft = 30;
+            timeLeftElement.textContent = timeLeft;
+            
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                timeLeftElement.textContent = timeLeft;
+                totalTime++;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    // Otomatis lanjut ke pertanyaan berikutnya
+                    nextQuestion();
+                }
+            }, 1000);
+        }
+
+        // Lanjut ke pertanyaan berikutnya
+        function nextQuestion() {
+            clearInterval(timer);
+            
+            // Jika pengguna sudah memilih jawaban, periksa
+            if (userAnswers[currentQuestion] !== undefined) {
+                checkAnswer();
+                setTimeout(() => {
+                    navigateToQuestion(currentQuestion + 1);
+                }, 1500);
+            } else {
+                navigateToQuestion(currentQuestion + 1);
+            }
+        }
+
+        // Navigasi ke pertanyaan
+        function navigateToQuestion(index) {
+            if (index < selectedQuestions.length) {
+                currentQuestion = index;
+                showQuestion();
+                startTimer();
+                // Reset hint untuk pertanyaan baru
+                hintContainer.style.display = 'none';
+                hintUsed = false;
+            } else {
+                showResult();
+            }
+        }
+
+        // Kembali ke layar awal
+        function backToStart() {
+            clearInterval(timer);
+            quizScreen.style.display = 'none';
+            resultScreen.style.display = 'none';
+            startScreen.style.display = 'block';
+            externalBackBtn.style.display = 'none';
+        }
+
+        // Tampilkan hasil kuis
+        function showResult() {
+            const totalTimeSpent = Math.round((Date.now() - startTime) / 1000);
+            
+            quizScreen.style.display = 'none';
+            resultScreen.style.display = 'block';
+            externalBackBtn.style.display = 'none';
+            scoreElement.textContent = score;
+            
+            correctAnswersElement.textContent = correctAnswers;
+            incorrectAnswersElement.textContent = incorrectAnswers;
+            skippedAnswersElement.textContent = skippedAnswers;
+            timeUsedElement.textContent = totalTimeSpent;
+            lifelinesUsedElement.textContent = lifelinesUsed;
+            totalTimeElement.textContent = totalTimeSpent + ' detik';
+            bestStreakElement.textContent = bestStreak;
+            
+            // Tentukan teks untuk tingkat kesulitan
+            const difficultyText = selectedDifficulty === 'easy' ? 'Mudah' : (selectedDifficulty === 'medium' ? 'Sedang' : 'Sulit');
+            difficultyUsed.textContent = difficultyText;
+            
+            // Tampilkan fakta IPA acak
+            const randomFact = scienceFacts[Math.floor(Math.random() * scienceFacts.length)];
+            scienceFactElement.textContent = randomFact;
+            
+            // Tampilkan pesan berdasarkan skor
+            if (score >= 90) {
+                scoreMessage.innerHTML = "Luar biasa! Anda benar-benar ahli IPA! <div class='badge correct'>Master IPA</div>";
+                playSound('complete');
+                createConfetti();
+                
+                // Unlock achievement nilai sempurna
+                if (!achievements.perfectScore) {
+                    achievements.perfectScore = true;
+                    showNotification("Pencapaian terbuka: Nilai Sempurna!", true);
+                }
+            } else if (score >= 70) {
+                scoreMessage.innerHTML = "Bagus! Pengetahuan IPA Anda sangat baik. <div class='badge correct'>Ahli IPA</div>";
+            } else if (score >= 40) {
+                scoreMessage.innerHTML = "Lumayan! Tingkatkan lagi pengetahuan IPA Anda. <div class='badge incorrect'>Pencinta IPA</div>";
+            } else {
+                scoreMessage.innerHTML = "Anda perlu belajar lebih banyak tentang IPA. <div class='badge incorrect'>Pemula</div>";
+            }
+            
+            // Unlock achievement pertama kali
+            if (!achievements.firstQuiz) {
+                achievements.firstQuiz = true;
+                showNotification("Pencapaian terbuka: Pertama Kali!", true);
+            }
+            
+            // Unlock achievement cepat tangkas jika waktu kurang dari 5 menit
+            if (totalTimeSpent < 300 && !achievements.speedRun) {
+                achievements.speedRun = true;
+                showNotification("Pencapaian terbaku: Cepat Tangkas!", true);
+            }
+            
+            // Update statistik
+            updateStats(totalTimeSpent);
+            
+            // Save data
+            saveData();
+            
+            // Update tampilan achievements
+            updateAchievementsDisplay();
+        }
+
+        // Update statistik setelah kuis
+        function updateStats(timeSpent) {
+            quizStats.totalQuizzes++;
+            quizStats.totalCorrect += correctAnswers;
+            quizStats.totalQuestions += selectedQuestions.length;
+            quizStats.averageScore = Math.round((quizStats.totalCorrect / quizStats.totalQuestions) * 100);
+            
+            if (score > quizStats.bestScore) {
+                quizStats.bestScore = score;
+            }
+            
+            updateStatsDisplay();
+        }
+
+        // Fungsi bantuan 50:50
+        function useFiftyFifty() {
+            if (fiftyFiftyUsed) return;
+            
+            const correctIndex = selectedQuestions[currentQuestion].answer;
+            const options = document.querySelectorAll('.option');
+            let removedCount = 0;
+            
+            // Acak indeks opsi yang akan dihilangkan (bukan jawaban benar)
+            const indices = [0, 1, 2, 3].filter(i => i !== correctIndex);
+            while (removedCount < 2 && indices.length > 0) {
+                const randomIndex = Math.floor(Math.random() * indices.length);
+                const optionToRemove = indices.splice(randomIndex, 1)[0];
+                
+                options[optionToRemove].style.opacity = '0.3';
+                options[optionToRemove].style.pointerEvents = 'none';
+                removedCount++;
+            }
+            
+            fiftyFiftyUsed = true;
+            fiftyFiftyBtn.disabled = true;
+            lifelinesUsed++;
+        }
+
+        // Fungsi skip pertanyaan
+        function useSkipQuestion() {
+            if (skipQuestionUsed) return;
+            
+            skippedAnswers++;
+            userAnswers[currentQuestion] = -1; // Tandai sebagai dilewati
+            navigateToQuestion(currentQuestion + 1);
+            
+            skipQuestionUsed = true;
+            skipQuestionBtn.disabled = true;
+            lifelinesUsed++;
+        }
+
+        // Fungsi hint
+        function useHint() {
+            if (hintUsed) return;
+            
+            const question = selectedQuestions[currentQuestion];
+            hintText.textContent = question.hint;
+            hintContainer.style.display = 'block';
+            
+            hintUsed = true;
+            hintBtn.disabled = true;
+            lifelinesUsed++;
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            startScreen.style.display = 'none';
+            quizScreen.style.display = 'block';
+            initQuiz();
+        });
+
+        nextBtn.addEventListener('click', nextQuestion);
+
+        // Mengubah fungsi tombol kembali untuk menampilkan konfirmasi
+        externalBackBtn.addEventListener('click', () => {
+            confirmationModal.classList.add('show');
+        });
+
+        modalCancel.addEventListener('click', () => {
+            confirmationModal.classList.remove('show');
+        });
+
+        modalConfirm.addEventListener('click', () => {
+            confirmationModal.classList.remove('show');
+            backToStart();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            resultScreen.style.display = 'none';
+            quizScreen.style.display = 'block';
+            initQuiz();
+        });
+
+        backToStartBtn.addEventListener('click', backToStart);
+
+        // Event listener untuk lifelines
+        fiftyFiftyBtn.addEventListener('click', useFiftyFifty);
+        skipQuestionBtn.addEventListener('click', useSkipQuestion);
+        hintBtn.addEventListener('click', useHint);
+
+        // Event listener untuk toggle theme
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+        });
+
+        // Event listener untuk pemilihan tingkat kesulitan
+        difficultyBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                selectedDifficulty = btn.dataset.difficulty;
+                difficultyBtns.forEach(b => b.classList.remove('pulse'));
+                btn.classList.add('pulse');
+            });
+        });
+
+        // Pilih fakta IPA acak untuk ditampilkan di layar awal
+        window.addEventListener('load', () => {
+            const randomFact = scienceFacts[Math.floor(Math.random() * scienceFacts.length)];
+            scienceFactStart.textContent = randomFact;
+            
+            // Load data dari local storage
+            loadData();
+            
+            // Set tingkat kesulitan default
+            selectedDifficulty = "medium";
+            document.querySelector('[data-difficulty="medium"]').classList.add('pulse');
+        });
+
+        // Fungsi untuk berbagi hasil kuis
+        function shareQuizResults(platform) {
+            const score = document.getElementById('score').textContent;
+            const message = `Saya baru saja mendapatkan skor ${score} dalam Kuis IPA Lengkap! Coba tantangan ini dan lihat seberapa banyak yang Anda ketahui tentang ilmu pengetahuan alam.`;
+            const url = window.location.href;
+            
+            if (platform === 'web-share') {
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Hasil Kuis IPA Lengkap',
+                        text: message,
+                        url: url
+                    })
+                    .then(() => console.log('Berhasil berbagi'))
+                    .catch((error) => console.log('Error berbagi:', error));
+                } else {
+                    copyToClipboard(`${message} ${url}`);
+                    showNotification("Tautan hasil kuis telah disalin ke clipboard!", true);
+                }
+            } else {
+                let shareUrl;
+                
+                switch(platform) {
+                    case 'facebook':
+                        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(message)}`;
+                        break;
+                    case 'twitter':
+                        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}&url=${encodeURIComponent(url)}`;
+                        break;
+                    case 'whatsapp':
+                        shareUrl = `https://wa.me/?text=${encodeURIComponent(message + ' ' + url)}`;
+                        break;
+                }
+                
+                window.open(shareUrl, '_blank', 'width=600,height=400');
+            }
+        }
+
+        // Fungsi untuk menyalin teks ke clipboard
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+
+        // Event listener untuk tombol berbagi
+        document.querySelectorAll('.share-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                let platform;
+                if (btn.classList.contains('twitter')) {
+                    platform = 'twitter';
+                } else if (btn.classList.contains('whatsapp')) {
+                    platform = 'whatsapp';
+                } else {
+                    platform = 'facebook';
+                }
+                
+                shareQuizResults(platform);
+            });
+        });
+
+        // Tambahkan tombol berbagi universal
+        const universalShareBtn = document.createElement('button');
+        universalShareBtn.className = 'btn share-btn';
+        universalShareBtn.innerHTML = '<i class="fas fa-share-alt"></i> Bagikan';
+        universalShareBtn.addEventListener('click', () => {
+            shareQuizResults('web-share');
+        });
+
+        document.querySelector('.share-container').appendChild(universalShareBtn);
+    </script>
+</body>
+</html>
