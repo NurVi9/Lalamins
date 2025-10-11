@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-t" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Luminox — DLC Game</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* CSS Anda tidak perlu diubah, biarkan seperti aslinya */
     :root {
-      --bg: #f8f9fa; --card: #ffffff; --sidebar-bg: #ffffff; --text: #212529; --muted: #6c757d; --accent: #007bff; --accent-dark: #0056b3; --danger: #e74c3c; --ring: rgba(0, 123, 255, 0.25); --header-bg: rgba(255, 255, 255, 0.85); --border: #dee2e6; --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.07); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+      --bg: #f8f9fa; --card: #ffffff; --sidebar-bg: #ffffff; --text: #212529; --muted: #6c757d; --accent: #007bff; --accent-dark: #0056b3; --danger: #e74c3c; --success: #28a745; --ring: rgba(0, 123, 255, 0.25); --header-bg: rgba(255, 255, 255, 0.85); --border: #dee2e6; --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.07); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
     }
     [data-theme="dark"] {
-      --bg: #121212; --card: #1e1e1e; --sidebar-bg: #1e1e1e; --text: #e0e0e0; --muted: #9e9e9e; --accent: #64b5f6; --accent-dark: #2196f3; --header-bg: rgba(30, 30, 30, 0.85); --border: #424242; --ring: rgba(100, 181, 246, 0.3);
+      --bg: #121212; --card: #1e1e1e; --sidebar-bg: #1e1e1e; --text: #e0e0e0; --muted: #9e9e9e; --accent: #64b5f6; --accent-dark: #2196f3; --danger: #e57373; --success: #81c784; --header-bg: rgba(30, 30, 30, 0.85); --border: #424242; --ring: rgba(100, 181, 246, 0.3);
     }
     *, *::before, *::after { box-sizing: border-box; }
     html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
@@ -70,30 +69,8 @@
     .wishlist-btn.wishlisted .fa-regular { display: none; }
     .wishlist-btn.wishlisted .fa-solid { display: inline-block; animation: heartbeat 0.5s ease; }
     @keyframes heartbeat { 0% {transform: scale(1);} 50% {transform: scale(1.3);} 100% {transform: scale(1);} }
-    
-    /* Tombol Edit Baru */
-    .edit-btn {
-        position: absolute;
-        top: 0.75rem;
-        left: 0.75rem; /* Posisi di kiri atas */
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-color: rgba(0,0,0,0.4);
-        color: white;
-        border: none;
-        cursor: pointer;
-        display: grid;
-        place-items: center;
-        font-size: 1rem;
-        transition: transform 0.2s ease, background-color 0.2s ease;
-        z-index: 5; /* Pastikan di atas gambar */
-    }
-    .edit-btn:hover {
-        transform: scale(1.1);
-        background-color: rgba(0, 123, 255, 0.8);
-    }
-
+    .edit-btn { position: absolute; top: 0.75rem; left: 0.75rem; width: 40px; height: 40px; border-radius: 50%; background-color: rgba(0,0,0,0.4); color: white; border: none; cursor: pointer; display: grid; place-items: center; font-size: 1rem; transition: transform 0.2s ease, background-color 0.2s ease; z-index: 5; }
+    .edit-btn:hover { transform: scale(1.1); background-color: rgba(0, 123, 255, 0.8); }
     .skeleton-card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
     .skeleton-img { height: 200px; background: var(--border); }
     .skeleton-content { padding: 1.25rem; }
@@ -129,6 +106,17 @@
     #auth-container button { width: 100%; padding: 0.75rem; border-radius: 8px; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; transition: background .2s; }
     #auth-container button:hover { background: var(--accent-dark); }
     #auth-container #logout-btn { background-color: var(--danger); margin-top: 1rem; }
+
+    /* --- Gaya Notifikasi Popup Baru --- */
+    #notification-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+    .toast { background: var(--card); color: var(--text); padding: 12px 20px; border-radius: 8px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 12px; border-left: 5px solid; transition: transform 0.3s ease, opacity 0.3s ease; transform: translateX(calc(100% + 20px)); }
+    .toast.show { transform: translateX(0); }
+    .toast.hide { transform: translateX(calc(100% + 20px)); opacity: 0; }
+    .toast i { font-size: 1.2rem; }
+    .toast.success { border-color: var(--success); }
+    .toast.success i { color: var(--success); }
+    .toast.error { border-color: var(--danger); }
+    .toast.error i { color: var(--danger); }
     
     @media (min-width: 768px) {
       body { overflow: hidden; }
@@ -158,12 +146,10 @@
         <div class="menu-item" data-category="featured"><i class="fas fa-star"></i> Pilihan Editor</div>
         <div class="menu-item" data-category="wishlist"><i class="fas fa-heart"></i> Wishlist</div>
         <div class="menu-item" data-category="history"><i class="fas fa-history"></i> Riwayat Unduhan</div>
-        
         <p class="menu-heading">Kategori</p>
         <div class="menu-item" data-category="addon"><i class="fas fa-puzzle-piece"></i> Addon</div>
         <div class="menu-item" data-category="template"><i class="fas fa-paint-brush"></i> Template</div>
-        <div class="menu-item" data-category="event"><i class="fas fa-calendar-alt"></i> Event</div>
-        
+        <div class="menu-item" data-category="texturepack"><i class="fas fa-calendar-alt"></i> TexturePack</div>
         <p class="menu-heading">Akun</p>
         <div class="menu-item" id="auth-menu-btn"><i class="fas fa-user-circle"></i><span id="auth-menu-text">Login</span></div>
       </nav>
@@ -187,7 +173,6 @@
       </header>
       <main>
         <h1 class="page-title" id="page-title">Postingan Terbaru</h1>
-        
         <section id="post-grid"></section>
         <section id="skeleton-grid" class="hidden"></section>
       </main>
@@ -218,12 +203,8 @@
                 <div class="download-section">
                     <h4>Unduh File</h4>
                     <div class="download-buttons">
-                        <a href="#" id="mediafire-link" target="_blank" class="btn-download btn-mediafire">
-                            <i class="fa-solid fa-cloud-arrow-down"></i> MediaFire
-                        </a>
-                        <a href="#" id="gofile-link" target="_blank" class="btn-download btn-gofile">
-                            <i class="fa-solid fa-rocket"></i> Gofile
-                        </a>
+                        <a href="#" id="mediafire-link" target="_blank" class="btn-download btn-mediafire"><i class="fa-solid fa-cloud-arrow-down"></i> MediaFire</a>
+                        <a href="#" id="gofile-link" target="_blank" class="btn-download btn-gofile"><i class="fa-solid fa-rocket"></i> Gofile</a>
                     </div>
                 </div>
             </div>
@@ -236,32 +217,52 @@
     <div class="modal-container">
       <div class="modal-content" style="max-width: 420px; position: relative;">
         <button id="auth-modal-close" class="header-icon-btn" style="position:absolute; top:0.5rem; right:0.5rem; z-index:10;"><i class="fas fa-times"></i></button>
-        <div id="auth-container" style="padding: 1.5rem;">
-          </div>
+        <div id="auth-container" style="padding: 1.5rem;"></div>
       </div>
     </div>
   </div>
 
+  <div id="notification-container"></div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
       const $ = (s) => document.querySelector(s);
       const $$ = (s) => document.querySelectorAll(s);
 
-      // --- 2. INISIALISASI SUPABASE ---
       const SUPABASE_URL = 'https://zmhshfqpyekrcddsqhuz.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptaHNoZnFweWVrcmNkZHNxaHV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMzgxNDAsImV4cCI6MjA3NTcxNDE0MH0.I_AMK5MYj4Ett8fFnAEq-w8HHSqL9NYKnfuaTZOy4O8';
       
       const { createClient } = window.supabase;
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      // --- Manager & State ---
       const createStorageManager = (key) => ({ get: () => JSON.parse(localStorage.getItem(key)) || [], save: (data) => localStorage.setItem(key, JSON.stringify(data)), });
       const WishlistManager = { ...createStorageManager('luminox_wishlist'), add: (postId) => { const wishlist = WishlistManager.get(); if (!wishlist.includes(postId)) { wishlist.push(postId); WishlistManager.save(wishlist); } }, remove: (postId) => { let wishlist = WishlistManager.get(); wishlist = wishlist.filter(id => id !== postId); WishlistManager.save(wishlist); }, has: (postId) => WishlistManager.get().includes(postId) };
       const HistoryManager = { ...createStorageManager('luminox_history'), add: (postId) => { let history = HistoryManager.get(); history = history.filter(id => id !== postId); history.unshift(postId); if (history.length > 50) history.pop(); HistoryManager.save(history); } };
       let state = { posts: [], currentCategory: '', searchQuery: '', isLoading: true, userRole: null };
 
-      // --- Logika untuk Modal Autentikasi ---
+      // --- FUNGSI NOTIFIKASI POPUP BARU ---
+      function showNotification(message, type = 'success', duration = 4000) {
+          const container = $('#notification-container');
+          const toast = document.createElement('div');
+          toast.className = `toast ${type}`;
+          
+          const icons = {
+              success: 'fa-check-circle',
+              error: 'fa-times-circle'
+          };
+          
+          toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
+          container.appendChild(toast);
+
+          setTimeout(() => toast.classList.add('show'), 10); // Trigger animation
+
+          setTimeout(() => {
+              toast.classList.remove('show');
+              toast.classList.add('hide');
+              toast.addEventListener('transitionend', () => toast.remove());
+          }, duration);
+      }
+
       const authModalWrapper = $('#auth-modal-wrapper');
       const authContainer = $('#auth-container');
       const openAuthModal = () => authModalWrapper.classList.add('open');
@@ -272,7 +273,6 @@
       $('#auth-modal-close').addEventListener('click', closeAuthModal);
       $('#auth-modal-backdrop').addEventListener('click', closeAuthModal);
 
-      // --- Render Functions ---
       const showLoading = (loading) => {
         state.isLoading = loading;
         $('#skeleton-grid').classList.toggle('hidden', !loading);
@@ -285,45 +285,12 @@
         el.dataset.postId = post.id;
         const isWishlisted = WishlistManager.has(post.id);
         const isAdmin = state.userRole === 'admin' || state.userRole === 'moderator';
-        const adminActionsHTML = isAdmin 
-            ? `<button class="edit-btn"><i class="fas fa-pencil-alt"></i></button>`
-            : '';
-
-        el.innerHTML = `
-            <div class="post-card-img-wrapper">
-                ${adminActionsHTML}
-                <img src="${post.img}" alt="${post.title}" class="post-card-img">
-                <button class="wishlist-btn ${isWishlisted ? 'wishlisted' : ''}">
-                    <i class="fa-regular fa-heart"></i><i class="fa-solid fa-heart"></i>
-                </button>
-            </div>
-            <div class="post-card-content">
-                <div class="post-card-category">${post.category}</div>
-                <h3 class="post-card-title">${post.title}</h3>
-                <p class="post-card-desc">${post.description.substring(0, 80)}...</p>
-            </div>`;
-
-        el.addEventListener('click', (e) => {
-            if (!e.target.closest('.wishlist-btn') && !e.target.closest('.edit-btn')) {
-                openPostModal(post);
-            }
-        });
-        
-        el.querySelector('.wishlist-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            const btn = e.currentTarget;
-            btn.classList.contains('wishlisted') ? WishlistManager.remove(post.id) : WishlistManager.add(post.id);
-            btn.classList.toggle('wishlisted');
-            if (['wishlist', 'history'].includes(state.currentCategory)) renderPosts();
-        });
-
+        const adminActionsHTML = isAdmin ? `<button class="edit-btn"><i class="fas fa-pencil-alt"></i></button>` : '';
+        el.innerHTML = `<div class="post-card-img-wrapper">${adminActionsHTML}<img src="${post.img}" alt="${post.title}" class="post-card-img"><button class="wishlist-btn ${isWishlisted ? 'wishlisted' : ''}"><i class="fa-regular fa-heart"></i><i class="fa-solid fa-heart"></i></button></div><div class="post-card-content"><div class="post-card-category">${post.category}</div><h3 class="post-card-title">${post.title}</h3><p class="post-card-desc">${post.description.substring(0, 80)}...</p></div>`;
+        el.addEventListener('click', (e) => { if (!e.target.closest('.wishlist-btn') && !e.target.closest('.edit-btn')) { openPostModal(post); } });
+        el.querySelector('.wishlist-btn').addEventListener('click', (e) => { e.stopPropagation(); const btn = e.currentTarget; btn.classList.contains('wishlisted') ? WishlistManager.remove(post.id) : WishlistManager.add(post.id); btn.classList.toggle('wishlisted'); if (['wishlist', 'history'].includes(state.currentCategory)) renderPosts(); });
         const editBtn = el.querySelector('.edit-btn');
-        if (editBtn) {
-            editBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                openEditModal(post);
-            });
-        }
+        if (editBtn) { editBtn.addEventListener('click', (e) => { e.stopPropagation(); openEditModal(post); }); }
         return el;
       };
 
@@ -333,29 +300,13 @@
           const grid = $('#post-grid');
           grid.innerHTML = '';
           let filteredPosts = [];
-          if (state.currentCategory === 'wishlist') {
-              const ids = WishlistManager.get();
-              filteredPosts = state.posts.filter(p => ids.includes(p.id));
-          } else if (state.currentCategory === 'history') {
-              const ids = HistoryManager.get();
-              filteredPosts = ids.map(id => state.posts.find(p => p.id === id)).filter(Boolean);
-          } else if (state.currentCategory === 'featured') {
-              filteredPosts = state.posts.filter(p => p.isFeatured);
-          } else {
-              filteredPosts = state.posts.filter(post => {
-                const query = state.searchQuery.toLowerCase();
-                const matchesSearch = post.title.toLowerCase().includes(query) || post.description.toLowerCase().includes(query);
-                const matchesCategory = !state.currentCategory || post.category.toLowerCase() === state.currentCategory;
-                return matchesSearch && matchesCategory;
-              });
-          }
-          if (filteredPosts.length === 0) {
-            const messages = { wishlist: 'Wishlist Anda kosong.', history: 'Riwayat unduhan kosong.', featured: 'Tidak ada pilihan editor saat ini.' };
-            grid.innerHTML = `<p style="color: var(--muted); text-align: center; grid-column: 1 / -1;">${messages[state.currentCategory] || 'Tidak ada postingan yang cocok.'}</p>`;
-          } else {
-            filteredPosts.forEach(post => grid.appendChild(createPostElement(post)));
-          }
-          const titles = { '': 'Postingan Terbaru', wishlist: 'Wishlist Saya', history: 'Riwayat Unduhan', featured: 'Pilihan Editor', addon: 'Addons', template: 'Templates', event: 'Events' };
+          if (state.currentCategory === 'wishlist') { const ids = WishlistManager.get(); filteredPosts = state.posts.filter(p => ids.includes(p.id)); } 
+          else if (state.currentCategory === 'history') { const ids = HistoryManager.get(); filteredPosts = ids.map(id => state.posts.find(p => p.id === id)).filter(Boolean); } 
+          else if (state.currentCategory === 'featured') { filteredPosts = state.posts.filter(p => p.isFeatured); } 
+          else { filteredPosts = state.posts.filter(post => { const query = state.searchQuery.toLowerCase(); const matchesSearch = post.title.toLowerCase().includes(query) || post.description.toLowerCase().includes(query); const matchesCategory = !state.currentCategory || post.category.toLowerCase() === state.currentCategory; return matchesSearch && matchesCategory; }); }
+          if (filteredPosts.length === 0) { const messages = { wishlist: 'Wishlist Anda kosong.', history: 'Riwayat unduhan kosong.', featured: 'Tidak ada pilihan editor saat ini.' }; grid.innerHTML = `<p style="color: var(--muted); text-align: center; grid-column: 1 / -1;">${messages[state.currentCategory] || 'Tidak ada postingan yang cocok.'}</p>`; } 
+          else { filteredPosts.forEach(post => grid.appendChild(createPostElement(post))); }
+          const titles = { '': 'Postingan Terbaru', wishlist: 'Wishlist Saya', history: 'Riwayat Unduhan', featured: 'Pilihan Editor', addon: 'Addons', template: 'Templates', texturepack: 'TexturePack' };
           $('#page-title').textContent = state.searchQuery ? `Hasil untuk "${state.searchQuery}"` : (titles[state.currentCategory] || 'Postingan');
           showLoading(false);
         }, 300);
@@ -363,145 +314,45 @@
       
       const postModalWrapper = $('#post-modal-wrapper');
       const openPostModal = (post) => {
-        $('#post-modal-img').src = post.img;
-        $('#modal-category').textContent = post.category;
-        $('#modal-title').textContent = post.title;
-        $('#modal-desc').textContent = post.description;
-        $('#mediafire-link').href = post.links.mediafire;
-        $('#gofile-link').href = post.links.gofile;
-        const downloadHandler = () => HistoryManager.add(post.id);
-        $$('.btn-download').forEach(btn => {
-            btn.removeEventListener('click', downloadHandler);
-            btn.addEventListener('click', downloadHandler, { once: true });
-        });
+        $('#post-modal-img').src = post.img; $('#modal-category').textContent = post.category; $('#modal-title').textContent = post.title; $('#modal-desc').textContent = post.description; $('#mediafire-link').href = post.links.mediafire; $('#gofile-link').href = post.links.gofile; const downloadHandler = () => HistoryManager.add(post.id); $$('.btn-download').forEach(btn => { btn.removeEventListener('click', downloadHandler); btn.addEventListener('click', downloadHandler, { once: true }); });
         postModalWrapper.classList.add('open');
       };
       postModalWrapper.querySelector('.modal-backdrop').addEventListener('click', () => postModalWrapper.classList.remove('open'));
       postModalWrapper.querySelector('.close-modal').addEventListener('click', () => postModalWrapper.classList.remove('open'));
       
-      // --- UI Interactivity (Tidak berubah) ---
-      $('#theme-toggle').onclick = () => {
-        const newTheme = document.documentElement.dataset.theme === 'dark' ? '' : 'dark';
-        document.documentElement.dataset.theme = newTheme;
-        $('#theme-toggle i').className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        localStorage.setItem('luminox_theme', newTheme);
-      };
+      $('#theme-toggle').onclick = () => { const newTheme = document.documentElement.dataset.theme === 'dark' ? '' : 'dark'; document.documentElement.dataset.theme = newTheme; $('#theme-toggle i').className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; localStorage.setItem('luminox_theme', newTheme); };
       $('#menu-toggle').onclick = () => $('#sidebar').classList.add('open') & $('#backdrop').classList.add('active');
       $('#backdrop').onclick = () => $('#sidebar').classList.remove('open') & $('#backdrop').classList.remove('active');
-      const handleCategoryClick = (e) => {
-          state.currentCategory = e.currentTarget.dataset.category;
-          state.searchQuery = '';
-          $('#header-search-input').value = '';
-          $('#app-header').classList.remove('search-active');
-          $$('[data-category]').forEach(i => i.classList.remove('active'));
-          $$(`[data-category="${state.currentCategory}"]`).forEach(i => i.classList.add('active'));
-          renderPosts();
-          if(window.innerWidth < 768) {
-            $('#sidebar').classList.remove('open');
-            $('#backdrop').classList.remove('active');
-          }
-      };
+      const handleCategoryClick = (e) => { state.currentCategory = e.currentTarget.dataset.category; state.searchQuery = ''; $('#header-search-input').value = ''; $('#app-header').classList.remove('search-active'); $$('[data-category]').forEach(i => i.classList.remove('active')); $$(`[data-category="${state.currentCategory}"]`).forEach(i => i.classList.add('active')); renderPosts(); if(window.innerWidth < 768) { $('#sidebar').classList.remove('open'); $('#backdrop').classList.remove('active'); } };
       $$('[data-category]').forEach(item => item.addEventListener('click', handleCategoryClick));
-      $('#search-toggle').onclick = () => {
-        const header = $('#app-header');
-        header.classList.toggle('search-active');
-        if (header.classList.contains('search-active')) $('#header-search-input').focus();
-        else { state.searchQuery = ''; renderPosts(); }
-      };
+      $('#search-toggle').onclick = () => { const header = $('#app-header'); header.classList.toggle('search-active'); if (header.classList.contains('search-active')) $('#header-search-input').focus(); else { state.searchQuery = ''; renderPosts(); } };
       $('#header-search-input').addEventListener('input', (e) => { state.searchQuery = e.target.value; renderPosts(); });
       
-      // --- BAGIAN AUTENTIKASI DAN ADMIN ---
-      async function getUserRole() {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return null;
-        const { data: profile, error } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-        return error ? null : profile.role;
-      }
+      async function getUserRole() { const { data: { user } } = await supabase.auth.getUser(); if (!user) return null; const { data: profile, error } = await supabase.from('profiles').select('role').eq('id', user.id).single(); return error ? null : profile.role; }
 
       function renderAdminForm(postToEdit = null) {
         const isEditing = postToEdit !== null;
         const title = isEditing ? 'Edit Postingan' : 'Buat Postingan Baru';
         const buttonText = isEditing ? 'Simpan Perubahan' : 'Upload Postingan';
-
-        authContainer.innerHTML = `
-          <h2>${title}</h2>
-          <form id="upload-form" data-editing-id="${isEditing ? postToEdit.id : ''}">
-            <label for="title">Judul:</label>
-            <input type="text" id="title" name="title" required value="${isEditing ? postToEdit.title : ''}">
-            
-            <label for="description">Deskripsi:</label>
-            <textarea id="description" name="description" rows="4" required>${isEditing ? postToEdit.description : ''}</textarea>
-            
-            <label for="category">Kategori:</label>
-            <select id="category" name="category" required>
-              <option value="Template">Template</option>
-              <option value="Addon">Addon</option>
-              <option value="Event">Event</option>
-            </select>
-            
-            <label for="img">URL Gambar:</label>
-            <input type="text" id="img" name="img" required value="${isEditing ? postToEdit.img : ''}">
-            
-            <label for="mediafire">Link MediaFire:</label>
-            <input type="url" id="mediafire" name="mediafire" required value="${isEditing ? postToEdit.links.mediafire : ''}">
-            
-            <label for="gofile">Link Gofile:</label>
-            <input type="url" id="gofile" name="gofile" required value="${isEditing ? postToEdit.links.gofile : ''}">
-            
-            <input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;">
-            <label for="isFeatured">Jadikan Pilihan Editor?</label><br>
-            
-            <button type="submit">${buttonText}</button>
-          </form>
-          <button id="logout-btn">Logout</button>
-        `;
-
-        if (isEditing) {
-          authContainer.querySelector('#category').value = postToEdit.category;
-          authContainer.querySelector('#isFeatured').checked = postToEdit.isFeatured;
-        }
-        
+        authContainer.innerHTML = `<h2>${title}</h2><form id="upload-form" data-editing-id="${isEditing ? postToEdit.id : ''}"><label for="title">Judul:</label><input type="text" id="title" name="title" required value="${isEditing ? postToEdit.title : ''}"><label for="description">Deskripsi:</label><textarea id="description" name="description" rows="4" required>${isEditing ? postToEdit.description : ''}</textarea><label for="category">Kategori:</label><select id="category" name="category" required><option value="Template">Template</option><option value="Addon">Addon</option><option value="TexturePack">TexturePack</option></select><label for="img">URL Gambar:</label><input type="text" id="img" name="img" required value="${isEditing ? postToEdit.img : ''}"><label for="mediafire">Link MediaFire:</label><input type="url" id="mediafire" name="mediafire" required value="${isEditing ? postToEdit.links.mediafire : ''}"><label for="gofile">Link Gofile:</label><input type="url" id="gofile" name="gofile" required value="${isEditing ? postToEdit.links.gofile : ''}"><input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;"><label for="isFeatured">Jadikan Pilihan Editor?</label><br><button type="submit">${buttonText}</button></form><button id="logout-btn">Logout</button>`;
+        if (isEditing) { authContainer.querySelector('#category').value = postToEdit.category; authContainer.querySelector('#isFeatured').checked = postToEdit.isFeatured; }
         authContainer.querySelector('#upload-form').addEventListener('submit', handleSubmit);
         authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
       }
       
-      const openEditModal = (post) => {
-        renderAdminForm(post);
-        openAuthModal();
-      };
+      const openEditModal = (post) => { renderAdminForm(post); openAuthModal(); };
 
       async function setupAdminUI() {
-        if (state.userRole === 'admin' || state.userRole === 'moderator') {
-          renderAdminForm(); 
-          $('#auth-menu-text').textContent = 'Panel Admin';
-        } else {
-          authContainer.innerHTML = `
-              <div id="login-view">
-                <h2>Login</h2>
-                <form id="login-form">
-                  <label for="email">Email:</label><input type="email" id="email" name="email" required>
-                  <label for="password">Password:</label><input type="password" id="password" name="password" required>
-                  <button type="submit">Login</button>
-                </form>
-              </div>`;
-          authContainer.querySelector('#login-form').addEventListener('submit', handleLogin);
-          $('#auth-menu-text').textContent = 'Login';
-        }
+        if (state.userRole === 'admin' || state.userRole === 'moderator') { renderAdminForm(); $('#auth-menu-text').textContent = 'Panel Admin'; } 
+        else { authContainer.innerHTML = `<div id="login-view"><h2>Login</h2><form id="login-form"><label for="email">Email:</label><input type="email" id="email" name="email" required><label for="password">Password:</label><input type="password" id="password" name="password" required><button type="submit">Login</button></form></div>`; authContainer.querySelector('#login-form').addEventListener('submit', handleLogin); $('#auth-menu-text').textContent = 'Login'; }
       }
 
       async function handleLogin(e) {
         e.preventDefault();
-        const email = e.target.email.value;
-        const password = e.target.password.value;
+        const email = e.target.email.value; const password = e.target.password.value;
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          alert("Login Gagal: " + error.message);
-        } else {
-          state.userRole = await getUserRole();
-          await setupAdminUI();
-          renderPosts(); 
-          closeAuthModal();
-        }
+        if (error) { showNotification("Login Gagal: " + error.message, 'error'); } 
+        else { showNotification('Login berhasil!', 'success'); state.userRole = await getUserRole(); await setupAdminUI(); renderPosts(); closeAuthModal(); }
       }
 
       async function handleLogout() {
@@ -509,62 +360,36 @@
         state.userRole = null;
         await setupAdminUI();
         renderPosts();
+        showNotification('Anda telah logout.', 'success');
       }
 
       async function handleSubmit(e) {
         e.preventDefault();
         const form = e.target;
         const editingId = form.dataset.editingId;
-        const postData = {
-          title: form.title.value, description: form.description.value, category: form.category.value,
-          isFeatured: form.isFeatured.checked, img: form.img.value,
-          links: { mediafire: form.mediafire.value, gofile: form.gofile.value }
-        };
-
-        const { error } = editingId
-            ? await supabase.from('posts').update(postData).eq('id', editingId)
-            : await supabase.from('posts').insert([postData]);
-
-        if (error) {
-          alert('Operasi Gagal: ' + error.message);
-        } else {
-          alert(`Postingan berhasil ${editingId ? 'diperbarui' : 'diupload'}!`);
-          form.reset();
-          closeAuthModal();
-          fetchPosts();
-        }
+        const postData = { title: form.title.value, description: form.description.value, category: form.category.value, isFeatured: form.isFeatured.checked, img: form.img.value, links: { mediafire: form.mediafire.value, gofile: form.gofile.value } };
+        const { error } = editingId ? await supabase.from('posts').update(postData).eq('id', editingId) : await supabase.from('posts').insert([postData]);
+        if (error) { showNotification('Operasi Gagal: ' + error.message, 'error'); } 
+        else { showNotification(`Postingan berhasil ${editingId ? 'diperbarui' : 'diupload'}!`, 'success'); form.reset(); closeAuthModal(); fetchPosts(); }
       }
 
-      // --- INISIALISASI ---
       async function fetchPosts() {
-        try {
-          const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
-          if (error) throw error;
-          state.posts = data;
-          renderPosts();
-        } catch (error) {
-            console.error('Gagal memuat data postingan:', error);
-            $('#post-grid').innerHTML = `<p style="color: var(--muted); text-align: center;">Gagal memuat data. Silakan coba lagi nanti.</p>`;
-        }
+        try { const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false }); if (error) throw error; state.posts = data; renderPosts(); } 
+        catch (error) { console.error('Gagal memuat data postingan:', error); $('#post-grid').innerHTML = `<p style="color: var(--muted); text-align: center;">Gagal memuat data. Silakan coba lagi nanti.</p>`; showNotification('Gagal memuat data postingan.', 'error'); }
       }
       
       const init = async () => {
         const savedTheme = localStorage.getItem('luminox_theme') || '';
-        if (savedTheme) {
-            document.documentElement.dataset.theme = savedTheme;
-            $('#theme-toggle i').className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        }
+        if (savedTheme) { document.documentElement.dataset.theme = savedTheme; $('#theme-toggle i').className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; }
         const skeletonGrid = $('#skeleton-grid');
         const skeletonCardHTML = `<div class="skeleton-card"><div class="skeleton-img shimmer"></div><div class="skeleton-content"><div class="skeleton-line shimmer" style="width: 35%;"></div><div class="skeleton-line shimmer" style="width: 85%;"></div><div class="skeleton-line shimmer" style="width: 60%;"></div></div></div>`;
         skeletonGrid.innerHTML = Array(4).fill(skeletonCardHTML).join('');
-        
         state.userRole = await getUserRole();
         await fetchPosts();
         setupAdminUI();
       };
-
       init();
     });
-  </script>
+</script>
 </body>
 </html>
