@@ -2,1562 +2,483 @@
 <html lang="id">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Luminox — Advanced Plus</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luminox — Full CMS + Banner</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
-    /* =====================================
-       THEME & TOKENS
-       ===================================== */
+    /* ... CSS SAMA PERSIS SEPERTI SEBELUMNYA ... */
     :root {
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --accent: #3b82f6;
-      --accent2: #7c3aed;
-      --success: #10b981;
-      --danger: #ef4444;
-      --ring: rgba(59,130,246,0.4);
+      --bg: #f4f7fa; --card: #ffffff; --sidebar-bg: #ffffff; --text: #1a202c; --muted: #64748b; --accent: #3b82f6; --accent-dark: #2563eb; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; --ring: rgba(59, 130, 246, 0.4); --header-bg: rgba(255, 255, 255, 0.8); --border: #e2e8f0; --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
     }
     [data-theme="dark"] {
-      --bg: #0b1220;
-      --card: #091325;
-      --text: #e6eef8;
-      --muted: #9aa9bf;
-      --accent: #60a5fa;
-      --accent2: #a78bfa;
-      --ring: rgba(96,165,250,0.35);
+      --bg: #0d1117; --card: #161b22; --sidebar-bg: #161b22; --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff; --accent-dark: #388bfd; --header-bg: rgba(22, 27, 34, 0.8); --border: #30363d; --ring: rgba(88, 166, 255, 0.35);
     }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body { background: var(--bg); color: var(--text); transition: background .25s, color .25s; }
-
-    /* Animated global gradient backdrop */
-    body::before {
-      content: ""; position: fixed; inset: 0; z-index: -1;
-      background: radial-gradient(1200px 600px at 20% -10%, rgba(124,58,237,.18), transparent 60%),
-                  radial-gradient(800px 500px at 110% 10%, rgba(59,130,246,.18), transparent 60%),
-                  radial-gradient(1000px 600px at -10% 120%, rgba(236,72,153,.15), transparent 60%);
-      filter: blur(20px);
-      animation: bgFloat 22s ease-in-out infinite alternate;
-    }
-    @keyframes bgFloat {
-      0% { transform: translateY(0); opacity: .85; }
-      100% { transform: translateY(-10px); opacity: 1; }
-    }
-
-    /* Utilities */
-    .muted { color: var(--muted); }
-    .ringed { outline: none; box-shadow: 0 0 0 3px var(--ring); }
-
-    /* Fade / slide */
-    .fade-in { opacity: 0; animation: fadeInUp .5s .05s forwards; }
-    @keyframes fadeInUp { from {opacity:0; transform:translateY(12px);} to {opacity:1; transform:translateY(0);} }
-
-    /* Header blur */
-    .glass {
-      background: linear-gradient(90deg, #3b82f6, #2563eb, #0ea5e9);
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      border: none;
-    }
-
-    /* Cards */
-    .post-card { background: var(--card); border-radius: 14px; padding: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.07); transition: transform .15s, box-shadow .25s; }
-    .post-card:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 14px 38px rgba(0,0,0,.12); }
-
-    /* Skeletons */
-    .skeleton { border-radius: 12px; overflow: hidden; }
-    .skeleton .shimmer { height: 100%; width: 100%; background: linear-gradient(90deg, rgba(148,163,184,.25) 25%, rgba(148,163,184,.1) 50%, rgba(148,163,184,.25) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
-    @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-
-    /* Modal */
-    .modal-backdrop { position: fixed; inset:0; background: rgba(2,6,23,0.55); display:flex; align-items:center; justify-content:center; z-index:1200; }
-    .modal { background: var(--card); color: var(--text); border-radius: 16px; padding:16px; width: min(920px, 96%); box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
-
-    /* Top notification (drop-in) */
-    #top-notif { position: fixed; top: -140px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.95); border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,.22); padding: 10px 14px; display:flex; gap:10px; align-items:center; min-width: 320px; max-width: 92%; z-index: 1400; opacity: 0; }
-    [data-theme="dark"] #top-notif { background: rgba(9,19,37,0.95); }
-    #top-notif img { width:46px; height:46px; border-radius:8px; object-fit:cover; }
-    #top-notif.show { animation: notifIn .8s cubic-bezier(.68,-0.55,.27,1.55) forwards; }
-    #top-notif.hide { animation: notifOut .6s forwards; }
-    @keyframes notifIn { 0%{ top:-140px; opacity:0 } 60%{ top:20px; opacity:1 } 100%{ top:1rem; opacity:1 } }
-    @keyframes notifOut { from{ top:1rem; opacity:1 } to{ top:-140px; opacity:0 } }
-
-    /* Toast (bottom-right) */
-    #toast { position: fixed; bottom: 1rem; right: 1rem; background: var(--card); color: var(--text); padding: .75rem 1rem; border-radius: 10px; box-shadow: 0 12px 30px rgba(0,0,0,.22); opacity: 0; transform: translateY(16px); transition: all .35s; z-index: 1600; }
-    #toast.show { opacity: 1; transform: translateY(0); }
-
-    /* Back to top */
-    #back-to-top { position: fixed; bottom: 2rem; left: 1rem; background: var(--accent); color: white; width: 44px; height: 44px; display:grid; place-items:center; border-radius: 999px; cursor: pointer; box-shadow: 0 10px 24px rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: all .25s; z-index: 1500; }
-    #back-to-top.show { opacity: 1; pointer-events: auto; }
-
-    /* List layout helper */
-    .list-layout .post-card { display:flex; gap:12px; }
-    .list-layout .post-thumb { width: 220px; height: 140px; }
-
-    /* Tiny badges */
-    .badge { background: linear-gradient(90deg, var(--accent), var(--accent2)); color: white; padding: 4px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; letter-spacing: .3px; }
-
-    /* Inputs */
-    .input { background: color-mix(in oklab, var(--card) 92%, transparent); border: 1px solid rgba(148,163,184,.25); padding: .55rem .8rem; border-radius: 10px; }
-    .input:focus { box-shadow: 0 0 0 3px var(--ring); border-color: transparent; }
-
-    .btn { border-radius: 10px; padding: .55rem .8rem; font-weight: 600; transition: all 0.2s ease; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; transition: background .2s, color .2s; }
+    .hidden { display: none !important; }
+    .app-layout { display: flex; transition: margin-left .3s ease; }
+    .sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--border); position: fixed; top: 0; left: -260px; bottom: 0; z-index: 1200; display: flex; flex-direction: column; transition: left .3s ease; }
+    .sidebar.open { left: 0; }
+    .content-wrapper { flex: 1; display: flex; flex-direction: column; min-height: 100vh; padding-bottom: 80px; }
+    main { padding: 1rem; flex: 1; }
+    .page-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 1.5rem; }
+    .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; opacity: 0; pointer-events: none; transition: opacity .3s; }
+    .backdrop.active { opacity: 1; pointer-events: auto; }
+    .app-header { background: var(--header-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; }
+    .header-icon-btn { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 99px; background: transparent; color: var(--muted); font-size: 1rem; cursor: pointer; border: none; transition: all .2s; }
+    .header-icon-btn:hover { background: var(--border); color: var(--text); }
+    .sidebar-header { padding: 1rem; border-bottom: 1px solid var(--border); }
+    .sidebar-logo { display: flex; align-items: center; gap: .75rem; text-decoration: none; color: var(--text); }
+    .sidebar-logo img { width: 40px; height: 40px; border-radius: 99px; }
+    .sidebar-logo-text h2 { font-size: 1.2rem; font-weight: 600; line-height: 1.2; }
+    .sidebar-logo-text p { font-size: .8rem; color: var(--muted); line-height: 1.2; }
+    .sidebar-menu { flex: 1; padding: 1rem; overflow-y: auto; }
+    .menu-heading { font-size: .75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; padding: 0 .75rem; margin: 1.5rem 0 .5rem; }
+    .menu-item { display: flex; align-items: center; gap: .75rem; padding: .65rem .75rem; border-radius: 8px; font-weight: 500; text-decoration: none; color: var(--text); transition: background .2s, color .2s; cursor: pointer; }
+    .menu-item i { width: 20px; text-align: center; color: var(--muted); transition: color .2s; }
+    .menu-item:hover { background: var(--border); }
+    .menu-item.active { background: var(--accent); color: white; font-weight: 600; }
+    .menu-item.active i { color: white; }
+    .sidebar-footer { padding: 1rem; border-top: 1px solid var(--border); }
+    #admin-panel { display: none; }
+    .admin-logged-in #admin-panel { display: block; }
+    .fab { position: fixed; bottom: 80px; right: 1rem; width: 56px; height: 56px; background: linear-gradient(45deg, var(--accent), var(--accent-dark)); color: white; border-radius: 50%; display: none; place-items: center; font-size: 1.5rem; box-shadow: var(--shadow-lg); z-index: 900; transition: transform .2s; border: none; cursor: pointer; }
+    .admin-logged-in .fab { display: grid; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: var(--header-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); }
+    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); flex: 1; padding: 0.5rem 0; transition: color 0.2s; cursor: pointer; }
+    .nav-item i { font-size: 1.25rem; margin-bottom: 2px; }
+    .nav-item .nav-text { font-size: 0.7rem; font-weight: 500; }
+    .nav-item.active { color: var(--accent); }
+    #post-grid { display: grid; gap: 1rem; }
+    .post-card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); transition: transform .2s, box-shadow .2s; }
+    .post-card-clickable { cursor: pointer; }
+    .post-card-clickable:active { transform: scale(0.98); }
+    .post-card-img-wrapper { position: relative; }
+    .post-card-img { width: 100%; height: 200px; object-fit: cover; }
+    .post-card-content { padding: 1rem; }
+    .post-card-category { background: var(--accent); color: white; padding: 4px 10px; border-radius: 99px; font-weight: 600; font-size: 11px; display: inline-block; margin-bottom: 0.5rem; }
+    .post-card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .post-card-desc { color: var(--muted); font-size: 0.9rem; line-height: 1.4; }
+    .post-admin-controls { position: absolute; top: .75rem; right: .75rem; display: none; gap: .5rem; }
+    .admin-logged-in .post-admin-controls { display: flex; }
+    .admin-btn { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: white; border: none; cursor: pointer; box-shadow: var(--shadow); }
+    .admin-btn.edit { background: var(--warning); }
+    .admin-btn.delete { background: var(--danger); }
+    #banner-section { margin-bottom: 1.5rem; }
+    .banner-card { position: relative; border-radius: 16px; overflow: hidden; min-height: 200px; background-color: var(--card); box-shadow: var(--shadow); display: flex; align-items: flex-end; }
+    .banner-card img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+    .banner-card-overlay { position: relative; z-index: 2; width: 100%; padding: 1.5rem; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); }
+    .banner-card-title { font-size: 1.5rem; font-weight: 700; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
+    .banner-card-desc { color: rgba(255,255,255,0.9); }
+    .skeleton-card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
+    .skeleton-img { height: 200px; background: var(--border); }
+    .skeleton-content { padding: 1rem; }
+    .skeleton-line { height: 1em; border-radius: 4px; background: var(--border); margin-bottom: .5rem; }
+    .shimmer { position: relative; overflow: hidden; }
+    .shimmer::after { content: ''; position: absolute; top: 0; left: -150%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); animation: shimmer 1.5s infinite; }
+    [data-theme="dark"] .shimmer::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); }
+    @keyframes shimmer { 100% { left: 150%; } }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 1200; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity .3s; }
+    .modal-container { position: fixed; inset: 0; z-index: 1300; display: flex; opacity: 0; pointer-events: none; transform: scale(0.95); transition: all .3s; }
+    .modal-backdrop.open, .modal-container.open { opacity: 1; pointer-events: auto; transform: scale(1); }
+    .modal-content { background: var(--card); display: flex; flex-direction: column; width: 100%; height: 100%; }
+    .modal-header { display: flex; align-items: center; padding: 0.75rem; border-bottom: 1px solid var(--border); flex-shrink: 0;}
+    .modal-title { font-size: 1.1rem; font-weight: 600; flex: 1; text-align: center; }
+    .modal-header .btn, .modal-header .header-icon-btn { margin-left: auto; }
+    .modal-body { flex: 1; overflow-y: auto; }
+    #post-modal-img { width: 100%; max-height: 40vh; object-fit: cover; }
+    .post-details { padding: 1.5rem; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; border-radius: 8px; padding: 0.65rem 1.25rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn-primary { background: var(--accent); color: white; }
-    .btn-primary:hover { filter: brightness(1.05); transform: translateY(-1px); }
-    .btn-ghost { background: rgba(148,163,184,.15); }
-    .btn-danger { background: var(--danger); color:#fff; }
-    .btn-success { background: var(--success); color:#fff; }
-    .btn-warning { background: #f59e0b; color:#fff; }
-  
-    /* Header buttons - IMPROVED STYLES */
-    .header-btn {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    .btn-primary:hover:not(:disabled) { background: var(--accent-dark); }
+    .btn-ghost { background: var(--border); color: var(--text); }
+    .btn-ghost:hover { background: #d1d5db; }
+    [data-theme="dark"] .btn-ghost:hover { background: #4b5563; }
+    .btn-block { width: 100%; }
+    .input { background: var(--bg); border: 1px solid var(--border); padding: 0.75rem 1rem; border-radius: 8px; width: 100%; color: var(--text); }
+    .input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); }
+    #auth-modal .modal-content, #post-form-modal .modal-content, #banner-form-modal .modal-content { max-width: 450px; width: 90vw; height: auto; margin: auto; border-radius: 16px; }
+    .auth-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .auth-tab { flex: 1; text-align: center; padding: .75rem; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
+    .auth-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 500; font-size: 0.875rem; margin-bottom: 0.5rem; }
+    .auth-error { color: var(--danger); font-size: .875rem; text-align: center; margin-top: 1rem; }
+    #empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); border: 2px dashed var(--border); border-radius: 16px; }
+    @media (min-width: 768px) {
+      body { overflow: hidden; }
+      .app-layout { margin-left: 260px; }
+      .sidebar { left: 0; }
+      .content-wrapper { padding-bottom: 0; }
+      main { padding: 1.5rem 2rem; }
+      .bottom-nav, #menu-toggle, .backdrop, .fab { display: none; }
+      #post-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+      #post-modal .modal-container { inset: auto; align-items: center; justify-content: center; }
+      #post-modal .modal-content { width: 90vw; max-width: 900px; height: auto; max-height: 90vh; border-radius: 16px; box-shadow: var(--shadow-lg); }
+      #post-modal .modal-body { display: grid; grid-template-columns: 3fr 2fr; }
+      #post-modal #post-modal-img { max-height: none; height: 100%; }
+      #post-modal .post-details { padding: 2rem; }
     }
-    .header-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-    .login-admin-btn {
-      background: linear-gradient(90deg, #f59e0b, #f97316);
-      color: white;
-      border: none;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .login-admin-btn:hover {
-      background: linear-gradient(90deg, #f97316, #ea580c);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-    .menu-toggle-btn {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-    }
-    .menu-toggle-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-    .search-toggle-btn {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-    }
-    .search-toggle-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    /* Sidebar menu styles */
-    .sidebar-menu {
-      position: fixed;
-      top: 0;
-      right: -300px;
-      width: 300px;
-      height: 100%;
-      background: var(--card);
-      box-shadow: -5px 0 25px rgba(0, 0, 0, 0.1);
-      z-index: 1000;
-      transition: right 0.3s ease;
-      padding: 1.5rem;
-      overflow-y: auto;
-    }
-    .sidebar-menu.open {
-      right: 0;
-    }
-    .sidebar-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 999;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-    .sidebar-backdrop.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    .sidebar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid rgba(148,163,184,.2);
-    }
-    .sidebar-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-    }
-    .close-sidebar {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: var(--muted);
-    }
-    .menu-item {
-      display: flex;
-      align-items: center;
-      padding: 0.75rem 1rem;
-      border-radius: 10px;
-      margin-bottom: 0.5rem;
-      color: var(--text);
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-    .menu-item:hover {
-      background: rgba(148,163,184,.1);
-    }
-    .menu-item i {
-      margin-right: 0.75rem;
-      width: 20px;
-      text-align: center;
-    }
-    .menu-item.active {
-      background: rgba(59,130,246,.1);
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    /* Search container */
-    .search-container {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.3s ease;
-    }
-    .search-expanded {
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 10px;
-      padding: 0.25rem 0.5rem;
-    }
-    #search-input {
-      width: 0;
-      opacity: 0;
-      transition: all 0.3s ease;
-      border: none;
-      background: transparent;
-      color: white;
-      padding: 0.25rem;
-    }
-    #search-input:focus {
-      outline: none;
-      box-shadow: none;
-    }
-    #search-input.expanded {
-      width: 180px;
-      opacity: 1;
-    }
-    #search-input::placeholder {
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    /* Admin controls */
-    .admin-controls { display: none; }
-    .admin-logged-in .admin-controls { display: flex; gap: 4px; margin-top: 8px; }
-    .admin-logged-in .post-card { position: relative; }
-    .admin-logged-in .post-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 0;
-      height: 0;
-      border-style: solid;
-      border-width: 0 24px 24px 0;
-      border-color: transparent #3b82f6 transparent transparent;
-    }
-
-    /* Banner styles */
-    .banner-container {
-      position: relative;
-      margin-bottom: 2rem;
-      border-radius: 16px;
-      overflow: hidden;
-      height: 280px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
-    .banner-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .banner-overlay {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,0.8));
-      padding: 1.5rem;
-      color: white;
-    }
-    .banner-title {
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-    }
-    .banner-description {
-      font-size: 1rem;
-      opacity: 0.9;
-    }
-    .banner-admin-controls {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      display: flex;
-      gap: 0.5rem;
-    }
-    .no-banner {
-      background: linear-gradient(135deg, #3b82f6, #7c3aed);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      color: white;
-      text-align: center;
-      padding: 2rem;
-    }
-    .no-banner h3 {
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-    }
-
-    /* Empty state styles */
-    .empty-state {
-      text-align: center;
-      padding: 3rem 1rem;
-    }
-    .empty-state-icon {
-      display: inline-block;
-      padding: 1rem;
-      background: rgba(59,130,246,.1);
-      border-radius: 50%;
-      margin-bottom: 1.5rem;
-    }
-    .empty-state-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: var(--text);
-    }
-    .empty-state-message {
-      color: var(--muted);
-      margin-bottom: 1.5rem;
-    }
-
-/* Responsive tweaks */
-@media (max-width: 640px) {
-  header .container {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-  header select,
-  header input,
-  header button {
-    width: 100%;
-  }
-  #category-filter, #search-input {
-    min-width: 0 !important;
-  }
-  .list-layout .post-thumb {
-    width: 100%;
-    height: auto;
-  }
-  .list-layout .post-card {
-    flex-direction: column;
-  }
-  .modal {
-    width: 100% !important;
-    max-width: 95% !important;
-    padding: 12px !important;
-  }
-  .admin-controls {
-    flex-direction: column;
-  }
-  .banner-container {
-    height: 200px;
-  }
-  .banner-title {
-    font-size: 1.2rem;
-  }
-  .banner-description {
-    font-size: 0.9rem;
-  }
-  .header-buttons {
-    display: flex;
-    flex-direction: row;
-    gap: 0.5rem;
-    width: 100%;
-    justify-content: flex-end;
-  }
-  .sidebar-menu {
-    width: 85%;
-    right: -85%;
-  }
-  #search-input.expanded {
-    width: 140px;
-  }
-}
-@media (min-width: 641px) {
-  .search-container {
-    position: relative;
-  }
-  #search-input {
-    width: 180px;
-    opacity: 1;
-  }
-  .search-toggle-btn {
-    display: none;
-  }
-}
-</style>
+    @media (hover: hover) { .post-card-clickable:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); } }
+  </style>
 </head>
-<body data-theme="">
+<body>
 
-  <!-- Top Notification -->
-  <div id="top-notif" role="status" aria-live="polite">
-    <img id="notif-img" src="" alt="img">
-    <div>
-      <div id="notif-text" class="font-medium text-sm"></div>
-      <div id="notif-sub" class="text-xs muted"></div>
-    </div>
-    <button id="notif-close" class="ml-auto px-3 py-1 rounded btn-danger">✕</button>
-  </div>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header"><a href="#" class="sidebar-logo"><img src="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz3yx9en&st=9zczqkqw&dl=1" alt="logo"><div class="sidebar-logo-text"><h2>Luminox</h2><p>Platform Game</p></div></a></div><nav class="sidebar-menu"><p class="menu-heading">Menu</p><div class="menu-item active" data-category=""><i class="fas fa-home"></i> Semua Postingan</div><p class="menu-heading">Kategori</p><div class="menu-item" data-category="addon"><i class="fas fa-puzzle-piece"></i> Addon</div><div class="menu-item" data-category="template"><i class="fas fa-paint-brush"></i> Template</div><div class="menu-item" data-category="event"><i class="fas fa-calendar-alt"></i> Event</div></nav><div class="sidebar-footer"><div id="admin-panel"><p class="menu-heading">Panel Admin</p><div style="display: grid; gap: 0.5rem; padding: 0 0.5rem;"><button class="btn btn-primary" id="add-post-btn-desktop"><i class="fas fa-plus"></i> Tambah Post</button><button class="btn btn-ghost" id="manage-banner-btn">Kelola Banner</button><button class="btn btn-ghost" id="logout-btn-desktop"><i class="fas fa-sign-out-alt"></i> Logout</button></div></div></div>
+    </aside>
 
-  <!-- Sidebar Menu -->
-  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
-  <div class="sidebar-menu" id="sidebar-menu">
-    <div class="sidebar-header">
-      <h2 class="sidebar-title">Menu</h2>
-      <button class="close-sidebar" id="close-sidebar">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-    <a href="#" class="menu-item" data-category="">
-      <i class="fas fa-home"></i> Semua Postingan
-    </a>
-    <div class="sidebar-header">
-      <h2 class="sidebar-title">Kategori</h2>
-    </div>
-    <a href="#" class="menu-item" data-category="addon">
-      <i class="fas fa-puzzle-piece"></i> Addon
-    </a>
-    <a href="#" class="menu-item" data-category="template">
-      <i class="fas fa-paint-brush"></i> Template
-    </a>
-    <a href="#" class="menu-item" data-category="event">
-      <i class="fas fa-calendar-alt"></i> Event
-    </a>
-    <a href="#" class="menu-item" data-category="lain">
-      <i class="fas fa-ellipsis-h"></i> Lainnya
-    </a>
-<div class="sidebar-header" style="margin-top: 2rem;">
-  <h2 class="sidebar-title">Pengaturan</h2>
-</div>
-      <a href="#" class="menu-item">
-  <i class="fas fa-cog"></i> Settings
-    </a>
-        <a href="list.html" class="menu-item">
-      <i class="fas fa-gamepad"></i> GameHub
-  </a>
-      <a href="blog.html" class="menu-item">
-        <i class="fas fa-info-circle"></i> Tentang
-  </a>
-      <a href="upload.html" class="menu-item">
-      <i class="fas fa-upload"></i> Uploader
-</a>
-    </div>
-  <!-- Header -->
-  <header class="sticky top-0 z-50 glass">
-    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <img src="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=9zczqkqw&dl=1" class="w-10 h-10 rounded" alt="logo">
-        <div>
-          <h1 class="text-white font-bold" style="text-shadow:0 2px 12px rgba(0,0,0,.35)">Luminox</h1>
-          <div class="text-xs text-white/90">Platform Download — Game</div>
+    <div class="content-wrapper">
+      <header class="app-header">
+        <button id="menu-toggle" class="header-icon-btn"><i class="fas fa-bars"></i></button>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <button id="search-toggle" class="header-icon-btn"><i class="fas fa-search"></i></button>
+          <button id="theme-toggle" class="header-icon-btn"><i class="fas fa-moon"></i></button>
         </div>
-      </div>
-
-      <div class="flex items-center gap-2 header-buttons">
-        <button id="menu-toggle" class="menu-toggle-btn">
-          <i class="fas fa-bars"></i>
-        </button>
-        
-        <div class="search-container" id="search-container">
-          <button id="search-toggle" class="search-toggle-btn md:hidden">
-            <i class="fas fa-search"></i>
-          </button>
-          <input id="search-input" placeholder="Cari postingan..." class="input" />
-        </div>
-        
-        <button id="theme-toggle" class="btn header-btn">
-          <i class="fas fa-moon"></i> <span class="hidden md:inline">Dark</span>
-        </button>
-        
-        <div id="auth-area" class="flex items-center gap-2">
-          <button id="login-btn" class="btn login-admin-btn">
-            <i class="fas fa-user-lock"></i> <span class="hidden md:inline">Login Admin</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- Admin bar -->
-  <div id="admin-bar" class="container mx-auto px-4 py-3 hidden">
-    <div class="p-4 rounded-lg flex flex-col md:flex-row md:items-center gap-4 post-card">
-      <div class="flex-1">
-        <div class="font-semibold">Panel Admin</div>
-        <div class="text-sm muted">Kelola postingan dan banner — hanya admin</div>
-      </div>
-      <div class="flex gap-2">
-        <button id="open-add" class="btn btn-success">
-          <i class="fas fa-plus"></i> Tambah Post
-        </button>
-        <button id="manage-banner" class="btn btn-primary">
-          <i class="fas fa-image"></i> Kelola Banner
-        </button>
-        <button id="logout-btn" class="btn btn-ghost">
-          <i class="fas fa-sign-out-alt"></i> Logout
-        </button>
-      </div>
+      </header>
+      <main>
+        <section id="banner-section"></section>
+        <h1 class="page-title">Postingan Terbaru</h1>
+        <section id="post-grid"></section>
+        <section id="skeleton-grid" class="hidden"></section>
+        <section id="empty-state" class="hidden">
+            <h2>Belum Ada Postingan</h2>
+            <p>Jadilah yang pertama membuat postingan!</p>
+        </section>
+      </main>
     </div>
   </div>
 
-  <!-- Banner Section -->
-  <section class="container mx-auto px-4 mt-6" id="banner-section">
-    <!-- Banner akan ditampilkan di sini -->
-  </section>
+  <div class="backdrop" id="backdrop"></div>
+  <button class="fab" id="fab-add-post"><i class="fas fa-plus"></i></button>
+  <nav class="bottom-nav">
+    <div class="nav-item active" data-category=""><i class="fas fa-home"></i><span class="nav-text">Home</span></div>
+    <div class="nav-item" data-category="addon"><i class="fas fa-puzzle-piece"></i><span class="nav-text">Addon</span></div>
+    <div class="nav-item" data-category="template"><i class="fas fa-paint-brush"></i><span class="nav-text">Template</span></div>
+    <div class="nav-item" id="auth-nav-item"><i class="fas fa-sign-in-alt"></i><span class="nav-text">Login</span></div>
+  </nav>
 
-  <!-- Controls row -->
-  <main class="container mx-auto px-4 py-6">
-    <section class="mb-4 flex flex-col md:flex-row md:items-center gap-3">
-      <h2 class="text-2xl font-bold flex-1">Postingan Terbaru</h2>
-      <div class="flex items-center gap-2">
-        <button id="view-grid" class="btn btn-primary">
-          <i class="fas fa-th-large"></i> Grid
-        </button>
-        <button id="view-list" class="btn btn-ghost">
-          <i class="fas fa-list"></i> List
-        </button>
-        <button id="refresh-btn" class="btn btn-ghost">
-          <i class="fas fa-sync-alt"></i> Muat Ulang
-        </button>
-      </div>
-    </section>
-
-    <!-- Grid / List container -->
-    <section id="post-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></section>
-
-    <!-- Empty state -->
-    <div id="empty-state" class="empty-state hidden">
-      <div class="empty-state-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      </div>
-      <h3 id="empty-title" class="empty-state-title">Belum ada postingan</h3>
-      <p id="empty-message" class="empty-state-message">Mulai dengan membuat postingan pertama Anda</p>
-      <button id="create-first-post" class="btn btn-success">
-        <i class="fas fa-plus"></i> Buat Postingan Pertama
-      </button>
-    </div>
-
-    <!-- Skeleton placeholder -->
-    <div id="skeletons" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2 hidden">
-      <div class="skeleton h-60"><div class="shimmer"></div></div>
-      <div class="skeleton h-60"><div class="shimmer"></div></div>
-      <div class="skeleton h-60"><div class="shimmer"></div></div>
-    </div>
-
-    <div id="loading" class="text-center muted py-6 hidden">Memuat…</div>
-    <div id="end-list" class="text-center muted py-6 hidden">Tidak ada postingan lagi</div>
-  </main>
-
-  <footer class="text-center py-8 muted">© 2025 Luminox. All rights reserved.</footer>
-
-  <!-- Post Modal -->
   <div id="post-modal" class="hidden">
-    <div class="modal-backdrop" id="post-modal-backdrop">
-      <div class="modal">
-        <div class="flex flex-col lg:flex-row gap-4">
-          <div class="flex-1">
-            <h3 id="modal-title" class="text-xl font-semibold"></h3>
-            <p id="modal-desc" class="muted mt-1"></p>
-            <img id="modal-img" src="" alt="" class="mt-4 w-full rounded" style="max-height:380px; object-fit:cover;">
-          </div>
-          <div style="min-width:280px;">
-            <div class="flex items-center justify-between mb-2">
-              <div class="text-sm font-semibold">Komentar</div>
-              <div id="comment-count" class="muted text-sm">0</div>
-            </div>
-            <div id="comment-list" style="max-height:320px; overflow:auto;" class="space-y-2 mb-3"></div>
-            <textarea id="comment-input" placeholder="Tulis komentar…" class="w-full p-2 rounded input" rows="3"></textarea>
-            <button id="comment-send" class="mt-2 w-full btn btn-primary">Kirim Komentar</button>
-          </div>
+    <div class="modal-backdrop"></div><div class="modal-container"><div class="modal-content"><header class="modal-header"><button class="header-icon-btn close-modal"><i class="fas fa-times"></i></button><h2 class="modal-title">Detail Postingan</h2></header><div class="modal-body"><img id="post-modal-img" src=""><div class="post-details"><h3 id="modal-title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;"></h3><p id="modal-desc" style="color: var(--muted)"></p></div></div></div></div>
+  </div>
+  
+  <div id="post-form-modal" class="hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-container">
+      <form id="post-form" class="modal-content">
+        <header class="modal-header">
+          <h2 class="modal-title" id="post-form-title">Tambah Postingan Baru</h2>
+          <button type="submit" id="post-form-submit-btn" class="btn btn-primary">Simpan</button>
+        </header>
+        <div class="modal-body" style="padding: 1rem;">
+            <input type="hidden" id="post-id-input">
+            <div class="form-group"><label for="post-title-input" class="form-label">Judul</label><input type="text" id="post-title-input" class="input" required></div>
+            <div class="form-group"><label for="post-desc-input" class="form-label">Deskripsi</label><textarea id="post-desc-input" class="input" rows="3"></textarea></div>
+            <div class="form-group"><label for="post-category-input" class="form-label">Kategori</label><select id="post-category-input" class="input"><option value="Addon">Addon</option><option value="Template">Template</option><option value="Event">Event</option><option value="Lainnya">Lainnya</option></select></div>
+            <div class="form-group"><label for="post-image-input" class="form-label">URL Gambar</label><input type="url" id="post-image-input" class="input" placeholder="https://..." required></div>
+            <div class="form-group"><label for="post-link-input" class="form-label">URL Link Postingan (opsional)</label><input type="url" id="post-link-input" class="input" placeholder="https://..."></div>
         </div>
-        <div class="mt-4 flex justify-end gap-2">
-          <a id="modal-open-link" href="#" target="_blank" class="btn btn-success">Kunjungi Halaman</a>
-          <div id="modal-admin-controls" class="admin-controls">
-            <button id="modal-edit" class="btn btn-warning">Edit</button>
-            <button id="modal-delete" class="btn btn-danger">Hapus</button>
-          </div>
-          <button id="modal-close" class="btn btn-ghost">Tutup</button>
-        </div>
-      </div>
+      </form>
     </div>
   </div>
 
-  <!-- Login Modal -->
-  <div id="login-modal" class="hidden">
-    <div class="modal-backdrop" id="login-backdrop">
-      <div class="modal max-w-sm">
-        <h3 class="text-xl font-semibold mb-2">Admin Login</h3>
-        <p class="muted text-sm mb-4">Masuk untuk mengakses panel admin.</p>
-        <label class="text-sm">Username</label>
-        <input id="login-username" class="w-full p-2 rounded input mb-2" />
-        <label class="text-sm">Password</label>
-        <input id="login-password" type="password" class="w-full p-2 rounded input mb-3" />
-        <div id="login-error" class="text-sm text-red-500 hidden mb-2"></div>
-        <div class="flex justify-between items-center">
-          <div class="text-xs muted">Login: <span class="badge">admin only</span></div>
-          <div class="flex gap-2">
-            <button id="login-cancel" class="btn btn-ghost">Batal</button>
-            <button id="login-submit" class="btn btn-primary">Masuk</button>
-          </div>
+  <div id="banner-form-modal" class="hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-container">
+      <form id="banner-form" class="modal-content">
+        <header class="modal-header">
+          <h2 class="modal-title">Kelola Banner</h2>
+          <button type="submit" id="banner-form-submit-btn" class="btn btn-primary">Simpan</button>
+        </header>
+        <div class="modal-body" style="padding: 1rem;">
+            <div class="form-group"><label for="banner-title-input" class="form-label">Judul Banner</label><input type="text" id="banner-title-input" class="input" required></div>
+            <div class="form-group"><label for="banner-desc-input" class="form-label">Deskripsi Banner</label><input id="banner-desc-input" class="input"></div>
+            <div class="form-group"><label for="banner-image-input" class="form-label">URL Gambar Banner</label><input type="url" id="banner-image-input" class="input" placeholder="https://..." required></div>
+            <div class="form-group"><label for="banner-link-input" class="form-label">URL Link Banner (opsional)</label><input type="url" id="banner-link-input" class="input" placeholder="https://..."></div>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 
-  <!-- Add Post Modal -->
-  <div id="add-modal" class="hidden">
-    <div class="modal-backdrop" id="add-backdrop">
-      <div class="modal max-w-lg">
-        <h3 class="text-xl font-semibold mb-2">Tambah Postingan</h3>
-        <label class="text-sm">Judul</label>
-        <input id="add-title" class="w-full p-2 rounded input mb-2" />
-        <label class="text-sm">Deskripsi singkat</label>
-        <input id="add-desc" class="w-full p-2 rounded input mb-2" />
-        <label class="text-sm">Kategori</label>
-        <select id="add-category" class="w-full p-2 rounded input mb-2">
-          <option value="addon">Addon</option>
-          <option value="template">Template</option>
-          <option value="event">Event</option>
-          <option value="lain">Lainnya</option>
-        </select>
-        <label class="text-sm">URL Gambar</label>
-        <input id="add-img" class="w-full p-2 rounded input mb-2" placeholder="https://…" />
-        <label class="text-sm">URL Link Postingan (opsional)</label>
-        <input id="add-link" class="w-full p-2 rounded input mb-4" placeholder="https://…" />
-        <div class="flex justify-end gap-2">
-          <button id="add-cancel" class="btn btn-ghost">Batal</button>
-          <button id="add-submit" class="btn btn-success">Tambah & Publikasi</button>
-        </div>
-      </div>
-    </div>
+  <div id="auth-modal" class="hidden">
+    <div class="modal-backdrop"></div><div class="modal-container"><div class="modal-content"><header class="modal-header"><button class="header-icon-btn close-modal"><i class="fas fa-times"></i></button><h2 class="modal-title" id="auth-modal-title">Login</h2></header><div class="modal-body" style="padding: 1rem;"><div class="auth-tabs"><div id="tab-login" class="auth-tab active">Login</div><div id="tab-register" class="auth-tab">Register</div></div><form id="login-form"><div class="form-group"><input type="email" id="login-email" class="input" placeholder="Email" required></div><div class="form-group"><input type="password" id="login-password" class="input" placeholder="Password" required></div><button type="submit" class="btn btn-primary btn-block">Login</button></form><form id="register-form" class="hidden"><div class="form-group"><input type="email" id="register-email" class="input" placeholder="Email" required></div><div class="form-group"><input type="password" id="register-password" class="input" placeholder="Password" required></div><button type="submit" class="btn btn-primary btn-block">Register</button></form><p id="auth-error" class="auth-error hidden"></p></div></div></div>
   </div>
 
-  <!-- Edit Post Modal -->
-  <div id="edit-modal" class="hidden">
-    <div class="modal-backdrop" id="edit-backdrop">
-      <div class="modal max-w-lg">
-        <h3 class="text-xl font-semibold mb-2">Edit Postingan</h3>
-        <input type="hidden" id="edit-id" />
-        <label class="text-sm">Judul</label>
-        <input id="edit-title" class="w-full p-2 rounded input mb-2" />
-        <label class="text-sm">Deskripsi singkat</label>
-        <input id="edit-desc" class="w-full p-2 rounded input mb-2" />
-        <label class="text-sm">Kategori</label>
-        <select id="edit-category" class="w-full p-2 rounded input mb-2">
-          <option value="addon">Addon</option>
-          <option value="template">Template</option>
-          <option value="event">Event</option>
-          <option value="lain">Lainnya</option>
-        </select>
-        <label class="text-sm">URL Gambar</label>
-        <input id="edit-img" class="w-full p-2 rounded input mb-2" placeholder="https://…" />
-        <label class="text-sm">URL Link Postingan (opsional)</label>
-        <input id="edit-link" class="w-full p-2 rounded input mb-4" placeholder="https://…" />
-        <div class="flex justify-end gap-2">
-          <button id="edit-cancel" class="btn btn-ghost">Batal</button>
-          <button id="edit-submit" class="btn btn-success">Simpan Perubahan</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Banner Modal -->
-  <div id="banner-modal" class="hidden">
-    <div class="modal-backdrop" id="banner-backdrop">
-      <div class="modal max-w-lg">
-        <h3 class="text-xl font-semibold mb-2">Kelola Banner</h3>
-        <label class="text-sm">Judul Banner</label>
-        <input id="banner-title" class="w-full p-2 rounded input mb-2" placeholder="Judul banner" />
-        <label class="text-sm">Deskripsi Banner</label>
-        <input id="banner-desc" class="w-full p-2 rounded input mb-2" placeholder="Deskripsi singkat banner" />
-        <label class="text-sm">URL Gambar Banner</label>
-        <input id="banner-img" class="w-full p-2 rounded input mb-2" placeholder="https://…" />
-        <label class="text-sm">URL Link Banner (opsional)</label>
-        <input id="banner-link" class="w-full p-2 rounded input mb-4" placeholder="https://…" />
-        <div class="flex justify-between items-center">
-          <button id="remove-banner" class="btn btn-danger">Hapus Banner</button>
-          <div class="flex gap-2">
-            <button id="banner-cancel" class="btn btn-ghost">Batal</button>
-            <button id="banner-submit" class="btn btn-success">Simpan Banner</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast & BackToTop -->
-  <div id="toast"></div>
-  <div id="back-to-top">↑</div>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>
-  /* ============================
-     CONFIG (client-side demo)
-     ============================ */
-  const ADMIN_USERNAME = 'noirr';
-  // Hash SHA-256 dari password asli 'KwzX5rGtH'
-  const ADMIN_PASSWORD_HASH = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
-  
-  // Fungsi untuk menghash string menggunakan SHA-256
-  async function hashPassword(password) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  }
+    document.addEventListener('DOMContentLoaded', () => {
+        const $ = (s) => document.querySelector(s);
+        const $$ = (s) => document.querySelectorAll(s);
 
-  /* ============================
-     HELPERS & STORAGE
-     ============================ */
-  const $ = s => document.querySelector(s);
-  const $$ = s => Array.from(document.querySelectorAll(s));
-  const saveLS = (k,v) => localStorage.setItem(k, JSON.stringify(v));
-  const loadLS = (k, fb) => { try { const t = localStorage.getItem(k); return t ? JSON.parse(t) : fb; } catch(e){ return fb } };
-  const sleep = (ms) => new Promise(r=>setTimeout(r, ms));
-
-  function escapeHtml(s){ if(!s) return ''; return s.replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])); }
-  function formatTime(ts){ if(!ts) return ''; const d = new Date(ts); const diff = Math.floor((Date.now()-ts)/1000); if(diff<60) return `${diff}s lalu`; if(diff<3600) return `${Math.floor(diff/60)}m lalu`; if(diff<86400) return `${Math.floor(diff/3600)}j lalu`; return d.toLocaleString(); }
-
-  /* ============================
-     APP STATE
-     ============================ */
-  let POSTS = []; // unified list (saved + sample)
-  const BATCH = 9; // per load
-  let offset = 0; let loading = false; let endReached = false;
-  let listMode = false; // grid by default
-  let currentPostId = null; // Untuk menyimpan ID post yang sedang dilihat/diedit
-  let BANNER = null; // Untuk menyimpan data banner
-  let currentCategory = ''; // Untuk menyimpan kategori aktif
-  let currentSearch = ''; // Untuk menyimpan pencarian aktif
-
-  /* ============================
-     INITIALIZATION
-     ============================ */
-  function initPosts(){
-    const saved = loadLS('luminox_posts', []);
-    // Tandai postingan yang dibuat user (bukan sample)
-    const userPosts = saved.map(post => ({ ...post, isSample: false }));
-    POSTS = userPosts;
-    POSTS.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-  }
-
-  function initBanner() {
-    BANNER = loadLS('luminox_banner', null);
-    renderBanner();
-  }
-
-  /* ============================
-     SIDEBAR MENU FUNCTIONS
-     ============================ */
-  function openSidebar() {
-    $('#sidebar-menu').classList.add('open');
-    $('#sidebar-backdrop').classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeSidebar() {
-    $('#sidebar-menu').classList.remove('open');
-    $('#sidebar-backdrop').classList.remove('active');
-    document.body.style.overflow = 'auto';
-  }
-
-  // Event listeners untuk sidebar
-  $('#menu-toggle').addEventListener('click', openSidebar);
-  $('#close-sidebar').addEventListener('click', closeSidebar);
-  $('#sidebar-backdrop').addEventListener('click', closeSidebar);
-
-  // Tutup sidebar ketika escape key ditekan
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && $('#sidebar-menu').classList.contains('open')) {
-      closeSidebar();
-    }
-  });
-
-  // Filter berdasarkan kategori dari menu sidebar
-  function setupCategoryFilters() {
-    const menuItems = $$('.menu-item[data-category]');
-    menuItems.forEach(item => {
-      item.addEventListener('click', (e) => {
-        e.preventDefault();
-        const category = item.getAttribute('data-category');
+        const SUPABASE_URL = 'https://hxhkawjfdpxasjbfdpxr.supabase.co'; // Ganti dengan URL Anda
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4aGthd2pmZHB4YXNqYmZkcHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMzQyNjQsImV4cCI6MjA3NTcxMDI2NH0.9NUYKKkTYWQ70M6z1mf4LQdul3dzmvVmtUciv_oeWvY'; // Ganti dengan Kunci Anon Anda
         
-        // Update active state
-        menuItems.forEach(mi => mi.classList.remove('active'));
-        item.classList.add('active');
-        
-        // Set category filter
-        currentCategory = category;
-        currentSearch = '';
-        $('#search-input').value = '';
-        
-        // Reset and render posts
-        resetListing();
-        
-        // Show notification
-        showToast(`Menampilkan: ${category ? category : 'Semua postingan'}`);
-        
-        // Close sidebar on mobile
-        if (window.innerWidth < 641) {
-          closeSidebar();
-        }
-      });
-    });
-  }
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  /* ============================
-     SEARCH FUNCTIONALITY
-     ============================ */
-  function setupSearch() {
-    const searchInput = $('#search-input');
-    const searchToggle = $('#search-toggle');
-    const searchContainer = $('#search-container');
-    
-    // Toggle search expansion on mobile
-    searchToggle.addEventListener('click', () => {
-      searchContainer.classList.toggle('search-expanded');
-      searchInput.classList.toggle('expanded');
-      
-      if (searchInput.classList.contains('expanded')) {
-        searchInput.focus();
-      }
-    });
-    
-    // Handle search input
-    searchInput.addEventListener('input', (e) => {
-      currentSearch = e.target.value.trim().toLowerCase();
-      resetListing();
-    });
-    
-    // Close expanded search when clicking outside on mobile
-    document.addEventListener('click', (e) => {
-      if (window.innerWidth < 641 && 
-          searchInput.classList.contains('expanded') &&
-          !searchContainer.contains(e.target) &&
-          e.target !== searchToggle) {
-        searchContainer.classList.remove('search-expanded');
-        searchInput.classList.remove('expanded');
-      }
-    });
-  }
+        let state = {
+            posts: [],
+            banner: null,
+            currentCategory: '',
+            currentUser: null,
+            isLoading: true,
+            editingPostId: null,
+        };
 
-  /* ============================
-     BANNER RENDERING
-     ============================ */
-  function renderBanner() {
-    const bannerSection = $('#banner-section');
-    
-    if (BANNER) {
-      bannerSection.innerHTML = `
-        <div class="banner-container">
-          <img src="${BANNER.image}" alt="${escapeHtml(BANNER.title)}" class="banner-image">
-          <div class="banner-overlay">
-            <h2 class="banner-title">${escapeHtml(BANNER.title)}</h2>
-            <p class="banner-description">${escapeHtml(BANNER.description)}</p>
-          </div>
-          ${loadLS('luminox_admin', null) ? `
-            <div class="banner-admin-controls">
-              <button class="btn btn-warning btn-sm edit-banner">Edit</button>
-            </div>
-          ` : ''}
-        </div>
-      `;
-      
-      // Add event listener for edit banner button if admin is logged in
-      if (loadLS('luminox_admin', null)) {
-        const editBtn = bannerSection.querySelector('.edit-banner');
-        if (editBtn) {
-          editBtn.addEventListener('click', () => {
-            openBannerModal();
-          });
-        }
-      }
-      
-      // Add click event to banner if link exists
-      if (BANNER.link) {
-        bannerSection.querySelector('.banner-container').style.cursor = 'pointer';
-        bannerSection.querySelector('.banner-container').addEventListener('click', () => {
-          window.open(BANNER.link, '_blank');
+        const fetchBanner = async () => {
+            const { data, error } = await supabase.from('banner').select('*').single();
+            if (data) state.banner = data;
+            renderBanner();
+        };
+
+        const handleBannerSubmit = async (event) => {
+            event.preventDefault();
+            const submitBtn = $('#banner-form-submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Menyimpan...';
+
+            const bannerData = {
+                title: $('#banner-title-input').value,
+                description: $('#banner-desc-input').value,
+                image_url: $('#banner-image-input').value,
+                link_url: $('#banner-link-input').value,
+                updated_at: new Date()
+            };
+
+            const { error } = await supabase.from('banner').update(bannerData).eq('id', 1);
+            if (error) {
+                alert('Error: ' + error.message);
+            } else {
+                closeModal('#banner-form-modal');
+                fetchBanner();
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Simpan';
+        };
+        
+        const fetchPosts = async () => {
+            showLoading(true);
+            const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
+            if (error) console.error("Error fetching posts:", error);
+            else state.posts = data;
+            showLoading(false);
+        };
+
+        const handlePostSubmit = async (event) => {
+            event.preventDefault();
+            const submitBtn = $('#post-form-submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Menyimpan...';
+            const postData = {
+                title: $('#post-title-input').value,
+                description: $('#post-desc-input').value,
+                category: $('#post-category-input').value,
+                image_url: $('#post-image-input').value,
+                link_url: $('#post-link-input').value,
+                user_id: state.currentUser.id,
+            };
+            let error;
+            if (state.editingPostId) {
+                const { error: updateError } = await supabase.from('posts').update(postData).eq('id', state.editingPostId);
+                error = updateError;
+            } else {
+                const { error: insertError } = await supabase.from('posts').insert(postData);
+                error = insertError;
+            }
+            if (error) alert('Error: ' + error.message);
+            else { closeModal('#post-form-modal'); fetchPosts(); }
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Simpan';
+        };
+        
+        const handleDeletePost = async (postId) => {
+            if (confirm('Apakah Anda yakin ingin menghapus postingan ini?')) {
+                const { error } = await supabase.from('posts').delete().eq('id', postId);
+                if (error) alert('Gagal menghapus: ' + error.message);
+                else fetchPosts();
+            }
+        };
+
+        const handleRegister = async (email, password) => {
+            const { user, error } = await supabase.auth.signUp({ email, password });
+            if (error) showAuthError(error.message);
+            else {
+                const { error: insertError } = await supabase.from('users').insert({ id: user.id, email: user.email, role: 'member' });
+                if (insertError) showAuthError("Gagal menyimpan data pengguna: " + insertError.message);
+                else closeAuthModal();
+            }
+        };
+        const handleLogin = async (email, password) => {
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) showAuthError(error.message);
+            else closeAuthModal();
+        };
+        const handleLogout = async () => {
+            if (confirm('Apakah Anda yakin ingin logout?')) await supabase.auth.signOut();
+        };
+
+        supabase.auth.onAuthStateChanged(async (_event, session) => {
+            const user = session?.user;
+            if (user) {
+                const { data } = await supabase.from('users').select('role').eq('id', user.id).single();
+                state.currentUser = { ...user, role: data?.role || 'member' };
+            } else {
+                state.currentUser = null;
+            }
+            updateUI();
         });
-      }
-    } else {
-      bannerSection.innerHTML = `
-        <div class="banner-container no-banner">
-          <h3>Belum ada banner</h3>
-          <p>Tambahkan banner untuk menarik perhatian pengunjung</p>
-          ${loadLS('luminox_admin', null) ? `
-            <button class="btn btn-success mt-4 add-banner">Tambahkan Banner</button>
-          ` : ''}
-        </div>
-      `;
-      
-      // Add event listener for add banner button if admin is logged in
-      if (loadLS('luminox_admin', null)) {
-        const addBtn = bannerSection.querySelector('.add-banner');
-        if (addBtn) {
-          addBtn.addEventListener('click', () => {
-            openBannerModal();
-          });
+
+        const updateUI = () => {
+            const isAdmin = state.currentUser?.role === 'admin';
+            document.body.classList.toggle('admin-logged-in', isAdmin);
+            const authNavItem = $('#auth-nav-item');
+            if (state.currentUser) {
+                const icon = isAdmin ? 'fa-user-shield' : 'fa-user-circle';
+                const text = isAdmin ? 'Admin' : 'Akun';
+                authNavItem.innerHTML = `<i class="fas ${icon}"></i><span class="nav-text">${text}</span>`;
+                authNavItem.onclick = handleLogout;
+            } else {
+                authNavItem.innerHTML = `<i class="fas fa-sign-in-alt"></i><span class="nav-text">Login</span>`;
+                authNavItem.onclick = openAuthModal;
+            }
+            fetchBanner();
+            fetchPosts();
+        };
+
+        const renderBanner = () => {
+            const bannerSection = $('#banner-section');
+            if (state.banner) {
+                bannerSection.innerHTML = `
+                <div class="banner-card" onclick="window.open('${state.banner.link_url || '#'}', '_blank')">
+                    <img src="${state.banner.image_url}" alt="${state.banner.title}">
+                    <div class="banner-card-overlay">
+                        <h2 class="banner-card-title">${state.banner.title}</h2>
+                        <p class="banner-card-desc">${state.banner.description || ''}</p>
+                    </div>
+                </div>`;
+            } else {
+                bannerSection.innerHTML = '';
+            }
+        };
+
+        const createPostElement = (post) => {
+            const el = document.createElement('div');
+            el.className = 'post-card';
+            el.innerHTML = `
+                <div class="post-card-img-wrapper" onclick="openPostModal(state.posts.find(p => p.id === ${post.id}))">
+                    <img src="${post.image_url}" alt="${post.title}" class="post-card-img">
+                    <div class="post-admin-controls">
+                        <button class="admin-btn edit"><i class="fas fa-pen"></i></button>
+                        <button class="admin-btn delete"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <div class="post-card-content" onclick="openPostModal(state.posts.find(p => p.id === ${post.id}))">
+                    <div class="post-card-category">${post.category || 'Lainnya'}</div>
+                    <h3 class="post-card-title">${post.title}</h3>
+                    <p class="post-card-desc">${post.description || ''}</p>
+                </div>`;
+            const editBtn = el.querySelector('.edit');
+            if (editBtn) editBtn.addEventListener('click', (e) => { e.stopPropagation(); openPostFormModal(post); });
+            const deleteBtn = el.querySelector('.delete');
+            if (deleteBtn) deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); handleDeletePost(post.id); });
+            return el;
+        };
+
+        const renderPosts = () => {
+            const grid = $('#post-grid');
+            grid.innerHTML = '';
+            const filteredPosts = state.posts.filter(p => !state.currentCategory || p.category.toLowerCase() === state.currentCategory.toLowerCase());
+            if (filteredPosts.length === 0 && !state.isLoading) {
+                $('#empty-state').classList.remove('hidden');
+            } else {
+                $('#empty-state').classList.add('hidden');
+                filteredPosts.forEach(post => grid.appendChild(createPostElement(post)));
+            }
+        };
+
+        const openModal = (modalId) => $(modalId).classList.remove('hidden');
+        const closeModal = (modalId) => $(modalId).classList.add('hidden');
+        const openAuthModal = () => openModal('#auth-modal');
+        const closeAuthModal = () => closeModal('#auth-modal');
+        const showAuthError = (message) => {
+            $('#auth-error').textContent = message;
+            $('#auth-error').classList.remove('hidden');
         }
-      }
-    }
-  }
+        window.openPostModal = (post) => {
+            if (!post) return;
+            $('#post-modal-img').src = post.image_url;
+            $('#modal-title').textContent = post.title;
+            $('#modal-desc').textContent = post.description;
+            openModal('#post-modal');
+        };
+        const openPostFormModal = (post = null) => {
+            $('#post-form').reset();
+            if (post) {
+                state.editingPostId = post.id;
+                $('#post-form-title').textContent = 'Edit Postingan';
+                $('#post-id-input').value = post.id;
+                $('#post-title-input').value = post.title;
+                $('#post-desc-input').value = post.description;
+                $('#post-category-input').value = post.category;
+                $('#post-image-input').value = post.image_url;
+                $('#post-link-input').value = post.link_url;
+            } else {
+                state.editingPostId = null;
+                $('#post-form-title').textContent = 'Tambah Postingan Baru';
+            }
+            openModal('#post-form-modal');
+        };
 
-  /* ============================
-     BANNER MODAL FUNCTIONS
-     ============================ */
-  function openBannerModal() {
-    if (BANNER) {
-      $('#banner-title').value = BANNER.title;
-      $('#banner-desc').value = BANNER.description;
-      $('#banner-img').value = BANNER.image;
-      $('#banner-link').value = BANNER.link || '';
-    } else {
-      $('#banner-title').value = '';
-      $('#banner-desc').value = '';
-      $('#banner-img').value = '';
-      $('#banner-link').value = '';
-    }
-    
-    $('#banner-modal').classList.remove('hidden');
-  }
-  
-  function closeBannerModal() {
-    $('#banner-modal').classList.add('hidden');
-  }
-  
-  // Event listener untuk modal banner
-  $('#banner-cancel').addEventListener('click', closeBannerModal);
-  $('#banner-backdrop').addEventListener('click', e => {
-    if (e.target === $('#banner-backdrop')) closeBannerModal();
-  });
-  
-  $('#banner-submit').addEventListener('click', () => {
-    const title = $('#banner-title').value.trim();
-    const description = $('#banner-desc').value.trim();
-    const image = $('#banner-img').value.trim();
-    const link = $('#banner-link').value.trim();
-    
-    if (!title || !description || !image) return alert('Judul, deskripsi, dan gambar banner wajib diisi.');
-    
-    BANNER = {
-      title,
-      description,
-      image,
-      link,
-      updatedAt: Date.now()
-    };
-    
-    saveLS('luminox_banner', BANNER);
-    renderBanner();
-    closeBannerModal();
-    showToast('Banner berhasil disimpan');
-  });
-  
-  $('#remove-banner').addEventListener('click', () => {
-    if (!BANNER) return;
-    
-    if (confirm('Apakah Anda yakin ingin menghapus banner?')) {
-      BANNER = null;
-      localStorage.removeItem('luminox_banner');
-      renderBanner();
-      closeBannerModal();
-      showToast('Banner berhasil dihapus');
-    }
-  });
+        const openBannerFormModal = () => {
+            if (!state.banner) { alert("Data banner belum termuat, coba lagi."); return; }
+            $('#banner-form').reset();
+            $('#banner-title-input').value = state.banner.title;
+            $('#banner-desc-input').value = state.banner.description;
+            $('#banner-image-input').value = state.banner.image_url;
+            $('#banner-link-input').value = state.banner.link_url;
+            openModal('#banner-form-modal');
+        };
 
-  /* ============================
-     RENDERING
-     ============================ */
-  const postGrid = $('#post-grid');
-  const skeletons = $('#skeletons');
-
-  function createPostEl(post){
-    const el = document.createElement('div');
-    el.className = 'post-card fade-in';
-    el.dataset.id = post.id;
-    const thumbClass = listMode ? 'post-thumb rounded' : 'rounded mb-3';
-    const thumbStyle = listMode ? 'object-fit:cover;' : 'height:190px;object-fit:cover;';
-    
-    // Tampilkan badge link jika tersedia
-    const linkBadge = post.link ? `<span class="badge ml-2" style="background:#10b981">Link</span>` : '';
-    
-    el.innerHTML = `
-      <img src="${post.img}" alt="${escapeHtml(post.title)}" class="w-full ${thumbClass}" style="${thumbStyle}">
-      <div class="flex ${listMode? 'items-start gap-3' : 'items-start gap-2'} ${listMode? '' : ''}">
-        <div class="flex-1">
-          <div class="flex items-center">
-            <h3 class="font-semibold">${escapeHtml(post.title)}</h3>
-            ${linkBadge}
-          </div>
-          <div class="muted text-sm">${escapeHtml(post.desc)}</div>
-          <div class="mt-2 text-xs muted">Kategori: <span class="badge">${escapeHtml(post.category||'lain')}</span></div>
-          <div class="admin-controls">
-            <button class="edit-post px-2 py-1 text-xs rounded btn btn-warning">Edit</button>
-            <button class="delete-post px-2 py-1 text-xs rounded btn btn-danger">Hapus</button>
-          </div>
-        </div>
-        <div class="text-right min-w-[90px]">
-          <div class="muted text-xs">${formatTime(post.createdAt)}</div>
-          <button class="open-post mt-2 px-2 py-1 text-sm rounded btn btn-primary">Buka</button>
-        </div>
-      </div>`;
-    
-    // Tambahkan event listener untuk tombol
-    el.querySelector('.open-post').addEventListener('click', ()=> openPostModal(post.id));
-    
-    // Hanya tambahkan event listener untuk edit/hapus jika admin sudah login
-    if (loadLS('luminox_admin', null)) {
-      const editBtn = el.querySelector('.edit-post');
-      if (editBtn) {
-        editBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          openEditModal(post.id);
+        $$('.close-modal').forEach(btn => btn.closest('.modal-container').previousElementSibling.onclick = (e) => {
+             if (e.target.classList.contains('modal-backdrop')) {
+                closeModal('#post-modal'); closeModal('#auth-modal'); closeModal('#post-form-modal'); closeModal('#banner-form-modal');
+             }
         });
-      }
-      
-      const deleteBtn = el.querySelector('.delete-post');
-      if (deleteBtn) {
-        deleteBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          deletePost(post.id);
-        });
-      }
-    }
-    
-    return el;
-  }
+         $$('.close-modal').forEach(btn => btn.onclick = () => {
+             closeModal('#post-modal'); closeModal('#auth-modal'); closeModal('#post-form-modal'); closeModal('#banner-form-modal');
+         });
 
-  function showSkeletons(){ skeletons.classList.remove('hidden'); }
-  function hideSkeletons(){ skeletons.classList.add('hidden'); }
-
-  function renderBatch(){
-    if(loading || endReached) return;
-    loading = true; $('#loading').classList.remove('hidden'); showSkeletons();
-
-    setTimeout(()=>{ // simulate network delay
-      const filtered = POSTS.filter(p=>{
-        // Filter by category
-        const okC = !currentCategory || (p.category||'').toLowerCase() === currentCategory;
+        $('#fab-add-post').addEventListener('click', () => openPostFormModal());
+        $('#add-post-btn-desktop').addEventListener('click', () => openPostFormModal());
+        $('#manage-banner-btn').addEventListener('click', openBannerFormModal);
+        $('#post-form').addEventListener('submit', handlePostSubmit);
+        $('#banner-form').addEventListener('submit', handleBannerSubmit);
         
-        // Filter by search
-        const okQ = !currentSearch || 
-                   (p.title||'').toLowerCase().includes(currentSearch) || 
-                   (p.desc||'').toLowerCase().includes(currentSearch) || 
-                   (p.category||'').toLowerCase().includes(currentSearch);
-        
-        return okQ && okC;
-      });
-      
-      const next = filtered.slice(offset, offset+BATCH);
-      next.forEach(p=> postGrid.appendChild(createPostEl(p)));
-      offset += next.length;
-      
-      // Toggle empty state
-      if (filtered.length === 0) {
-        $('#empty-state').classList.remove('hidden');
-        $('#post-grid').classList.add('hidden');
-        
-        // Custom empty message based on filters
-        const emptyTitle = $('#empty-title');
-        const emptyMessage = $('#empty-message');
-        const createFirstPostBtn = $('#create-first-post');
-        
-        if (currentSearch) {
-          emptyTitle.textContent = 'Tidak ada hasil pencarian';
-          emptyMessage.textContent = `Tidak ditemukan postingan untuk "${currentSearch}"`;
-          createFirstPostBtn.classList.add('hidden');
-        } else if (currentCategory) {
-          emptyTitle.textContent = 'Tidak ada postingan';
-          emptyMessage.textContent = `Tidak ada postingan dalam kategori "${currentCategory}"`;
-          createFirstPostBtn.classList.add('hidden');
-        } else {
-          emptyTitle.textContent = 'Belum ada postingan';
-          emptyMessage.textContent = 'Mulai dengan membuat postingan pertama Anda';
-          createFirstPostBtn.classList.remove('hidden');
-        }
-      } else {
-        $('#empty-state').classList.add('hidden');
-        $('#post-grid').classList.remove('hidden');
-      }
-      
-      if(offset >= filtered.length){ endReached = true; $('#end-list').classList.remove('hidden'); }
-      else { $('#end-list').classList.add('hidden'); }
-      loading = false; $('#loading').classList.add('hidden'); hideSkeletons();
-    }, 350);
-  }
-
-  function resetListing(){ 
-    postGrid.innerHTML=''; 
-    offset=0; 
-    loading=false; 
-    endReached=false; 
-    $('#end-list').classList.add('hidden'); 
-    renderBatch(); 
-  }
-
-  /* ============================
-     MODALS & COMMENTS
-     ============================ */
-  function openPostModal(id){
-    const post = POSTS.find(p=>p.id===id); 
-    if(!post) return;
-    
-    currentPostId = id;
-    
-    $('#modal-title').textContent = post.title;
-    $('#modal-desc').textContent = post.desc;
-    $('#modal-img').src = post.img;
-    
-    // Atur tombol "Kunjungi Halaman" - gunakan link jika tersedia
-    const linkBtn = $('#modal-open-link');
-    if(post.link){
-      linkBtn.href = post.link;
-      linkBtn.textContent = 'Kunjungi Halaman';
-    } else {
-      linkBtn.href = "https://www.google.com/search?q=" + encodeURIComponent(post.title);
-      linkBtn.textContent = 'Cari di Google';
-    }
-    
-    // Tampilkan kontrol admin jika login
-    const adminControls = $('#modal-admin-controls');
-    if (loadLS('luminox_admin', null)) {
-      adminControls.style.display = 'flex';
-    } else {
-      adminControls.style.display = 'none';
-    }
-    
-    const key = 'luminox_comments_'+id;
-    const comments = loadLS(key, []);
-    const list = $('#comment-list'); list.innerHTML = '';
-    comments.forEach(c=>{
-      const div = document.createElement('div');
-      div.className = 'p-2 rounded';
-      div.style.background = (document.body.getAttribute('data-theme')==='dark') ? '#0e2030' : '#eef2f7';
-      div.innerHTML = `<div class="font-semibold text-sm">${escapeHtml(c.name||'Pengunjung')}</div><div class="muted text-sm">${escapeHtml(c.text)}</div><div class="text-xs muted mt-1">${formatTime(c.at)}</div>`;
-      list.appendChild(div);
+        $('#tab-login').onclick = () => {$('#tab-login').classList.add('active');$('#tab-register').classList.remove('active');$('#login-form').classList.remove('hidden');$('#register-form').classList.add('hidden');$('#auth-modal-title').textContent = 'Login';$('#auth-error').classList.add('hidden');};$('#tab-register').onclick = () => {$('#tab-login').classList.remove('active');$('#tab-register').classList.add('active');$('#login-form').classList.add('hidden');$('#register-form').classList.remove('hidden');$('#auth-modal-title').textContent = 'Register';$('#auth-error').classList.add('hidden');};$('#login-form').addEventListener('submit', (e) => {e.preventDefault();handleLogin($('#login-email').value, $('#login-password').value);});$('#register-form').addEventListener('submit', (e) => {e.preventDefault();handleRegister($('#register-email').value, $('#register-password').value);});$('#theme-toggle').onclick = () => {const newTheme = document.body.dataset.theme === 'dark' ? '' : 'dark';document.body.dataset.theme = newTheme;$('#theme-toggle i').className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';localStorage.setItem('luminox_theme', newTheme);};$('#menu-toggle').onclick = () => { $('#sidebar').classList.add('open'); $('#backdrop').classList.add('active'); };$('#backdrop').onclick = () => { $('#sidebar').classList.remove('open'); $('#backdrop').classList.remove('active'); };$$('[data-category]').forEach(item => {item.onclick = (e) => {e.preventDefault();$$('[data-category]').forEach(i => i.classList.remove('active'));$$(`[data-category="${item.dataset.category}"]`).forEach(i => i.classList.add('active'));state.currentCategory = item.dataset.category;renderPosts();if(window.innerWidth < 768) {$('#sidebar').classList.remove('open');$('#backdrop').classList.remove('active');}}});$('#logout-btn-desktop').onclick = handleLogout;
+        const showLoading = (loading) => {
+            state.isLoading = loading;
+            const wasEmpty = state.posts.length === 0;
+            $('#skeleton-grid').classList.toggle('hidden', !loading);
+            $('#post-grid').classList.toggle('hidden', loading);
+            if (!loading && wasEmpty && state.posts.length === 0) {
+                $('#empty-state').classList.remove('hidden');
+            } else {
+                $('#empty-state').classList.add('hidden');
+            }
+            renderPosts();
+        };
+        const init = () => {
+            document.body.dataset.theme = localStorage.getItem('luminox_theme') || '';
+            $('#theme-toggle i').className = document.body.dataset.theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            const skeletonGrid = $('#skeleton-grid');
+            const skeletonCardHTML = `<div class="skeleton-card"><div class="skeleton-img shimmer"></div><div class="skeleton-content"><div class="skeleton-line shimmer" style="width: 25%"></div><div class="skeleton-line shimmer" style="width: 75%"></div><div class="skeleton-line shimmer" style="width: 50%"></div></div></div>`;
+            skeletonGrid.innerHTML = Array(4).fill(skeletonCardHTML).join('');
+        };
+        init();
     });
-    $('#comment-count').textContent = comments.length;
-    $('#post-modal').classList.remove('hidden');
-  }
-  
-  function closePostModal(){ 
-    $('#post-modal').classList.add('hidden'); 
-    currentPostId = null;
-  }
-
-  $('#comment-send').addEventListener('click', ()=>{
-    const text = $('#comment-input').value.trim(); 
-    if(!text) return alert('Komentar kosong');
-    const post = POSTS.find(p=>p.id === currentPostId); 
-    if(!post) return;
-    const key = 'luminox_comments_'+post.id; 
-    const comments = loadLS(key, []);
-    comments.unshift({ name:'Pengunjung', text, at: Date.now() }); 
-    saveLS(key, comments); 
-    $('#comment-input').value=''; 
-    openPostModal(post.id);
-    showToast('Komentar ditambahkan');
-  });
-  
-  $('#modal-close').addEventListener('click', closePostModal);
-  $('#post-modal-backdrop').addEventListener('click', e=>{ 
-    if(e.target===$('#post-modal-backdrop')) closePostModal(); 
-  });
-
-  // Event listener untuk tombol edit di modal
-  $('#modal-edit').addEventListener('click', () => {
-    if (currentPostId) {
-      closePostModal();
-      openEditModal(currentPostId);
-    }
-  });
-
-  // Event listener untuk tombol hapus di modal
-  $('#modal-delete').addEventListener('click', () => {
-    if (currentPostId) {
-      closePostModal();
-      deletePost(currentPostId);
-    }
-  });
-
-  /* ============================
-     EDIT POST MODAL
-     ============================ */
-  function openEditModal(id) {
-    const post = POSTS.find(p => p.id === id);
-    if (!post) return;
-    
-    // Isi form dengan data post yang ada
-    $('#edit-id').value = post.id;
-    $('#edit-title').value = post.title;
-    $('#edit-desc').value = post.desc;
-    $('#edit-category').value = post.category;
-    $('#edit-img').value = post.img;
-    $('#edit-link').value = post.link || '';
-    
-    // Tampilkan modal edit
-    $('#edit-modal').classList.remove('hidden');
-  }
-  
-  function closeEditModal() {
-    $('#edit-modal').classList.add('hidden');
-  }
-  
-  // Event listener untuk modal edit
-  $('#edit-cancel').addEventListener('click', closeEditModal);
-  $('#edit-backdrop').addEventListener('click', e => {
-    if (e.target === $('#edit-backdrop')) closeEditModal();
-  });
-  
-  $('#edit-submit').addEventListener('click', () => {
-    const id = $('#edit-id').value;
-    const title = $('#edit-title').value.trim();
-    const desc = $('#edit-desc').value.trim();
-    const category = $('#edit-category').value;
-    const img = $('#edit-img').value.trim();
-    const link = $('#edit-link').value.trim();
-    
-    if (!title || !desc) return alert('Judul dan deskripsi wajib.');
-    
-    // Update post dalam array POSTS
-    const postIndex = POSTS.findIndex(p => p.id === id);
-    if (postIndex !== -1) {
-      POSTS[postIndex] = {
-        ...POSTS[postIndex],
-        title,
-        desc,
-        category,
-        img,
-        link
-      };
-    }
-    
-    // Update di localStorage
-    const savedPosts = loadLS('luminox_posts', []);
-    const savedPostIndex = savedPosts.findIndex(p => p.id === id);
-    if (savedPostIndex !== -1) {
-      savedPosts[savedPostIndex] = {
-        ...savedPosts[savedPostIndex],
-        title,
-        desc,
-        category,
-        img,
-        link
-      };
-      saveLS('luminox_posts', savedPosts);
-    }
-    
-    closeEditModal();
-    resetListing();
-    showToast('Postingan berhasil diupdate');
-  });
-
-  /* ============================
-     DELETE POST FUNCTION
-     ============================ */
-  function deletePost(id) {
-    const post = POSTS.find(p => p.id === id);
-    if (!post) return;
-    
-    if (!confirm(`Apakah Anda yakin ingin menghapus postingan "${post.title}"?`)) return;
-    
-    // Hapus dari array POSTS
-    POSTS = POSTS.filter(p => p.id !== id);
-    
-    // Hapus dari localStorage
-    const savedPosts = loadLS('luminox_posts', []);
-    const updatedPosts = savedPosts.filter(p => p.id !== id);
-    saveLS('luminox_posts', updatedPosts);
-    
-    // Hapus komentar terkait
-    localStorage.removeItem('luminox_comments_' + id);
-    
-    resetListing();
-    showToast('Postingan berhasil dihapus');
-  }
-
-  /* ============================
-     SEARCH, FILTER, VIEW TOGGLE
-     ============================ */
-  $('#view-grid').addEventListener('click', ()=>{ document.body.classList.remove('list-layout'); listMode=false; resetListing(); });
-  $('#view-list').addEventListener('click', ()=>{ document.body.classList.add('list-layout'); listMode=true; resetListing(); });
-  $('#refresh-btn').addEventListener('click', ()=>{ resetListing(); showToast('Daftar dimuat ulang'); });
-
-  /* ============================
-     INFINITE SCROLL & BACK TO TOP
-     ============================ */
-  window.addEventListener('scroll', ()=>{
-    const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 220;
-    if(nearBottom && !loading && !endReached) renderBatch();
-    if(window.scrollY > 240) $('#back-to-top').classList.add('show'); else $('#back-to-top').classList.remove('show');
-  });
-  $('#back-to-top').addEventListener('click', ()=> window.scrollTo({ top:0, behavior:'smooth' }));
-
-  /* ============================
-     THEME
-     ============================ */
-  function applyTheme(theme){
-    if(theme==='dark'){ 
-      document.body.setAttribute('data-theme','dark'); 
-      $('#theme-toggle').innerHTML = '<i class="fas fa-sun"></i> <span class="hidden md:inline">Light</span>';
-      // Update tombol theme toggle untuk dark mode
-      $('#theme-toggle').classList.remove('header-btn');
-      $('#theme-toggle').classList.add('login-admin-btn');
-    } else { 
-      document.body.setAttribute('data-theme',''); 
-      $('#theme-toggle').innerHTML = '<i class="fas fa-moon"></i> <span class="hidden md:inline">Dark</span>';
-      // Update tombol theme toggle untuk light mode
-      $('#theme-toggle').classList.remove('login-admin-btn');
-      $('#theme-toggle').classList.add('header-btn');
-    }
-    saveLS('luminox_theme', theme);
-  }
-  $('#theme-toggle').addEventListener('click', ()=>{ 
-    const cur = loadLS('luminox_theme',''); 
-    applyTheme(cur==='dark'?'':'dark'); 
-  });
-  (function initTheme(){ 
-    const theme = loadLS('luminox_theme','');
-    applyTheme(theme);
-  })();
-
-  /* ============================
-     AUTH (client-side demo)
-     ============================ */
-  function showLoginModal(){ $('#login-modal').classList.remove('hidden'); }
-  function hideLoginModal(){ $('#login-modal').classList.add('hidden'); $('#login-error').classList.add('hidden'); }
-  $('#login-btn').addEventListener('click', showLoginModal);
-  $('#login-cancel').addEventListener('click', hideLoginModal);
-
-  function setLoggedIn(flag){
-    if(flag){
-      saveLS('luminox_admin', { user: ADMIN_USERNAME, at: Date.now() });
-      $('#admin-bar').classList.remove('hidden');
-      $('#auth-area').innerHTML = `<div class="badge">Admin: ${ADMIN_USERNAME}</div>`;
-      $('#login-modal').classList.add('hidden');
-      
-      // Tampilkan kontrol admin di semua post
-      document.body.classList.add('admin-logged-in');
-      
-      // Render ulang daftar post untuk menampilkan kontrol admin
-      resetListing();
-      
-      // Render ulang banner untuk menampilkan kontrol admin
-      renderBanner();
-      
-      showTopNotification('Login berhasil', ADMIN_USERNAME, 'https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=qy1lfcag&dl=1');
-    } else {
-      localStorage.removeItem('luminox_admin');
-      $('#admin-bar').classList.add('hidden');
-      $('#auth-area').innerHTML = `<button id="login-btn" class="btn login-admin-btn"><i class="fas fa-user-lock"></i> <span class="hidden md:inline">Login Admin</span></button>`;
-      $('#login-btn').addEventListener('click', showLoginModal);
-      
-      // Sembunyikan kontrol admin di semua post
-      document.body.classList.remove('admin-logged-in');
-      
-      // Render ulang daftar post untuk menyembunyikan kontrol admin
-      resetListing();
-      
-      // Render ulang banner untuk menyembunyikan kontrol admin
-      renderBanner();
-      
-      showToast('Logout berhasil');
-    }
-  }
-
-  $('#login-submit').addEventListener('click', async ()=>{
-    const u = $('#login-username').value.trim();
-    const p = $('#login-password').value;
-    
-    // Hash password yang dimasukkan
-    const hashedInput = await hashPassword(p);
-    
-    // Cek apakah username benar dan hash password cocok atau password asli cocok (untuk demo)
-    if (u === ADMIN_USERNAME && (hashedInput === ADMIN_PASSWORD_HASH || p === 'KwzX5rGtH')) {
-      setLoggedIn(true);
-      $('#login-username').value = '';
-      $('#login-password').value = '';
-    } else {
-      $('#login-error').textContent = 'Username atau password salah';
-      $('#login-error').classList.remove('hidden');
-    }
-  });
-
-  $('#logout-btn').addEventListener('click', ()=>{ if(confirm('Logout admin?')) setLoggedIn(false); });
-  
-  // Event listener untuk kelola banner
-  $('#manage-banner').addEventListener('click', () => {
-    openBannerModal();
-  });
-
-  (function checkLogin(){ 
-    const s = loadLS('luminox_admin', null); 
-    if(s && s.user===ADMIN_USERNAME) {
-      setLoggedIn(true);
-    }
-  })();
-
-  /* ============================
-     ADMIN ADD POST (DITAMBAHKAN LINK)
-     ============================ */
-  $('#open-add').addEventListener('click', ()=> $('#add-modal').classList.remove('hidden'));
-  $('#add-cancel').addEventListener('click', ()=> $('#add-modal').classList.add('hidden'));
-  $('#add-backdrop').addEventListener('click', (e)=>{ if(e.target === $('#add-backdrop')) $('#add-modal').classList.add('hidden'); });
-
-  $('#add-submit').addEventListener('click', ()=>{
-    const title = $('#add-title').value.trim();
-    const desc = $('#add-desc').value.trim();
-    const cat = $('#add-category').value;
-    const img = $('#add-img').value.trim() || `https://picsum.photos/seed/${Math.random().toString(36).slice(2,7)}/900/520`;
-    const link = $('#add-link').value.trim();
-    
-    if(!title || !desc) return alert('Judul dan deskripsi wajib.');
-    const id = 'p'+Math.random().toString(36).slice(2,9);
-    const newPost = { id, title, desc, category: cat, img, link, createdAt: Date.now(), isSample: false };
-    
-    const saved = loadLS('luminox_posts', []); 
-    saved.unshift(newPost); 
-    saveLS('luminox_posts', saved);
-    
-    POSTS.unshift(newPost); 
-    POSTS.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-    
-    resetListing(); 
-    $('#add-modal').classList.add('hidden');
-    $('#add-title').value=''; 
-    $('#add-desc').value=''; 
-    $('#add-category').value='addon'; 
-    $('#add-img').value=''; 
-    $('#add-link').value='';
-    
-    showTopNotification('Post baru dipublikasikan', newPost.title, newPost.img);
-  });
-
-  // Event listener untuk tombol buat postingan pertama
-  $('#create-first-post').addEventListener('click', () => {
-    $('#add-modal').classList.remove('hidden');
-  });
-
-  /* ============================
-     NOTIFICATIONS
-     ============================ */
-  const notifBox = $('#top-notif');
-  const notifImg = $('#notif-img');
-  const notifText = $('#notif-text');
-  const notifSub = $('#notif-sub');
-  const notifClose = $('#notif-close');
-  let notifTimer = null;
-  function showTopNotification(title, sub, img){
-    clearTimeout(notifTimer); notifImg.src = img || 'https://via.placeholder.com/80'; notifText.textContent = title; notifSub.textContent = sub || '';
-    notifBox.classList.remove('hide'); notifBox.classList.add('show');
-    notifTimer = setTimeout(()=>{ notifBox.classList.remove('show'); notifBox.classList.add('hide'); }, 8800);
-  }
-  notifClose.addEventListener('click', ()=>{ clearTimeout(notifTimer); notifBox.classList.remove('show'); notifBox.classList.add('hide'); });
-
-  const toast = $('#toast');
-  function showToast(msg){ toast.textContent = msg; toast.classList.add('show'); setTimeout(()=> toast.classList.remove('show'), 2600); }
-
-  /* ============================
-     ACCESSIBILITY
-     ============================ */
-  document.addEventListener('keydown', (e)=>{
-    if(e.key==='Escape'){ 
-      $('#post-modal').classList.add('hidden'); 
-      $('#login-modal').classList.add('hidden'); 
-      $('#add-modal').classList.add('hidden');
-      $('#edit-modal').classList.add('hidden');
-      $('#banner-modal').classList.add('hidden');
-    }
-    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){ 
-      e.preventDefault(); 
-      $('#search-input').classList.add('expanded');
-      $('#search-container').classList.add('search-expanded');
-      $('#search-input').focus();
-      showToast('Fokus ke pencarian'); 
-    }
-  });
-
-  /* ============================
-     INIT
-     ============================ */
-  (function init(){ 
-    initPosts(); 
-    initBanner();
-    resetListing(); 
-    setupCategoryFilters();
-    setupSearch();
-    $('#login-backdrop').addEventListener('click', (e)=>{ 
-      if(e.target===$('#login-backdrop')) hideLoginModal(); 
-    }); 
-  })();
-
   </script>
 </body>
 </html>
