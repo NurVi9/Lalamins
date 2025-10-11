@@ -100,7 +100,6 @@
     .btn-mediafire:hover { background-color: #0077b2; transform: translateY(-2px); }
     .btn-gofile { background-color: #215ff3; color: white; }
     .btn-gofile:hover { background-color: #1a4ccc; transform: translateY(-2px); }
-    .admin-section { padding: 2rem; background: var(--card); margin: 1rem; border-radius: 16px; box-shadow: var(--shadow); }
     #auth-container h2 { margin-top: 0; }
     #auth-container input, #auth-container textarea, #auth-container select { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; }
     #auth-container button { width: 100%; padding: 0.75rem; border-radius: 8px; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; transition: background .2s; }
@@ -142,7 +141,7 @@
         <div class="menu-item" data-category="event"><i class="fas fa-calendar-alt"></i> Event</div>
         
         <p class="menu-heading">Akun</p>
-        <div class="menu-item" id="auth-menu-btn"><i class="fas fa-user-circle"></i><span id="auth-menu-text">Login / Register</span></div>
+        <div class="menu-item" id="auth-menu-btn"><i class="fas fa-user-circle"></i><span id="auth-menu-text">Login</span></div>
       </nav>
     </aside>
 
@@ -238,7 +237,7 @@
       const HistoryManager = { ...createStorageManager('luminox_history'), add: (postId) => { let history = HistoryManager.get(); history = history.filter(id => id !== postId); history.unshift(postId); if (history.length > 50) history.pop(); HistoryManager.save(history); } };
       let state = { posts: [], currentCategory: '', searchQuery: '', isLoading: true, };
 
-      // --- [BARU] Logika untuk Modal Autentikasi ---
+      // --- Logika untuk Modal Autentikasi ---
       const authModalWrapper = $('#auth-modal-wrapper');
       const authContainer = $('#auth-container');
       const openAuthModal = () => authModalWrapper.classList.add('open');
@@ -248,7 +247,6 @@
       $('#auth-bottom-nav-btn').addEventListener('click', openAuthModal);
       $('#auth-modal-close').addEventListener('click', closeAuthModal);
       $('#auth-modal-backdrop').addEventListener('click', closeAuthModal);
-
 
       // --- Render Functions (Tidak berubah) ---
       const showLoading = (loading) => {
@@ -355,7 +353,7 @@
       $('#header-search-input').addEventListener('input', (e) => { state.searchQuery = e.target.value; renderPosts(); });
       
       
-      // --- BAGIAN AUTENTIKASI & UPLOAD (SEKARANG DI DALAM MODAL) ---
+      // --- BAGIAN AUTENTIKASI (HANYA LOGIN) ---
       async function getUserRole() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return null;
@@ -373,7 +371,7 @@
           authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
           $('#auth-menu-text').textContent = 'Panel Admin';
         } else {
-          // Tampilkan form login dan register jika belum login atau role tidak sesuai
+          // Tampilkan form login saja
           authContainer.innerHTML = `
               <div id="login-view">
                 <h2>Login</h2>
@@ -382,45 +380,9 @@
                   <label for="password">Password:</label><input type="password" id="password" name="password" required>
                   <button type="submit">Login</button>
                 </form>
-                <p style="text-align:center; margin-top:1rem; font-size:0.9em;">Belum punya akun? <a href="#" id="show-register" style="color:var(--accent);text-decoration:none;font-weight:600;">Daftar di sini</a></p>
-              </div>
-              <div id="register-view" class="hidden">
-                <h2>Register Pengguna Baru</h2>
-                <form id="register-form">
-                  <label for="reg-email">Email:</label><input type="email" id="reg-email" name="email" required>
-                  <label for="reg-password">Password:</label><input type="password" id="reg-password" name="password" required>
-                  <button type="submit">Register</button>
-                </form>
-                <p style="text-align:center; margin-top:1rem; font-size:0.9em;">Sudah punya akun? <a href="#" id="show-login" style="color:var(--accent);text-decoration:none;font-weight:600;">Login di sini</a></p>
               </div>`;
-
           authContainer.querySelector('#login-form').addEventListener('submit', handleLogin);
-          authContainer.querySelector('#register-form').addEventListener('submit', handleRegister);
-          authContainer.querySelector('#show-register').addEventListener('click', (e) => {
-            e.preventDefault();
-            authContainer.querySelector('#login-view').classList.add('hidden');
-            authContainer.querySelector('#register-view').classList.remove('hidden');
-          });
-          authContainer.querySelector('#show-login').addEventListener('click', (e) => {
-            e.preventDefault();
-            authContainer.querySelector('#login-view').classList.remove('hidden');
-            authContainer.querySelector('#register-view').classList.add('hidden');
-          });
-          $('#auth-menu-text').textContent = 'Login / Register';
-        }
-      }
-
-      async function handleRegister(e) {
-        e.preventDefault();
-        const email = e.target.elements['reg-email'].value;
-        const password = e.target.elements['reg-password'].value;
-        const { data, error } = await supabase.auth.signUp({ email, password });
-        if (error) {
-          alert("Registrasi Gagal: " + error.message);
-        } else {
-          alert("Registrasi berhasil! Silakan cek email Anda untuk verifikasi.");
-          authContainer.querySelector('#login-view').classList.remove('hidden');
-          authContainer.querySelector('#register-view').classList.add('hidden');
+          $('#auth-menu-text').textContent = 'Login';
         }
       }
 
