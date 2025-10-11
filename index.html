@@ -78,12 +78,12 @@
     .shimmer::after { content: ''; position: absolute; top: 0; left: -150%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); animation: shimmer 1.5s infinite; }
     [data-theme="dark"] .shimmer::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); }
     @keyframes shimmer { 100% { left: 150%; } }
-    #post-modal-wrapper { position: fixed; inset: 0; z-index: 1300; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
-    #post-modal-wrapper.open { opacity: 1; pointer-events: auto; }
+    #post-modal-wrapper, #auth-modal-wrapper { position: fixed; inset: 0; z-index: 1300; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+    #post-modal-wrapper.open, #auth-modal-wrapper.open { opacity: 1; pointer-events: auto; }
     .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
     .modal-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 1rem; }
     .modal-content { background: var(--card); width: 100%; max-width: 480px; border-radius: 16px; box-shadow: var(--shadow-lg); overflow: hidden; transform: scale(0.95); transition: transform .3s ease; }
-    #post-modal-wrapper.open .modal-content { transform: scale(1); }
+    #post-modal-wrapper.open .modal-content, #auth-modal-wrapper.open .modal-content { transform: scale(1); }
     #post-modal-header { position: relative; }
     #post-modal-img { width: 100%; height: 220px; object-fit: cover; display: block; }
     #post-modal-close { position: absolute; top: 0.75rem; right: 0.75rem; background: rgba(0,0,0,0.4); color: white; z-index: 10; }
@@ -100,13 +100,12 @@
     .btn-mediafire:hover { background-color: #0077b2; transform: translateY(-2px); }
     .btn-gofile { background-color: #215ff3; color: white; }
     .btn-gofile:hover { background-color: #1a4ccc; transform: translateY(-2px); }
-    /* Tambahan CSS untuk form login & upload */
     .admin-section { padding: 2rem; background: var(--card); margin: 1rem; border-radius: 16px; box-shadow: var(--shadow); }
-    .admin-section h2 { margin-top: 0; }
-    .admin-section input, .admin-section textarea, .admin-section select { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; }
-    .admin-section button { width: 100%; padding: 0.75rem; border-radius: 8px; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; transition: background .2s; }
-    .admin-section button:hover { background: var(--accent-dark); }
-    #logout-btn { background-color: var(--danger); margin-top: 1rem; }
+    #auth-container h2 { margin-top: 0; }
+    #auth-container input, #auth-container textarea, #auth-container select { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; }
+    #auth-container button { width: 100%; padding: 0.75rem; border-radius: 8px; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; transition: background .2s; }
+    #auth-container button:hover { background: var(--accent-dark); }
+    #auth-container #logout-btn { background-color: var(--danger); margin-top: 1rem; }
     
     @media (min-width: 768px) {
       body { overflow: hidden; }
@@ -142,8 +141,8 @@
         <div class="menu-item" data-category="template"><i class="fas fa-paint-brush"></i> Template</div>
         <div class="menu-item" data-category="event"><i class="fas fa-calendar-alt"></i> Event</div>
         
-        <p class="menu-heading">Lainnya</p>
-        <a href="linktree.html" target="_blank" class="menu-item"><i class="fas fa-list"></i> Link Tree</a>
+        <p class="menu-heading">Akun</p>
+        <div class="menu-item" id="auth-menu-btn"><i class="fas fa-user-circle"></i><span id="auth-menu-text">Login / Register</span></div>
       </nav>
     </aside>
 
@@ -166,8 +165,6 @@
       <main>
         <h1 class="page-title" id="page-title">Postingan Terbaru</h1>
         
-        <section id="admin-area"></section>
-
         <section id="post-grid"></section>
         <section id="skeleton-grid" class="hidden"></section>
       </main>
@@ -180,7 +177,7 @@
     <div class="nav-item active" data-category=""><i class="fas fa-home"></i><span class="nav-text">Home</span></div>
     <div class="nav-item" data-category="featured"><i class="fas fa-star"></i><span class="nav-text">Pilihan</span></div>
     <div class="nav-item" data-category="wishlist"><i class="fas fa-heart"></i><span class="nav-text">Wishlist</span></div>
-    <div class="nav-item" data-category="history"><i class="fas fa-history"></i><span class="nav-text">Riwayat</span></div>
+    <div class="nav-item" id="auth-bottom-nav-btn"><i class="fas fa-user-circle"></i><span class="nav-text">Akun</span></div>
   </nav>
 
   <div id="post-modal-wrapper">
@@ -211,6 +208,17 @@
     </div>
   </div>
 
+  <div id="auth-modal-wrapper">
+    <div class="modal-backdrop" id="auth-modal-backdrop"></div>
+    <div class="modal-container">
+      <div class="modal-content" style="max-width: 420px; position: relative;">
+        <button id="auth-modal-close" class="header-icon-btn" style="position:absolute; top:0.5rem; right:0.5rem; z-index:10;"><i class="fas fa-times"></i></button>
+        <div id="auth-container" style="padding: 1.5rem;">
+          </div>
+      </div>
+    </div>
+  </div>
+
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -224,46 +232,30 @@
       const { createClient } = window.supabase;
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      // --- LocalStorage Manager (Tidak berubah) ---
-      const createStorageManager = (key) => ({
-        get: () => JSON.parse(localStorage.getItem(key)) || [],
-        save: (data) => localStorage.setItem(key, JSON.stringify(data)),
-      });
-
-      const WishlistManager = {
-        ...createStorageManager('luminox_wishlist'),
-        add: (postId) => {
-            const wishlist = WishlistManager.get();
-            if (!wishlist.includes(postId)) { wishlist.push(postId); WishlistManager.save(wishlist); }
-        },
-        remove: (postId) => {
-            let wishlist = WishlistManager.get();
-            wishlist = wishlist.filter(id => id !== postId);
-            WishlistManager.save(wishlist);
-        },
-        has: (postId) => WishlistManager.get().includes(postId)
-      };
-      
-      const HistoryManager = {
-        ...createStorageManager('luminox_history'),
-        add: (postId) => {
-            let history = HistoryManager.get();
-            history = history.filter(id => id !== postId);
-            history.unshift(postId);
-            if (history.length > 50) history.pop();
-            HistoryManager.save(history);
-        }
-      };
-
-      // --- STATE APLIKASI (Tidak berubah) ---
+      // --- Manager & State (Tidak berubah) ---
+      const createStorageManager = (key) => ({ get: () => JSON.parse(localStorage.getItem(key)) || [], save: (data) => localStorage.setItem(key, JSON.stringify(data)), });
+      const WishlistManager = { ...createStorageManager('luminox_wishlist'), add: (postId) => { const wishlist = WishlistManager.get(); if (!wishlist.includes(postId)) { wishlist.push(postId); WishlistManager.save(wishlist); } }, remove: (postId) => { let wishlist = WishlistManager.get(); wishlist = wishlist.filter(id => id !== postId); WishlistManager.save(wishlist); }, has: (postId) => WishlistManager.get().includes(postId) };
+      const HistoryManager = { ...createStorageManager('luminox_history'), add: (postId) => { let history = HistoryManager.get(); history = history.filter(id => id !== postId); history.unshift(postId); if (history.length > 50) history.pop(); HistoryManager.save(history); } };
       let state = { posts: [], currentCategory: '', searchQuery: '', isLoading: true, };
+
+      // --- [BARU] Logika untuk Modal Autentikasi ---
+      const authModalWrapper = $('#auth-modal-wrapper');
+      const authContainer = $('#auth-container');
+      const openAuthModal = () => authModalWrapper.classList.add('open');
+      const closeAuthModal = () => authModalWrapper.classList.remove('open');
+
+      $('#auth-menu-btn').addEventListener('click', openAuthModal);
+      $('#auth-bottom-nav-btn').addEventListener('click', openAuthModal);
+      $('#auth-modal-close').addEventListener('click', closeAuthModal);
+      $('#auth-modal-backdrop').addEventListener('click', closeAuthModal);
+
+
+      // --- Render Functions (Tidak berubah) ---
       const showLoading = (loading) => {
         state.isLoading = loading;
         $('#skeleton-grid').classList.toggle('hidden', !loading);
         $('#post-grid').classList.toggle('hidden', loading);
       };
-
-      // --- RENDER FUNCTIONS (Tidak berubah) ---
       const createPostElement = (post) => {
         const el = document.createElement('div');
         el.className = 'post-card';
@@ -314,8 +306,6 @@
         }, 300);
       };
       const postModalWrapper = $('#post-modal-wrapper');
-      const openModal = () => postModalWrapper.classList.add('open');
-      const closeModal = () => postModalWrapper.classList.remove('open');
       const openPostModal = (post) => {
         $('#post-modal-img').src = post.img;
         $('#modal-category').textContent = post.category;
@@ -328,10 +318,12 @@
             btn.removeEventListener('click', downloadHandler);
             btn.addEventListener('click', downloadHandler, { once: true });
         });
-        openModal();
+        postModalWrapper.classList.add('open');
       };
-      postModalWrapper.querySelector('.modal-backdrop').addEventListener('click', closeModal);
-      postModalWrapper.querySelector('.close-modal').addEventListener('click', closeModal);
+      postModalWrapper.querySelector('.modal-backdrop').addEventListener('click', () => postModalWrapper.classList.remove('open'));
+      postModalWrapper.querySelector('.close-modal').addEventListener('click', () => postModalWrapper.classList.remove('open'));
+      
+      // --- UI Interactivity (Tidak berubah) ---
       $('#theme-toggle').onclick = () => {
         const newTheme = document.documentElement.dataset.theme === 'dark' ? '' : 'dark';
         document.documentElement.dataset.theme = newTheme;
@@ -363,9 +355,7 @@
       $('#header-search-input').addEventListener('input', (e) => { state.searchQuery = e.target.value; renderPosts(); });
       
       
-      // --- BAGIAN AUTENTIKASI & UPLOAD (MODIFIKASI) ---
-      const adminArea = $('#admin-area');
-
+      // --- BAGIAN AUTENTIKASI & UPLOAD (SEKARANG DI DALAM MODAL) ---
       async function getUserRole() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return null;
@@ -373,19 +363,18 @@
         return error ? null : profile.role;
       }
 
-      // --- [MODIFIKASI] Tampilkan UI Admin, Login, dan Register ---
       async function setupAdminUI() {
         const role = await getUserRole();
         
         if (role === 'admin' || role === 'moderator') {
           // Tampilkan form upload jika role sesuai
-          adminArea.innerHTML = `<div class="admin-section"><h2>Buat Postingan Baru</h2><form id="upload-form"><label for="title">Judul:</label><input type="text" id="title" name="title" required><label for="description">Deskripsi:</label><textarea id="description" name="description" rows="4" required></textarea><label for="category">Kategori:</label><select id="category" name="category" required><option value="Template">Template</option><option value="Addon">Addon</option><option value="Event">Event</option></select><label for="img">URL Gambar:</label><input type="text" id="img" name="img" required><label for="mediafire">Link MediaFire:</label><input type="url" id="mediafire" name="mediafire" required><label for="gofile">Link Gofile:</label><input type="url" id="gofile" name="gofile" required><input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;"><label for="isFeatured">Jadikan Pilihan Editor (Featured)?</label><br><button type="submit">Upload Postingan</button></form><button id="logout-btn">Logout</button></div>`;
-          $('#upload-form').addEventListener('submit', handleUpload);
-          $('#logout-btn').addEventListener('click', handleLogout);
+          authContainer.innerHTML = `<h2>Buat Postingan Baru</h2><form id="upload-form"><label for="title">Judul:</label><input type="text" id="title" name="title" required><label for="description">Deskripsi:</label><textarea id="description" name="description" rows="4" required></textarea><label for="category">Kategori:</label><select id="category" name="category" required><option value="Template">Template</option><option value="Addon">Addon</option><option value="Event">Event</option></select><label for="img">URL Gambar:</label><input type="text" id="img" name="img" required><label for="mediafire">Link MediaFire:</label><input type="url" id="mediafire" name="mediafire" required><label for="gofile">Link Gofile:</label><input type="url" id="gofile" name="gofile" required><input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;"><label for="isFeatured">Jadikan Pilihan Editor?</label><br><button type="submit">Upload Postingan</button></form><button id="logout-btn">Logout</button>`;
+          authContainer.querySelector('#upload-form').addEventListener('submit', handleUpload);
+          authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
+          $('#auth-menu-text').textContent = 'Panel Admin';
         } else {
           // Tampilkan form login dan register jika belum login atau role tidak sesuai
-          adminArea.innerHTML = `
-            <div class="admin-section">
+          authContainer.innerHTML = `
               <div id="login-view">
                 <h2>Login</h2>
                 <form id="login-form">
@@ -403,26 +392,24 @@
                   <button type="submit">Register</button>
                 </form>
                 <p style="text-align:center; margin-top:1rem; font-size:0.9em;">Sudah punya akun? <a href="#" id="show-login" style="color:var(--accent);text-decoration:none;font-weight:600;">Login di sini</a></p>
-              </div>
-            </div>`;
+              </div>`;
 
-          // Tambah event listener untuk form dan link
-          $('#login-form').addEventListener('submit', handleLogin);
-          $('#register-form').addEventListener('submit', handleRegister);
-          $('#show-register').addEventListener('click', (e) => {
+          authContainer.querySelector('#login-form').addEventListener('submit', handleLogin);
+          authContainer.querySelector('#register-form').addEventListener('submit', handleRegister);
+          authContainer.querySelector('#show-register').addEventListener('click', (e) => {
             e.preventDefault();
-            $('#login-view').classList.add('hidden');
-            $('#register-view').classList.remove('hidden');
+            authContainer.querySelector('#login-view').classList.add('hidden');
+            authContainer.querySelector('#register-view').classList.remove('hidden');
           });
-          $('#show-login').addEventListener('click', (e) => {
+          authContainer.querySelector('#show-login').addEventListener('click', (e) => {
             e.preventDefault();
-            $('#login-view').classList.remove('hidden');
-            $('#register-view').classList.add('hidden');
+            authContainer.querySelector('#login-view').classList.remove('hidden');
+            authContainer.querySelector('#register-view').classList.add('hidden');
           });
+          $('#auth-menu-text').textContent = 'Login / Register';
         }
       }
 
-      // --- [FUNGSI BARU] Handler untuk Register ---
       async function handleRegister(e) {
         e.preventDefault();
         const email = e.target.elements['reg-email'].value;
@@ -432,13 +419,11 @@
           alert("Registrasi Gagal: " + error.message);
         } else {
           alert("Registrasi berhasil! Silakan cek email Anda untuk verifikasi.");
-          // Kembali ke form login setelah berhasil
-          $('#login-view').classList.remove('hidden');
-          $('#register-view').classList.add('hidden');
+          authContainer.querySelector('#login-view').classList.remove('hidden');
+          authContainer.querySelector('#register-view').classList.add('hidden');
         }
       }
 
-      // Handler lainnya (tidak berubah)
       async function handleLogin(e) {
         e.preventDefault();
         const email = e.target.email.value;
@@ -447,22 +432,22 @@
         if (error) {
           alert("Login Gagal: " + error.message);
         } else {
-          setupAdminUI();
+          await setupAdminUI(); // Muat ulang konten modal
+          closeAuthModal();   // Tutup modal setelah berhasil login
         }
       }
+
       async function handleLogout() {
         await supabase.auth.signOut();
-        setupAdminUI();
+        await setupAdminUI(); // Muat ulang konten modal menjadi form login
       }
+
       async function handleUpload(e) {
         e.preventDefault();
         const form = e.target;
         const postData = {
-          title: form.title.value,
-          description: form.description.value,
-          category: form.category.value,
-          isFeatured: form.isFeatured.checked,
-          img: form.img.value,
+          title: form.title.value, description: form.description.value, category: form.category.value,
+          isFeatured: form.isFeatured.checked, img: form.img.value,
           links: { mediafire: form.mediafire.value, gofile: form.gofile.value }
         };
         const { error } = await supabase.from('posts').insert([postData]);
@@ -471,11 +456,12 @@
         } else {
           alert('Postingan berhasil diupload!');
           form.reset();
+          closeAuthModal();
           fetchPosts();
         }
       }
 
-      // --- FUNGSI INISIALISASI (Tidak berubah) ---
+      // --- INISIALISASI ---
       async function fetchPosts() {
         try {
           const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
@@ -487,6 +473,7 @@
             $('#post-grid').innerHTML = `<p style="color: var(--muted); text-align: center;">Gagal memuat data. Silakan coba lagi nanti.</p>`;
         }
       }
+      
       const init = async () => {
         const savedTheme = localStorage.getItem('luminox_theme') || '';
         if (savedTheme) {
@@ -496,8 +483,9 @@
         const skeletonGrid = $('#skeleton-grid');
         const skeletonCardHTML = `<div class="skeleton-card"><div class="skeleton-img shimmer"></div><div class="skeleton-content"><div class="skeleton-line shimmer" style="width: 35%;"></div><div class="skeleton-line shimmer" style="width: 85%;"></div><div class="skeleton-line shimmer" style="width: 60%;"></div></div></div>`;
         skeletonGrid.innerHTML = Array(4).fill(skeletonCardHTML).join('');
+        
         await fetchPosts();
-        setupAdminUI();
+        await setupAdminUI(); // Siapkan konten modal di latar belakang saat halaman dimuat
       };
 
       init();
