@@ -3,574 +3,567 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Luminox — Full CMS Activated</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <title>Luminox — DLC Game</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    /* CSS Anda tidak perlu diubah, biarkan seperti aslinya */
     :root {
-      --bg: #f4f7fa; --card: #ffffff; --sidebar-bg: #ffffff; --text: #1a202c; --muted: #64748b; --accent: #3b82f6; --accent-dark: #2563eb; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; --ring: rgba(59, 130, 246, 0.4); --header-bg: rgba(255, 255, 255, 0.8); --border: #e2e8f0; --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+      --bg: #f8f9fa; --card: #ffffff; --sidebar-bg: #ffffff; --text: #212529; --muted: #6c757d; --accent: #007bff; --accent-dark: #0056b3; --danger: #e74c3c; --ring: rgba(0, 123, 255, 0.25); --header-bg: rgba(255, 255, 255, 0.85); --border: #dee2e6; --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.07); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
     }
     [data-theme="dark"] {
-      --bg: #0d1117; --card: #161b22; --sidebar-bg: #161b22; --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff; --accent-dark: #388bfd; --header-bg: rgba(22, 27, 34, 0.8); --border: #30363d; --ring: rgba(88, 166, 255, 0.35);
+      --bg: #121212; --card: #1e1e1e; --sidebar-bg: #1e1e1e; --text: #e0e0e0; --muted: #9e9e9e; --accent: #64b5f6; --accent-dark: #2196f3; --header-bg: rgba(30, 30, 30, 0.85); --border: #424242; --ring: rgba(100, 181, 246, 0.3);
     }
     *, *::before, *::after { box-sizing: border-box; }
     html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
-    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; transition: background .2s, color .2s; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; transition: background .3s, color .3s; }
     .hidden { display: none !important; }
     .app-layout { display: flex; transition: margin-left .3s ease; }
-    .sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--border); position: fixed; top: 0; left: -260px; bottom: 0; z-index: 1200; display: flex; flex-direction: column; transition: left .3s ease; }
+    .sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--border); position: fixed; top: 0; left: -260px; bottom: 0; z-index: 1200; display: flex; flex-direction: column; transition: left .3s ease; box-shadow: var(--shadow); }
     .sidebar.open { left: 0; }
     .content-wrapper { flex: 1; display: flex; flex-direction: column; min-height: 100vh; padding-bottom: 80px; }
     main { padding: 1rem; flex: 1; }
-    .page-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 1.5rem; }
-    .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; opacity: 0; pointer-events: none; transition: opacity .3s; }
+    .page-title { font-size: 2rem; font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.5px; }
+    .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1100; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
     .backdrop.active { opacity: 1; pointer-events: auto; }
-    .app-header { background: var(--header-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; }
-    .header-icon-btn { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 99px; background: transparent; color: var(--muted); font-size: 1rem; cursor: pointer; border: none; transition: all .2s; }
+    .app-header { background: var(--header-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .header-left, .header-right { display: flex; align-items: center; gap: .5rem; transition: opacity 0.3s ease; }
+    .header-search-container { flex: 1; display: flex; justify-content: flex-end; }
+    #header-search-input { width: 0; padding: 0; border: none; background: transparent; outline: none; font-size: 1rem; color: var(--text); transition: all 0.4s ease-in-out; }
+    .app-header.search-active #header-search-input { width: 100%; padding: 0.5rem; border-bottom: 2px solid var(--accent); }
+    .app-header.search-active .header-left, .app-header.search-active .header-right .header-icon-btn:not(#search-toggle) { opacity: 0; pointer-events: none; }
+    #search-toggle .fa-times { display: none; }
+    .app-header.search-active #search-toggle .fa-search { display: none; }
+    .app-header.search-active #search-toggle .fa-times { display: block; }
+    .header-icon-btn { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: transparent; color: var(--muted); font-size: 1.1rem; cursor: pointer; border: none; transition: all .2s; }
     .header-icon-btn:hover { background: var(--border); color: var(--text); }
-    .sidebar-header { padding: 1rem; border-bottom: 1px solid var(--border); }
+    .sidebar-header { padding: 1.5rem 1rem; border-bottom: 1px solid var(--border); }
     .sidebar-logo { display: flex; align-items: center; gap: .75rem; text-decoration: none; color: var(--text); }
-    .sidebar-logo img { width: 40px; height: 40px; border-radius: 99px; }
-    .sidebar-logo-text h2 { font-size: 1.2rem; font-weight: 600; line-height: 1.2; }
-    .sidebar-logo-text p { font-size: .8rem; color: var(--muted); line-height: 1.2; }
+    .sidebar-logo img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; box-shadow: var(--shadow); }
+    .sidebar-logo-text h2 { font-size: 1.25rem; font-weight: 600; line-height: 1.2; margin: 0; }
+    .sidebar-logo-text p { font-size: .85rem; color: var(--muted); line-height: 1.2; margin: 0; }
     .sidebar-menu { flex: 1; padding: 1rem; overflow-y: auto; }
-    .menu-heading { font-size: .75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; padding: 0 .75rem; margin: 1.5rem 0 .5rem; }
-    .menu-item { display: flex; align-items: center; gap: .75rem; padding: .65rem .75rem; border-radius: 8px; font-weight: 500; text-decoration: none; color: var(--text); transition: background .2s, color .2s; cursor: pointer; }
-    .menu-item i { width: 20px; text-align: center; color: var(--muted); transition: color .2s; }
+    .menu-heading { font-size: .7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; padding: 0 .75rem; margin: 1.5rem 0 .75rem; }
+    .menu-item { display: flex; align-items: center; gap: .85rem; padding: .75rem; border-radius: 8px; font-weight: 500; text-decoration: none; color: var(--text); transition: background .2s, color .2s; cursor: pointer; }
+    .menu-item i { width: 20px; text-align: center; color: var(--muted); transition: color .2s; font-size: 0.95rem; }
     .menu-item:hover { background: var(--border); }
     .menu-item.active { background: var(--accent); color: white; font-weight: 600; }
     .menu-item.active i { color: white; }
-    .sidebar-footer { padding: 1rem; border-top: 1px solid var(--border); }
-    #admin-panel { display: none; }
-    .admin-logged-in #admin-panel { display: block; }
-    .fab { position: fixed; bottom: 80px; right: 1rem; width: 56px; height: 56px; background: linear-gradient(45deg, var(--accent), var(--accent-dark)); color: white; border-radius: 50%; display: none; place-items: center; font-size: 1.5rem; box-shadow: var(--shadow-lg); z-index: 900; transition: transform .2s; border: none; cursor: pointer; }
-    .admin-logged-in .fab { display: grid; }
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: var(--header-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); }
-    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); flex: 1; padding: 0.5rem 0; transition: color 0.2s; cursor: pointer; }
-    .nav-item i { font-size: 1.25rem; margin-bottom: 2px; }
-    .nav-item .nav-text { font-size: 0.7rem; font-weight: 500; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); flex: 1; padding: 0.5rem 0; cursor: pointer; transition: color 0.2s ease, transform 0.1s ease; }
+    .nav-item:active { transform: scale(0.92); }
+    .nav-item i { font-size: 1.3rem; margin-bottom: 2px; }
+    .nav-item .nav-text { font-size: 0.75rem; font-weight: 500; }
     .nav-item.active { color: var(--accent); }
     #post-grid { display: grid; gap: 1rem; }
-    .post-card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); transition: transform .2s, box-shadow .2s; }
-    .post-card-clickable { cursor: pointer; }
-    .post-card-clickable:active { transform: scale(0.98); }
+    .post-card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); transition: transform .25s ease, box-shadow .25s ease; cursor: pointer; position: relative; }
     .post-card-img-wrapper { position: relative; }
-    .post-card-img { width: 100%; height: 200px; object-fit: cover; }
-    .post-card-content { padding: 1rem; }
-    .post-card-category { background: var(--accent); color: white; padding: 4px 10px; border-radius: 99px; font-weight: 600; font-size: 11px; display: inline-block; margin-bottom: 0.5rem; }
-    .post-card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem; }
-    .post-card-desc { color: var(--muted); font-size: 0.9rem; line-height: 1.4; }
-    .post-admin-controls { position: absolute; top: .75rem; right: .75rem; display: none; gap: .5rem; }
-    .admin-logged-in .post-admin-controls { display: flex; }
-    .admin-btn { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: white; border: none; cursor: pointer; box-shadow: var(--shadow); }
-    .admin-btn.edit { background: var(--warning); }
-    .admin-btn.delete { background: var(--danger); }
-    #banner-section { margin-bottom: 1.5rem; }
-    .banner-card { position: relative; border-radius: 16px; overflow: hidden; min-height: 200px; background-color: var(--card); box-shadow: var(--shadow); display: flex; align-items: flex-end; }
-    .banner-card img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
-    .banner-card-overlay { position: relative; z-index: 2; width: 100%; padding: 1.5rem; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); }
-    .banner-card-title { font-size: 1.5rem; font-weight: 700; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
-    .banner-card-desc { color: rgba(255,255,255,0.9); }
+    .post-card-img { width: 100%; height: 200px; object-fit: cover; display: block; }
+    .post-card-content { padding: 1.25rem; }
+    .post-card-category { background: var(--accent); color: white; padding: 5px 12px; border-radius: 99px; font-weight: 600; font-size: 11px; display: inline-block; margin-bottom: 0.75rem; }
+    .post-card-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .post-card-desc { color: var(--muted); font-size: 0.95rem; line-height: 1.5; }
+    .wishlist-btn { position: absolute; top: 0.75rem; right: 0.75rem; width: 40px; height: 40px; border-radius: 50%; background-color: rgba(0,0,0,0.4); color: white; border: none; cursor: pointer; display: grid; place-items: center; font-size: 1.1rem; transition: transform 0.2s ease, color 0.2s ease; }
+    .wishlist-btn:hover { transform: scale(1.1); }
+    .wishlist-btn.wishlisted { color: var(--danger); }
+    .wishlist-btn .fa-solid { display: none; }
+    .wishlist-btn.wishlisted .fa-regular { display: none; }
+    .wishlist-btn.wishlisted .fa-solid { display: inline-block; animation: heartbeat 0.5s ease; }
+    @keyframes heartbeat { 0% {transform: scale(1);} 50% {transform: scale(1.3);} 100% {transform: scale(1);} }
     .skeleton-card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
     .skeleton-img { height: 200px; background: var(--border); }
-    .skeleton-content { padding: 1rem; }
-    .skeleton-line { height: 1em; border-radius: 4px; background: var(--border); margin-bottom: .5rem; }
+    .skeleton-content { padding: 1.25rem; }
+    .skeleton-line { height: 1em; border-radius: 4px; background: var(--border); margin-bottom: .75rem; }
     .shimmer { position: relative; overflow: hidden; }
     .shimmer::after { content: ''; position: absolute; top: 0; left: -150%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); animation: shimmer 1.5s infinite; }
     [data-theme="dark"] .shimmer::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); }
     @keyframes shimmer { 100% { left: 150%; } }
-    .modal-backdrop { position: fixed; inset: 0; z-index: 1200; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity .3s; }
-    .modal-container { position: fixed; inset: 0; z-index: 1300; display: flex; opacity: 0; pointer-events: none; transform: scale(0.95); transition: all .3s; }
-    .modal-backdrop.open, .modal-container.open { opacity: 1; pointer-events: auto; transform: scale(1); }
-    .modal-content { background: var(--card); display: flex; flex-direction: column; width: 100%; height: 100%; }
-    .modal-header { display: flex; align-items: center; padding: 0.75rem; border-bottom: 1px solid var(--border); flex-shrink: 0;}
-    .modal-title { font-size: 1.1rem; font-weight: 600; flex: 1; text-align: center; }
-    .modal-header .btn, .modal-header .header-icon-btn { margin-left: auto; }
-    .modal-body { flex: 1; overflow-y: auto; }
-    #post-modal-img { width: 100%; max-height: 40vh; object-fit: cover; }
+    #post-modal-wrapper { position: fixed; inset: 0; z-index: 1300; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+    #post-modal-wrapper.open { opacity: 1; pointer-events: auto; }
+    .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    .modal-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-content { background: var(--card); width: 100%; max-width: 480px; border-radius: 16px; box-shadow: var(--shadow-lg); overflow: hidden; transform: scale(0.95); transition: transform .3s ease; }
+    #post-modal-wrapper.open .modal-content { transform: scale(1); }
+    #post-modal-header { position: relative; }
+    #post-modal-img { width: 100%; height: 220px; object-fit: cover; display: block; }
+    #post-modal-close { position: absolute; top: 0.75rem; right: 0.75rem; background: rgba(0,0,0,0.4); color: white; z-index: 10; }
+    #post-modal-close:hover { background: rgba(0,0,0,0.6); }
     .post-details { padding: 1.5rem; }
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; border-radius: 8px; padding: 0.65rem 1.25rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .btn-primary { background: var(--accent); color: white; }
-    .btn-primary:hover:not(:disabled) { background: var(--accent-dark); }
-    .btn-ghost { background: var(--border); color: var(--text); }
-    .btn-ghost:hover { background: #d1d5db; }
-    [data-theme="dark"] .btn-ghost:hover { background: #4b5563; }
-    .btn-block { width: 100%; }
-    .input { background: var(--bg); border: 1px solid var(--border); padding: 0.75rem 1rem; border-radius: 8px; width: 100%; color: var(--text); }
-    .input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); }
-    #auth-modal .modal-content, #post-form-modal .modal-content, #banner-form-modal .modal-content { max-width: 450px; width: 90vw; height: auto; margin: auto; border-radius: 16px; }
-    .auth-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
-    .auth-tab { flex: 1; text-align: center; padding: .75rem; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
-    .auth-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-    .form-group { margin-bottom: 1rem; }
-    .form-label { display: block; font-weight: 500; font-size: 0.875rem; margin-bottom: 0.5rem; }
-    .auth-error { color: var(--danger); font-size: .875rem; text-align: center; margin-top: 1rem; }
-    #empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); border: 2px dashed var(--border); border-radius: 16px; }
+    #modal-category { background: var(--accent); color: white; padding: 5px 12px; border-radius: 99px; font-weight: 600; font-size: 11px; display: inline-block; margin-bottom: 0.75rem; }
+    #modal-title { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.5rem; }
+    #modal-desc { color: var(--muted); font-size: 0.95rem; line-height: 1.6; margin: 0 0 1.5rem; }
+    .download-section h4 { margin: 0 0 1rem; font-size: 0.9rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .download-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .btn-download { display: flex; align-items: center; justify-content: center; text-decoration: none; padding: 0.75rem; border-radius: 8px; font-weight: 600; transition: all .2s ease; }
+    .btn-download i { margin-right: 0.5rem; font-size: 1.1rem; }
+    .btn-mediafire { background-color: #0099e5; color: white; }
+    .btn-mediafire:hover { background-color: #0077b2; transform: translateY(-2px); }
+    .btn-gofile { background-color: #215ff3; color: white; }
+    .btn-gofile:hover { background-color: #1a4ccc; transform: translateY(-2px); }
+    /* Tambahan CSS untuk form login & upload */
+    .admin-section { padding: 2rem; background: var(--card); margin: 1rem; border-radius: 16px; box-shadow: var(--shadow); }
+    .admin-section h2 { margin-top: 0; }
+    .admin-section input, .admin-section textarea, .admin-section select { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; }
+    .admin-section button { width: 100%; padding: 0.75rem; border-radius: 8px; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; transition: background .2s; }
+    .admin-section button:hover { background: var(--accent-dark); }
+    #logout-btn { background-color: var(--danger); margin-top: 1rem; }
+    
     @media (min-width: 768px) {
       body { overflow: hidden; }
       .app-layout { margin-left: 260px; }
-      .sidebar { left: 0; }
+      .sidebar { left: 0; box-shadow: none; }
       .content-wrapper { padding-bottom: 0; }
-      main { padding: 1.5rem 2rem; }
-      .bottom-nav, #menu-toggle, .backdrop, .fab { display: none; }
+      main { padding: 2rem; }
+      .bottom-nav, #menu-toggle, .backdrop { display: none; }
       #post-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
-      #post-modal .modal-container { inset: auto; align-items: center; justify-content: center; }
-      #post-modal .modal-content { width: 90vw; max-width: 900px; height: auto; max-height: 90vh; border-radius: 16px; box-shadow: var(--shadow-lg); }
-      #post-modal .modal-body { display: grid; grid-template-columns: 3fr 2fr; }
-      #post-modal #post-modal-img { max-height: none; height: 100%; }
-      #post-modal .post-details { padding: 2rem; }
     }
-    @media (hover: hover) { .post-card-clickable:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); } }
+    @media (hover: hover) { .post-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: var(--shadow-lg); } }
   </style>
 </head>
 <body>
 
   <div class="app-layout">
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header"><a href="#" class="sidebar-logo"><img src="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz3yx9en&st=9zczqkqw&dl=1" alt="logo"><div class="sidebar-logo-text"><h2>Luminox</h2><p>Platform Game</p></div></a></div>
-        <nav class="sidebar-menu">
-            <p class="menu-heading">Menu</p>
-            <div class="menu-item active" data-category=""><i class="fas fa-home"></i> Semua Postingan</div>
-            <p class="menu-heading">Kategori</p>
-            <div class="menu-item" data-category="Addon"><i class="fas fa-puzzle-piece"></i> Addon</div>
-            <div class="menu-item" data-category="Template"><i class="fas fa-paint-brush"></i> Template</div>
-            <div class="menu-item" data-category="Event"><i class="fas fa-calendar-alt"></i> Event</div>
-        </nav>
-        <div class="sidebar-footer">
-            <div id="admin-panel">
-                <p class="menu-heading">Panel Admin</p>
-                <div style="display: grid; gap: 0.5rem; padding: 0 0.5rem;">
-                    <button class="btn btn-primary" id="add-post-btn-desktop"><i class="fas fa-plus"></i> Tambah Post</button>
-                    <button class="btn btn-ghost" id="manage-banner-btn">Kelola Banner</button>
-                    <button class="btn btn-ghost" id="logout-btn-desktop"><i class="fas fa-sign-out-alt"></i> Logout</button>
-                </div>
-            </div>
-        </div>
+      <div class="sidebar-header">
+        <a href="#" class="sidebar-logo">
+          <img src="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=6cfbpj8t&dl=1" alt="logo">
+          <div class="sidebar-logo-text"><h2>Luminox</h2><p>Galeri Minecraft</p></div>
+        </a>
+      </div>
+      <nav class="sidebar-menu">
+        <p class="menu-heading">Menu</p>
+        <div class="menu-item active" data-category=""><i class="fas fa-home"></i> Semua Postingan</div>
+        <div class="menu-item" data-category="featured"><i class="fas fa-star"></i> Pilihan Editor</div>
+        <div class="menu-item" data-category="wishlist"><i class="fas fa-heart"></i> Wishlist</div>
+        <div class="menu-item" data-category="history"><i class="fas fa-history"></i> Riwayat Unduhan</div>
+        
+        <p class="menu-heading">Kategori</p>
+        <div class="menu-item" data-category="addon"><i class="fas fa-puzzle-piece"></i> Addon</div>
+        <div class="menu-item" data-category="template"><i class="fas fa-paint-brush"></i> Template</div>
+        <div class="menu-item" data-category="event"><i class="fas fa-calendar-alt"></i> Event</div>
+        
+        <p class="menu-heading">Lainnya</p>
+        <a href="https://discord.com/" target="_blank" class="menu-item"><i class="fas fa-list"></i> Link Tree</a>
+      </nav>
     </aside>
 
     <div class="content-wrapper">
-      <header class="app-header">
-        <button id="menu-toggle" class="header-icon-btn"><i class="fas fa-bars"></i></button>
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <button id="search-toggle" class="header-icon-btn"><i class="fas fa-search"></i></button>
-          <button id="theme-toggle" class="header-icon-btn"><i class="fas fa-moon"></i></button>
+      <header class="app-header" id="app-header">
+        <div class="header-left">
+            <button id="menu-toggle" class="header-icon-btn"><i class="fas fa-bars"></i></button>
+        </div>
+        <div class="header-search-container">
+            <input type="search" id="header-search-input" placeholder="Cari postingan..." autocomplete="off">
+        </div>
+        <div class="header-right">
+            <button id="search-toggle" class="header-icon-btn">
+                <i class="fas fa-search"></i>
+                <i class="fas fa-times"></i>
+            </button>
+            <button id="theme-toggle" class="header-icon-btn"><i class="fas fa-moon"></i></button>
         </div>
       </header>
       <main>
-        <section id="banner-section"></section>
-        <h1 class="page-title">Postingan Terbaru</h1>
+        <h1 class="page-title" id="page-title">Postingan Terbaru</h1>
+        
+        <section id="admin-area"></section>
+
         <section id="post-grid"></section>
         <section id="skeleton-grid" class="hidden"></section>
-        <section id="empty-state" class="hidden">
-            <h2>Belum Ada Postingan</h2>
-            <p>Jadilah yang pertama membuat postingan!</p>
-        </section>
       </main>
     </div>
   </div>
 
   <div class="backdrop" id="backdrop"></div>
-  <button class="fab" id="fab-add-post"><i class="fas fa-plus"></i></button>
+
   <nav class="bottom-nav">
     <div class="nav-item active" data-category=""><i class="fas fa-home"></i><span class="nav-text">Home</span></div>
-    <div class="nav-item" data-category="Addon"><i class="fas fa-puzzle-piece"></i><span class="nav-text">Addon</span></div>
-    <div class="nav-item" data-category="Template"><i class="fas fa-paint-brush"></i><span class="nav-text">Template</span></div>
-    <div class="nav-item" id="auth-nav-item"><i class="fas fa-sign-in-alt"></i><span class="nav-text">Login</span></div>
+    <div class="nav-item" data-category="featured"><i class="fas fa-star"></i><span class="nav-text">Pilihan</span></div>
+    <div class="nav-item" data-category="wishlist"><i class="fas fa-heart"></i><span class="nav-text">Wishlist</span></div>
+    <div class="nav-item" data-category="history"><i class="fas fa-history"></i><span class="nav-text">Riwayat</span></div>
   </nav>
 
-  <div id="post-modal" class="hidden">
+  <div id="post-modal-wrapper">
     <div class="modal-backdrop"></div>
-    <div class="modal-container">
+    <div id="post-modal" class="modal-container">
         <div class="modal-content">
-            <header class="modal-header">
-                <button class="header-icon-btn close-modal"><i class="fas fa-times"></i></button>
-                <h2 class="modal-title">Detail Postingan</h2>
+            <header id="post-modal-header">
+                <img id="post-modal-img" src="" alt="Detail Gambar Postingan">
+                <button id="post-modal-close" class="header-icon-btn close-modal"><i class="fas fa-times"></i></button>
             </header>
-            <div class="modal-body">
-                <img id="post-modal-img" src="">
-                <div class="post-details">
-                    <h3 id="modal-title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;"></h3>
-                    <p id="modal-desc" style="color: var(--muted)"></p>
+            <div class="post-details">
+                <div id="modal-category"></div>
+                <h3 id="modal-title"></h3>
+                <p id="modal-desc"></p>
+                <div class="download-section">
+                    <h4>Unduh File</h4>
+                    <div class="download-buttons">
+                        <a href="#" id="mediafire-link" target="_blank" class="btn-download btn-mediafire">
+                            <i class="fa-solid fa-cloud-arrow-down"></i> MediaFire
+                        </a>
+                        <a href="#" id="gofile-link" target="_blank" class="btn-download btn-gofile">
+                            <i class="fa-solid fa-rocket"></i> Gofile
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
   </div>
-  
-  <div id="post-form-modal" class="hidden">
-    <div class="modal-backdrop"></div>
-    <div class="modal-container">
-      <form id="post-form" class="modal-content">
-        <header class="modal-header">
-          <h2 class="modal-title" id="post-form-title">Tambah Postingan Baru</h2>
-          <button type="submit" id="post-form-submit-btn" class="btn btn-primary">Simpan</button>
-        </header>
-        <div class="modal-body" style="padding: 1rem;">
-            <input type="hidden" id="post-id-input">
-            <div class="form-group"><label for="post-title-input" class="form-label">Judul</label><input type="text" id="post-title-input" class="input" required></div>
-            <div class="form-group"><label for="post-desc-input" class="form-label">Deskripsi</label><textarea id="post-desc-input" class="input" rows="3"></textarea></div>
-            <div class="form-group"><label for="post-category-input" class="form-label">Kategori</label><select id="post-category-input" class="input"><option value="Addon">Addon</option><option value="Template">Template</option><option value="Event">Event</option><option value="Lainnya">Lainnya</option></select></div>
-            <div class="form-group"><label for="post-image-input" class="form-label">URL Gambar</label><input type="url" id="post-image-input" class="input" placeholder="https://..." required></div>
-            <div class="form-group"><label for="post-link-input" class="form-label">URL Link Postingan (opsional)</label><input type="url" id="post-link-input" class="input" placeholder="https://..."></div>
-        </div>
-      </form>
-    </div>
-  </div>
 
-  <div id="banner-form-modal" class="hidden">
-    <div class="modal-backdrop"></div>
-    <div class="modal-container">
-      <form id="banner-form" class="modal-content">
-        <header class="modal-header">
-          <h2 class="modal-title">Kelola Banner</h2>
-          <button type="submit" id="banner-form-submit-btn" class="btn btn-primary">Simpan</button>
-        </header>
-        <div class="modal-body" style="padding: 1rem;">
-            <div class="form-group"><label for="banner-title-input" class="form-label">Judul Banner</label><input type="text" id="banner-title-input" class="input" required></div>
-            <div class="form-group"><label for="banner-desc-input" class="form-label">Deskripsi Banner</label><input id="banner-desc-input" class="input"></div>
-            <div class="form-group"><label for="banner-image-input" class="form-label">URL Gambar Banner</label><input type="url" id="banner-image-input" class="input" placeholder="https://..." required></div>
-            <div class="form-group"><label for="banner-link-input" class="form-label">URL Link Banner (opsional)</label><input type="url" id="banner-link-input" class="input" placeholder="https://..."></div>
-        </div>
-      </form>
-    </div>
-  </div>
 
-  <div id="auth-modal" class="hidden">
-    <div class="modal-backdrop"></div>
-    <div class="modal-container">
-        <div class="modal-content">
-            <header class="modal-header">
-                <button class="header-icon-btn close-modal"><i class="fas fa-times"></i></button>
-                <h2 class="modal-title" id="auth-modal-title">Login</h2>
-            </header>
-            <div class="modal-body" style="padding: 1rem;">
-                <div class="auth-tabs">
-                    <div id="tab-login" class="auth-tab active">Login</div>
-                    <div id="tab-register" class="auth-tab">Register</div>
-                </div>
-                <form id="login-form">
-                    <div class="form-group"><input type="email" id="login-email" class="input" placeholder="Email" required></div>
-                    <div class="form-group"><input type="password" id="login-password" class="input" placeholder="Password" required></div>
-                    <button type="submit" class="btn btn-primary btn-block">Login</button>
-                </form>
-                <form id="register-form" class="hidden">
-                    <div class="form-group"><input type="email" id="register-email" class="input" placeholder="Email" required></div>
-                    <div class="form-group"><input type="password" id="register-password" class="input" placeholder="Password" required></div>
-                    <button type="submit" class="btn btn-primary btn-block">Register</button>
-                </form>
-                <p id="auth-error" class="auth-error hidden"></p>
-            </div>
-        </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const $ = (s) => document.querySelector(s);
-        const $$ = (s) => document.querySelectorAll(s);
+      const $ = (s) => document.querySelector(s);
+      const $$ = (s) => document.querySelectorAll(s);
 
-        // --- KONFIGURASI SUPABASE ---
-        const SUPABASE_URL = 'https://zmhshfqpyekrcddsqhuz.supabase.co'; // Ganti dengan URL Anda
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptaHNoZnFweWVrcmNkZHNxaHV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMzgxNDAsImV4cCI6MjA3NTcxNDE0MH0.I_AMK5MYj4Ett8fFnAEq-w8HHSqL9NYKnfuaTZOy4O8'; // Ganti dengan Kunci Anon Anda
+      // --- 2. INISIALISASI SUPABASE ---
+      // GANTI DENGAN URL & KEY DARI PROYEK SUPABASE ANDA
+      const SUPABASE_URL = 'https://zmhshfqpyekrcddsqhuz.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptaHNoZnFweWVrcmNkZHNxaHV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMzgxNDAsImV4cCI6MjA3NTcxNDE0MH0.I_AMK5MYj4Ett8fFnAEq-w8HHSqL9NYKnfuaTZOy4O8';
+      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+
+      // --- MANAJEMEN DATA LOCALSTORAGE (Wishlist & History tetap sama) ---
+      const createStorageManager = (key) => ({
+        get: () => JSON.parse(localStorage.getItem(key)) || [],
+        save: (data) => localStorage.setItem(key, JSON.stringify(data)),
+      });
+
+      const WishlistManager = {
+        ...createStorageManager('luminox_wishlist'),
+        add: (postId) => {
+            const wishlist = WishlistManager.get();
+            if (!wishlist.includes(postId)) { wishlist.push(postId); WishlistManager.save(wishlist); }
+        },
+        remove: (postId) => {
+            let wishlist = WishlistManager.get();
+            wishlist = wishlist.filter(id => id !== postId);
+            WishlistManager.save(wishlist);
+        },
+        has: (postId) => WishlistManager.get().includes(postId)
+      };
+      
+      const HistoryManager = {
+        ...createStorageManager('luminox_history'),
+        add: (postId) => {
+            let history = HistoryManager.get();
+            history = history.filter(id => id !== postId);
+            history.unshift(postId);
+            if (history.length > 50) history.pop();
+            HistoryManager.save(history);
+        }
+      };
+
+
+      // --- STATE APLIKASI ---
+      let state = {
+        posts: [], // Ini akan diisi dari Supabase
+        currentCategory: '',
+        searchQuery: '',
+        isLoading: true,
+      };
+
+      const showLoading = (loading) => {
+        state.isLoading = loading;
+        $('#skeleton-grid').classList.toggle('hidden', !loading);
+        $('#post-grid').classList.toggle('hidden', loading);
+      };
+
+      // --- RENDER ---
+      const createPostElement = (post) => {
+        const el = document.createElement('div');
+        el.className = 'post-card';
+        el.dataset.postId = post.id;
+        const isWishlisted = WishlistManager.has(post.id);
         
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        let state = {
-            posts: [],
-            banner: null,
-            currentCategory: '',
-            currentUser: null,
-            isLoading: true,
-            editingPostId: null,
-        };
-
-        // --- LOGIC BANNER ---
-        const fetchBanner = async () => {
-            const { data, error } = await supabase.from('banner').select('*').single();
-            if (data) state.banner = data;
-            renderBanner();
-        };
-
-        const handleBannerSubmit = async (event) => {
-            event.preventDefault();
-            const submitBtn = $('#banner-form-submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Menyimpan...';
-
-            const bannerData = {
-                title: $('#banner-title-input').value,
-                description: $('#banner-desc-input').value,
-                image_url: $('#banner-image-input').value,
-                link_url: $('#banner-link-input').value,
-                updated_at: new Date()
-            };
-
-            const { error } = await supabase.from('banner').update(bannerData).eq('id', 1);
-            if (error) {
-                alert('Error: ' + error.message);
-            } else {
-                closeModal('#banner-form-modal');
-                fetchBanner();
-            }
-
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Simpan';
-        };
+        el.innerHTML = `
+          <div class="post-card-img-wrapper">
+            <img src="${post.img}" alt="${post.title}" class="post-card-img">
+            <button class="wishlist-btn ${isWishlisted ? 'wishlisted' : ''}">
+                <i class="fa-regular fa-heart"></i> <i class="fa-solid fa-heart"></i>
+            </button>
+          </div>
+          <div class="post-card-content">
+            <div class="post-card-category">${post.category}</div>
+            <h3 class="post-card-title">${post.title}</h3>
+            <p class="post-card-desc">${post.description.substring(0, 80)}...</p>
+          </div>`;
         
-        // --- LOGIC POSTINGAN (CRUD) ---
-        const fetchPosts = async () => {
-            showLoading(true);
-            const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
-            if (error) {
-                console.error("Error fetching posts:", error);
-                state.posts = [];
-            } else {
-                state.posts = data;
-            }
-            showLoading(false);
-        };
-
-        const handlePostSubmit = async (event) => {
-            event.preventDefault();
-            const submitBtn = $('#post-form-submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Menyimpan...';
-
-            const postData = {
-                title: $('#post-title-input').value,
-                description: $('#post-desc-input').value,
-                category: $('#post-category-input').value,
-                image_url: $('#post-image-input').value,
-                link_url: $('#post-link-input').value,
-                user_id: state.currentUser.id,
-            };
-
-            let error;
-            if (state.editingPostId) {
-                const { error: updateError } = await supabase.from('posts').update(postData).eq('id', state.editingPostId);
-                error = updateError;
-            } else {
-                const { error: insertError } = await supabase.from('posts').insert([postData]);
-                error = insertError;
-            }
-
-            if (error) {
-                alert('Error: ' + error.message);
-            } else {
-                closeModal('#post-form-modal');
-                fetchPosts(); // Refresh data
-            }
-
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Simpan';
-        };
+        el.addEventListener('click', (e) => !e.target.closest('.wishlist-btn') && openPostModal(post));
         
-        const handleDeletePost = async (postId) => {
-            if (confirm('Apakah Anda yakin ingin menghapus postingan ini?')) {
-                const { error } = await supabase.from('posts').delete().eq('id', postId);
-                if (error) {
-                    alert('Gagal menghapus: ' + error.message);
-                } else {
-                    fetchPosts(); // Refresh data
-                }
-            }
-        };
-
-        // --- AUTHENTICATION LOGIC ---
-        const handleRegister = async (email, password) => {
-            const { user, error } = await supabase.auth.signUp({ email, password });
-            if (error) {
-                showAuthError(error.message);
-            } else if (user) {
-                const { error: insertError } = await supabase.from('users').insert({ id: user.id, email: user.email, role: 'member' });
-                if (insertError) showAuthError("Gagal menyimpan data pengguna: " + insertError.message);
-                else closeAuthModal();
-            }
-        };
-        const handleLogin = async (email, password) => {
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) showAuthError(error.message);
-            else closeAuthModal();
-        };
-        const handleLogout = async () => {
-            if (confirm('Apakah Anda yakin ingin logout?')) await supabase.auth.signOut();
-        };
-
-        supabase.auth.onAuthStateChanged(async (_event, session) => {
-            const user = session?.user;
-            if (user) {
-                const { data } = await supabase.from('users').select('role').eq('id', user.id).single();
-                state.currentUser = { ...user, role: data?.role || 'member' };
-            } else {
-                state.currentUser = null;
-            }
-            updateUI();
+        el.querySelector('.wishlist-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const btn = e.currentTarget;
+            btn.classList.contains('wishlisted') ? WishlistManager.remove(post.id) : WishlistManager.add(post.id);
+            btn.classList.toggle('wishlisted');
+            if (['wishlist', 'history'].includes(state.currentCategory)) renderPosts();
         });
+        return el;
+      };
 
-        // --- UI & RENDER FUNCTIONS ---
-        const updateUI = () => {
-            const isAdmin = state.currentUser?.role === 'admin';
-            document.body.classList.toggle('admin-logged-in', isAdmin);
-            const authNavItem = $('#auth-nav-item');
-            if (state.currentUser) {
-                const icon = isAdmin ? 'fa-user-shield' : 'fa-user-circle';
-                const text = isAdmin ? 'Admin' : 'Akun';
-                authNavItem.innerHTML = `<i class="fas ${icon}"></i><span class="nav-text">${text}</span>`;
-                authNavItem.onclick = handleLogout;
-            } else {
-                authNavItem.innerHTML = `<i class="fas fa-sign-in-alt"></i><span class="nav-text">Login</span>`;
-                authNavItem.onclick = openAuthModal;
-            }
-            fetchBanner();
-            fetchPosts();
-        };
+      // --- 3. FUNGSI RENDER POSTS (MODIFIKASI) ---
+      // Sekarang mengambil data dari state, bukan fetch langsung
+      const renderPosts = () => {
+        showLoading(true);
+        setTimeout(() => { // Simulasi loading agar transisi mulus
+          const grid = $('#post-grid');
+          grid.innerHTML = '';
+          let filteredPosts = [];
+
+          if (state.currentCategory === 'wishlist') {
+              const ids = WishlistManager.get();
+              filteredPosts = state.posts.filter(p => ids.includes(p.id));
+          } else if (state.currentCategory === 'history') {
+              const ids = HistoryManager.get();
+              filteredPosts = ids.map(id => state.posts.find(p => p.id === id)).filter(Boolean);
+          } else if (state.currentCategory === 'featured') {
+              filteredPosts = state.posts.filter(p => p.isFeatured);
+          } else {
+              filteredPosts = state.posts.filter(post => {
+                const query = state.searchQuery.toLowerCase();
+                const matchesSearch = post.title.toLowerCase().includes(query) || post.description.toLowerCase().includes(query);
+                const matchesCategory = !state.currentCategory || post.category.toLowerCase() === state.currentCategory;
+                return matchesSearch && matchesCategory;
+              });
+          }
+
+          if (filteredPosts.length === 0) {
+            const messages = { wishlist: 'Wishlist Anda kosong.', history: 'Riwayat unduhan kosong.', featured: 'Tidak ada pilihan editor saat ini.' };
+            grid.innerHTML = `<p style="color: var(--muted); text-align: center; grid-column: 1 / -1;">${messages[state.currentCategory] || 'Tidak ada postingan yang cocok.'}</p>`;
+          } else {
+            filteredPosts.forEach(post => grid.appendChild(createPostElement(post)));
+          }
+          
+          const titles = { '': 'Postingan Terbaru', wishlist: 'Wishlist Saya', history: 'Riwayat Unduhan', featured: 'Pilihan Editor', addon: 'Addons', template: 'Templates', event: 'Events' };
+          $('#page-title').textContent = state.searchQuery ? `Hasil untuk "${state.searchQuery}"` : (titles[state.currentCategory] || 'Postingan');
+          showLoading(false);
+        }, 300);
+      };
+
+      // --- MODAL ---
+      const postModalWrapper = $('#post-modal-wrapper');
+      const openModal = () => postModalWrapper.classList.add('open');
+      const closeModal = () => postModalWrapper.classList.remove('open');
+      
+      const openPostModal = (post) => {
+        $('#post-modal-img').src = post.img;
+        $('#modal-category').textContent = post.category;
+        $('#modal-title').textContent = post.title;
+        $('#modal-desc').textContent = post.description; // Menggunakan 'description'
+        $('#mediafire-link').href = post.links.mediafire;
+        $('#gofile-link').href = post.links.gofile;
         
-        const renderBanner = () => {
-            const bannerSection = $('#banner-section');
-            if (state.banner && state.banner.image_url) {
-                bannerSection.innerHTML = `
-                <div class="banner-card" ${state.banner.link_url ? `onclick="window.open('${state.banner.link_url}', '_blank')"` : ''} style="cursor: ${state.banner.link_url ? 'pointer': 'default'}">
-                    <img src="${state.banner.image_url}" alt="${state.banner.title}">
-                    <div class="banner-card-overlay">
-                        <h2 class="banner-card-title">${state.banner.title}</h2>
-                        <p class="banner-card-desc">${state.banner.description || ''}</p>
-                    </div>
-                </div>`;
-            } else {
-                bannerSection.innerHTML = '';
-            }
-        };
+        const downloadHandler = () => HistoryManager.add(post.id);
+        $$('.btn-download').forEach(btn => {
+            btn.removeEventListener('click', downloadHandler);
+            btn.addEventListener('click', downloadHandler, { once: true });
+        });
+        openModal();
+      };
 
-        const createPostElement = (post) => {
-            const el = document.createElement('div');
-            el.className = 'post-card';
-            el.innerHTML = `
-                <div class="post-card-img-wrapper post-card-clickable">
-                    <img src="${post.image_url}" alt="${post.title}" class="post-card-img">
-                    <div class="post-admin-controls">
-                        <button class="admin-btn edit"><i class="fas fa-pen"></i></button>
-                        <button class="admin-btn delete"><i class="fas fa-trash"></i></button>
-                    </div>
-                </div>
-                <div class="post-card-content post-card-clickable">
-                    <div class="post-card-category">${post.category || 'Lainnya'}</div>
-                    <h3 class="post-card-title">${post.title}</h3>
-                    <p class="post-card-desc">${post.description || ''}</p>
-                </div>`;
+      // --- EVENT LISTENERS (Sebagian besar tetap sama) ---
+      postModalWrapper.querySelector('.modal-backdrop').addEventListener('click', closeModal);
+      postModalWrapper.querySelector('.close-modal').addEventListener('click', closeModal);
+      
+      $('#theme-toggle').onclick = () => {
+        const newTheme = document.documentElement.dataset.theme === 'dark' ? '' : 'dark';
+        document.documentElement.dataset.theme = newTheme;
+        $('#theme-toggle i').className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        localStorage.setItem('luminox_theme', newTheme);
+      };
 
-            el.querySelector('.post-card-clickable').addEventListener('click', () => openPostModal(post));
-            
-            const editBtn = el.querySelector('.edit');
-            if(editBtn) editBtn.addEventListener('click', (e) => { e.stopPropagation(); openPostFormModal(post); });
-            
-            const deleteBtn = el.querySelector('.delete');
-            if(deleteBtn) deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); handleDeletePost(post.id); });
+      $('#menu-toggle').onclick = () => $('#sidebar').classList.add('open') & $('#backdrop').classList.add('active');
+      $('#backdrop').onclick = () => $('#sidebar').classList.remove('open') & $('#backdrop').classList.remove('active');
+      
+      const handleCategoryClick = (e) => {
+          state.currentCategory = e.currentTarget.dataset.category;
+          state.searchQuery = '';
+          $('#header-search-input').value = '';
+          $('#app-header').classList.remove('search-active');
+          $$('[data-category]').forEach(i => i.classList.remove('active'));
+          $$(`[data-category="${state.currentCategory}"]`).forEach(i => i.classList.add('active'));
+          renderPosts(); // Memanggil renderPosts yang sudah pakai data dari state
+          if(window.innerWidth < 768) {
+            $('#sidebar').classList.remove('open');
+            $('#backdrop').classList.remove('active');
+          }
+      };
+      $$('[data-category]').forEach(item => item.addEventListener('click', handleCategoryClick));
 
-            return el;
-        };
+      $('#search-toggle').onclick = () => {
+        const header = $('#app-header');
+        header.classList.toggle('search-active');
+        if (header.classList.contains('search-active')) $('#header-search-input').focus();
+        else { state.searchQuery = ''; renderPosts(); }
+      };
+      $('#header-search-input').addEventListener('input', (e) => { state.searchQuery = e.target.value; renderPosts(); });
+      
+      
+      // --- 4. BAGIAN BARU: AUTENTIKASI DAN UPLOAD ---
+      const adminArea = $('#admin-area');
+
+      // Fungsi untuk memeriksa peran pengguna yang sedang login
+      async function getUserRole() {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null;
+
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        return error ? null : profile.role;
+      }
+
+      // Fungsi untuk menampilkan UI yang sesuai (Login form atau Upload form)
+      async function setupAdminUI() {
+        const role = await getUserRole();
         
-        const renderPosts = () => {
-            const grid = $('#post-grid');
-            grid.innerHTML = '';
-            const filteredPosts = state.posts.filter(p => !state.currentCategory || p.category === state.currentCategory);
-            
-            if (filteredPosts.length === 0 && !state.isLoading) {
-                $('#empty-state').classList.remove('hidden');
-            } else {
-                $('#empty-state').classList.add('hidden');
-                filteredPosts.forEach(post => grid.appendChild(createPostElement(post)));
-            }
-        };
+        if (role === 'admin' || role === 'moderator') {
+          // Jika admin/moderator, tampilkan form upload
+          adminArea.innerHTML = `
+            <div class="admin-section">
+              <h2>Buat Postingan Baru</h2>
+              <form id="upload-form">
+                <label for="title">Judul:</label>
+                <input type="text" id="title" name="title" required>
+                
+                <label for="description">Deskripsi:</label>
+                <textarea id="description" name="description" rows="4" required></textarea>
+                
+                <label for="category">Kategori:</label>
+                <select id="category" name="category" required>
+                  <option value="Template">Template</option>
+                  <option value="Addon">Addon</option>
+                  <option value="Event">Event</option>
+                </select>
+                
+                <label for="img">URL Gambar:</label>
+                <input type="text" id="img" name="img" required>
 
-        const showLoading = (loading) => {
-            state.isLoading = loading;
-            $('#skeleton-grid').classList.toggle('hidden', !loading);
-            $('#post-grid').classList.toggle('hidden', loading);
-            if (!loading) {
-                renderPosts();
-            }
-        };
-        
-        // --- MODAL & FORM LOGIC ---
-        const openModal = (modalId) => $(modalId).classList.remove('hidden');
-        const closeModal = (modalId) => $(modalId).classList.add('hidden');
-        const openAuthModal = () => openModal('#auth-modal');
-        const closeAuthModal = () => { closeModal('#auth-modal'); $('#auth-error').classList.add('hidden'); };
-        const showAuthError = (message) => {
-            $('#auth-error').textContent = message;
-            $('#auth-error').classList.remove('hidden');
+                <label for="mediafire">Link MediaFire:</label>
+                <input type="url" id="mediafire" name="mediafire" required>
+
+                <label for="gofile">Link Gofile:</label>
+                <input type="url" id="gofile" name="gofile" required>
+
+                <input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;">
+                <label for="isFeatured">Jadikan Pilihan Editor (Featured)?</label><br>
+
+                <button type="submit">Upload Postingan</button>
+              </form>
+              <button id="logout-btn">Logout</button>
+            </div>
+          `;
+          // Tambahkan listener untuk form upload dan tombol logout
+          $('#upload-form').addEventListener('submit', handleUpload);
+          $('#logout-btn').addEventListener('click', handleLogout);
+        } else {
+          // Jika bukan, tampilkan form login
+          adminArea.innerHTML = `
+            <div class="admin-section">
+              <h2>Login Admin/Moderator</h2>
+              <form id="login-form">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                <button type="submit">Login</button>
+              </form>
+            </div>
+          `;
+          // Tambahkan listener untuk form login
+          $('#login-form').addEventListener('submit', handleLogin);
         }
-        const openPostModal = (post) => {
-            if (!post) return;
-            $('#post-modal-img').src = post.image_url;
-            $('#modal-title').textContent = post.title;
-            $('#modal-desc').textContent = post.description;
-            openModal('#post-modal');
-        };
-        const openPostFormModal = (post = null) => {
-            $('#post-form').reset();
-            if (post) { // Edit mode
-                state.editingPostId = post.id;
-                $('#post-form-title').textContent = 'Edit Postingan';
-                $('#post-id-input').value = post.id;
-                $('#post-title-input').value = post.title;
-                $('#post-desc-input').value = post.description;
-                $('#post-category-input').value = post.category;
-                $('#post-image-input').value = post.image_url;
-                $('#post-link-input').value = post.link_url;
-            } else { // Create mode
-                state.editingPostId = null;
-                $('#post-form-title').textContent = 'Tambah Postingan Baru';
-            }
-            openModal('#post-form-modal');
-        };
+      }
 
-        const openBannerFormModal = () => {
-            if (!state.banner) { alert("Data banner belum termuat, coba lagi."); return; }
-            $('#banner-form').reset();
-            $('#banner-title-input').value = state.banner.title;
-            $('#banner-desc-input').value = state.banner.description;
-            $('#banner-image-input').value = state.banner.image_url;
-            $('#banner-link-input').value = state.banner.link_url;
-            openModal('#banner-form-modal');
-        };
-
-        // --- EVENT LISTENERS ---
-        const closeModalHandler = () => {
-            closeModal('#post-modal');
-            closeModal('#auth-modal');
-            closeModal('#post-form-modal');
-            closeModal('#banner-form-modal');
+      // Handler untuk proses login
+      async function handleLogin(e) {
+        e.preventDefault();
+        const email = e.target.email.value;
+        const password = e.target.password.value;
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          alert("Login Gagal: " + error.message);
+        } else {
+          setupAdminUI(); // Muat ulang UI setelah berhasil login
         }
-        $$('.close-modal').forEach(btn => btn.addEventListener('click', closeModalHandler));
-        $$('.modal-backdrop').forEach(backdrop => backdrop.addEventListener('click', closeModalHandler));
+      }
 
-        $('#fab-add-post').addEventListener('click', () => openPostFormModal());
-        $('#add-post-btn-desktop').addEventListener('click', () => openPostFormModal());
-        $('#manage-banner-btn').addEventListener('click', openBannerFormModal);
-        $('#post-form').addEventListener('submit', handlePostSubmit);
-        $('#banner-form').addEventListener('submit', handleBannerSubmit);
-        
-        $('#tab-login').onclick = () => {$('#tab-login').classList.add('active');$('#tab-register').classList.remove('active');$('#login-form').classList.remove('hidden');$('#register-form').classList.add('hidden');$('#auth-modal-title').textContent = 'Login';$('#auth-error').classList.add('hidden');};
-        $('#tab-register').onclick = () => {$('#tab-login').classList.remove('active');$('#tab-register').classList.add('active');$('#login-form').classList.add('hidden');$('#register-form').classList.remove('hidden');$('#auth-modal-title').textContent = 'Register';$('#auth-error').classList.add('hidden');};
-        $('#login-form').addEventListener('submit', (e) => {e.preventDefault();handleLogin($('#login-email').value, $('#login-password').value);});
-        $('#register-form').addEventListener('submit', (e) => {e.preventDefault();handleRegister($('#register-email').value, $('#register-password').value);});
-        $('#theme-toggle').onclick = () => {const newTheme = document.body.dataset.theme === 'dark' ? '' : 'dark';document.body.dataset.theme = newTheme;$('#theme-toggle i').className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';localStorage.setItem('luminox_theme', newTheme);};
-        $('#menu-toggle').onclick = () => { $('#sidebar').classList.add('open'); $('#backdrop').classList.add('active'); };
-        $('#backdrop').onclick = () => { $('#sidebar').classList.remove('open'); $('#backdrop').classList.remove('active'); };
-        $$('[data-category]').forEach(item => {item.onclick = (e) => {e.preventDefault();$$('[data-category]').forEach(i => i.classList.remove('active'));$$(`[data-category="${item.dataset.category}"]`).forEach(i => i.classList.add('active'));state.currentCategory = item.dataset.category;renderPosts();if(window.innerWidth < 768) {$('#sidebar').classList.remove('open');$('#backdrop').classList.remove('active');}}});
-        $('#logout-btn-desktop').onclick = handleLogout;
-        
-        const init = () => {
-            document.body.dataset.theme = localStorage.getItem('luminox_theme') || '';
-            $('#theme-toggle i').className = document.body.dataset.theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-            const skeletonGrid = $('#skeleton-grid');
-            const skeletonCardHTML = `<div class="skeleton-card"><div class="skeleton-img shimmer"></div><div class="skeleton-content"><div class="skeleton-line shimmer" style="width: 25%"></div><div class="skeleton-line shimmer" style="width: 75%"></div><div class="skeleton-line shimmer" style="width: 50%"></div></div></div>`;
-            skeletonGrid.innerHTML = Array(4).fill(skeletonCardHTML).join('');
+      // Handler untuk proses logout
+      async function handleLogout() {
+        await supabase.auth.signOut();
+        setupAdminUI(); // Muat ulang UI setelah berhasil logout
+      }
+
+      // Handler untuk proses upload postingan baru
+      async function handleUpload(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+
+        const postData = {
+          title: formData.get('title'),
+          description: formData.get('description'),
+          category: formData.get('category'),
+          isFeatured: formData.get('isFeatured') === 'on',
+          img: formData.get('img'),
+          links: {
+            mediafire: formData.get('mediafire'),
+            gofile: formData.get('gofile')
+          }
         };
 
-        init();
+        const { error } = await supabase.from('posts').insert([postData]);
+
+        if (error) {
+          alert('Upload Gagal: ' + error.message);
+        } else {
+          alert('Postingan berhasil diupload!');
+          form.reset();
+          fetchPosts(); // Ambil data terbaru dari Supabase
+        }
+      }
+
+      // --- 5. FUNGSI INISIALISASI (MODIFIKASI) ---
+      
+      // Fungsi baru untuk mengambil semua posts dari Supabase dan menyimpannya di state
+      async function fetchPosts() {
+        try {
+          const { data, error } = await supabase
+            .from('posts')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          
+          state.posts = data; // Simpan data ke state
+          renderPosts(); // Render postingan setelah data diterima
+
+        } catch (error) {
+            console.error('Gagal memuat data postingan:', error);
+            $('#post-grid').innerHTML = `<p style="color: var(--muted); text-align: center;">Gagal memuat data. Silakan coba lagi nanti.</p>`;
+        }
+      }
+      
+      const init = async () => {
+        const savedTheme = localStorage.getItem('luminox_theme') || '';
+        if (savedTheme) {
+            document.documentElement.dataset.theme = savedTheme;
+            $('#theme-toggle i').className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        
+        const skeletonGrid = $('#skeleton-grid');
+        const skeletonCardHTML = `<div class="skeleton-card"><div class="skeleton-img shimmer"></div><div class="skeleton-content"><div class="skeleton-line shimmer" style="width: 35%;"></div><div class="skeleton-line shimmer" style="width: 85%;"></div><div class="skeleton-line shimmer" style="width: 60%;"></div></div></div>`;
+        skeletonGrid.innerHTML = Array(4).fill(skeletonCardHTML).join('');
+
+        await fetchPosts(); // Panggil fungsi untuk ambil data dari Supabase
+        setupAdminUI(); // Tampilkan form login/upload
+      };
+
+      init();
     });
   </script>
 </body>
