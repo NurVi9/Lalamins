@@ -212,18 +212,19 @@
   </div>
 
 
-  <script>
+<script>
     document.addEventListener('DOMContentLoaded', () => {
       const $ = (s) => document.querySelector(s);
       const $$ = (s) => document.querySelectorAll(s);
 
-// --- 2. INISIALISASI SUPABASE ---
-const SUPABASE_URL = 'https://zmhshfqpyekrcddsqhuz.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptaHNoZnFweWVrcmNkZHNxaHV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMzgxNDAsImV4cCI6MjA3NTcxNDE0MH0.I_AMK5MYj4Ett8fFnAEq-w8HHSqL9NYKnfuaTZOy4O8';
-
-      const { createClient } = window.supabase; // Ditambahkan 'window.'
+      // --- 2. INISIALISASI SUPABASE ---
+      const SUPABASE_URL = 'https://zmhshfqpyekrcddsqhuz.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptaHNoZnFweWVrcmNkZHNxaHV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMzgxNDAsImV4cCI6MjA3NTcxNDE0MH0.I_AMK5MYj4Ett8fFnAEq-w8HHSqL9NYKnfuaTZOy4O8';
+      
+      const { createClient } = window.supabase;
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+      // --- LocalStorage Manager (Tidak berubah) ---
       const createStorageManager = (key) => ({
         get: () => JSON.parse(localStorage.getItem(key)) || [],
         save: (data) => localStorage.setItem(key, JSON.stringify(data)),
@@ -254,43 +255,22 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         }
       };
 
-
-      // --- STATE APLIKASI ---
-      let state = {
-        posts: [], // Ini akan diisi dari Supabase
-        currentCategory: '',
-        searchQuery: '',
-        isLoading: true,
-      };
-
+      // --- STATE APLIKASI (Tidak berubah) ---
+      let state = { posts: [], currentCategory: '', searchQuery: '', isLoading: true, };
       const showLoading = (loading) => {
         state.isLoading = loading;
         $('#skeleton-grid').classList.toggle('hidden', !loading);
         $('#post-grid').classList.toggle('hidden', loading);
       };
 
-      // --- RENDER ---
+      // --- RENDER FUNCTIONS (Tidak berubah) ---
       const createPostElement = (post) => {
         const el = document.createElement('div');
         el.className = 'post-card';
         el.dataset.postId = post.id;
         const isWishlisted = WishlistManager.has(post.id);
-        
-        el.innerHTML = `
-          <div class="post-card-img-wrapper">
-            <img src="${post.img}" alt="${post.title}" class="post-card-img">
-            <button class="wishlist-btn ${isWishlisted ? 'wishlisted' : ''}">
-                <i class="fa-regular fa-heart"></i> <i class="fa-solid fa-heart"></i>
-            </button>
-          </div>
-          <div class="post-card-content">
-            <div class="post-card-category">${post.category}</div>
-            <h3 class="post-card-title">${post.title}</h3>
-            <p class="post-card-desc">${post.description.substring(0, 80)}...</p>
-          </div>`;
-        
+        el.innerHTML = `<div class="post-card-img-wrapper"><img src="${post.img}" alt="${post.title}" class="post-card-img"><button class="wishlist-btn ${isWishlisted ? 'wishlisted' : ''}"><i class="fa-regular fa-heart"></i> <i class="fa-solid fa-heart"></i></button></div><div class="post-card-content"><div class="post-card-category">${post.category}</div><h3 class="post-card-title">${post.title}</h3><p class="post-card-desc">${post.description.substring(0, 80)}...</p></div>`;
         el.addEventListener('click', (e) => !e.target.closest('.wishlist-btn') && openPostModal(post));
-        
         el.querySelector('.wishlist-btn').addEventListener('click', (e) => {
             e.stopPropagation();
             const btn = e.currentTarget;
@@ -300,16 +280,12 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         });
         return el;
       };
-
-      // --- 3. FUNGSI RENDER POSTS (MODIFIKASI) ---
-      // Sekarang mengambil data dari state, bukan fetch langsung
       const renderPosts = () => {
         showLoading(true);
-        setTimeout(() => { // Simulasi loading agar transisi mulus
+        setTimeout(() => {
           const grid = $('#post-grid');
           grid.innerHTML = '';
           let filteredPosts = [];
-
           if (state.currentCategory === 'wishlist') {
               const ids = WishlistManager.get();
               filteredPosts = state.posts.filter(p => ids.includes(p.id));
@@ -326,33 +302,27 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
                 return matchesSearch && matchesCategory;
               });
           }
-
           if (filteredPosts.length === 0) {
             const messages = { wishlist: 'Wishlist Anda kosong.', history: 'Riwayat unduhan kosong.', featured: 'Tidak ada pilihan editor saat ini.' };
             grid.innerHTML = `<p style="color: var(--muted); text-align: center; grid-column: 1 / -1;">${messages[state.currentCategory] || 'Tidak ada postingan yang cocok.'}</p>`;
           } else {
             filteredPosts.forEach(post => grid.appendChild(createPostElement(post)));
           }
-          
           const titles = { '': 'Postingan Terbaru', wishlist: 'Wishlist Saya', history: 'Riwayat Unduhan', featured: 'Pilihan Editor', addon: 'Addons', template: 'Templates', event: 'Events' };
           $('#page-title').textContent = state.searchQuery ? `Hasil untuk "${state.searchQuery}"` : (titles[state.currentCategory] || 'Postingan');
           showLoading(false);
         }, 300);
       };
-
-      // --- MODAL ---
       const postModalWrapper = $('#post-modal-wrapper');
       const openModal = () => postModalWrapper.classList.add('open');
       const closeModal = () => postModalWrapper.classList.remove('open');
-      
       const openPostModal = (post) => {
         $('#post-modal-img').src = post.img;
         $('#modal-category').textContent = post.category;
         $('#modal-title').textContent = post.title;
-        $('#modal-desc').textContent = post.description; // Menggunakan 'description'
+        $('#modal-desc').textContent = post.description;
         $('#mediafire-link').href = post.links.mediafire;
         $('#gofile-link').href = post.links.gofile;
-        
         const downloadHandler = () => HistoryManager.add(post.id);
         $$('.btn-download').forEach(btn => {
             btn.removeEventListener('click', downloadHandler);
@@ -360,21 +330,16 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         });
         openModal();
       };
-
-      // --- EVENT LISTENERS (Sebagian besar tetap sama) ---
       postModalWrapper.querySelector('.modal-backdrop').addEventListener('click', closeModal);
       postModalWrapper.querySelector('.close-modal').addEventListener('click', closeModal);
-      
       $('#theme-toggle').onclick = () => {
         const newTheme = document.documentElement.dataset.theme === 'dark' ? '' : 'dark';
         document.documentElement.dataset.theme = newTheme;
         $('#theme-toggle i').className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
         localStorage.setItem('luminox_theme', newTheme);
       };
-
       $('#menu-toggle').onclick = () => $('#sidebar').classList.add('open') & $('#backdrop').classList.add('active');
       $('#backdrop').onclick = () => $('#sidebar').classList.remove('open') & $('#backdrop').classList.remove('active');
-      
       const handleCategoryClick = (e) => {
           state.currentCategory = e.currentTarget.dataset.category;
           state.searchQuery = '';
@@ -382,14 +347,13 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
           $('#app-header').classList.remove('search-active');
           $$('[data-category]').forEach(i => i.classList.remove('active'));
           $$(`[data-category="${state.currentCategory}"]`).forEach(i => i.classList.add('active'));
-          renderPosts(); // Memanggil renderPosts yang sudah pakai data dari state
+          renderPosts();
           if(window.innerWidth < 768) {
             $('#sidebar').classList.remove('open');
             $('#backdrop').classList.remove('active');
           }
       };
       $$('[data-category]').forEach(item => item.addEventListener('click', handleCategoryClick));
-
       $('#search-toggle').onclick = () => {
         const header = $('#app-header');
         header.classList.toggle('search-active');
@@ -399,86 +363,82 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       $('#header-search-input').addEventListener('input', (e) => { state.searchQuery = e.target.value; renderPosts(); });
       
       
-      // --- 4. BAGIAN BARU: AUTENTIKASI DAN UPLOAD ---
+      // --- BAGIAN AUTENTIKASI & UPLOAD (MODIFIKASI) ---
       const adminArea = $('#admin-area');
 
-      // Fungsi untuk memeriksa peran pengguna yang sedang login
       async function getUserRole() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return null;
-
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-
+        const { data: profile, error } = await supabase.from('profiles').select('role').eq('id', user.id).single();
         return error ? null : profile.role;
       }
 
-      // Fungsi untuk menampilkan UI yang sesuai (Login form atau Upload form)
+      // --- [MODIFIKASI] Tampilkan UI Admin, Login, dan Register ---
       async function setupAdminUI() {
         const role = await getUserRole();
         
         if (role === 'admin' || role === 'moderator') {
-          // Jika admin/moderator, tampilkan form upload
-          adminArea.innerHTML = `
-            <div class="admin-section">
-              <h2>Buat Postingan Baru</h2>
-              <form id="upload-form">
-                <label for="title">Judul:</label>
-                <input type="text" id="title" name="title" required>
-                
-                <label for="description">Deskripsi:</label>
-                <textarea id="description" name="description" rows="4" required></textarea>
-                
-                <label for="category">Kategori:</label>
-                <select id="category" name="category" required>
-                  <option value="Template">Template</option>
-                  <option value="Addon">Addon</option>
-                  <option value="Event">Event</option>
-                </select>
-                
-                <label for="img">URL Gambar:</label>
-                <input type="text" id="img" name="img" required>
-
-                <label for="mediafire">Link MediaFire:</label>
-                <input type="url" id="mediafire" name="mediafire" required>
-
-                <label for="gofile">Link Gofile:</label>
-                <input type="url" id="gofile" name="gofile" required>
-
-                <input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;">
-                <label for="isFeatured">Jadikan Pilihan Editor (Featured)?</label><br>
-
-                <button type="submit">Upload Postingan</button>
-              </form>
-              <button id="logout-btn">Logout</button>
-            </div>
-          `;
-          // Tambahkan listener untuk form upload dan tombol logout
+          // Tampilkan form upload jika role sesuai
+          adminArea.innerHTML = `<div class="admin-section"><h2>Buat Postingan Baru</h2><form id="upload-form"><label for="title">Judul:</label><input type="text" id="title" name="title" required><label for="description">Deskripsi:</label><textarea id="description" name="description" rows="4" required></textarea><label for="category">Kategori:</label><select id="category" name="category" required><option value="Template">Template</option><option value="Addon">Addon</option><option value="Event">Event</option></select><label for="img">URL Gambar:</label><input type="text" id="img" name="img" required><label for="mediafire">Link MediaFire:</label><input type="url" id="mediafire" name="mediafire" required><label for="gofile">Link Gofile:</label><input type="url" id="gofile" name="gofile" required><input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;"><label for="isFeatured">Jadikan Pilihan Editor (Featured)?</label><br><button type="submit">Upload Postingan</button></form><button id="logout-btn">Logout</button></div>`;
           $('#upload-form').addEventListener('submit', handleUpload);
           $('#logout-btn').addEventListener('click', handleLogout);
         } else {
-          // Jika bukan, tampilkan form login
+          // Tampilkan form login dan register jika belum login atau role tidak sesuai
           adminArea.innerHTML = `
             <div class="admin-section">
-              <h2>Login Admin/Moderator</h2>
-              <form id="login-form">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-                <button type="submit">Login</button>
-              </form>
-            </div>
-          `;
-          // Tambahkan listener untuk form login
+              <div id="login-view">
+                <h2>Login</h2>
+                <form id="login-form">
+                  <label for="email">Email:</label><input type="email" id="email" name="email" required>
+                  <label for="password">Password:</label><input type="password" id="password" name="password" required>
+                  <button type="submit">Login</button>
+                </form>
+                <p style="text-align:center; margin-top:1rem; font-size:0.9em;">Belum punya akun? <a href="#" id="show-register" style="color:var(--accent);text-decoration:none;font-weight:600;">Daftar di sini</a></p>
+              </div>
+              <div id="register-view" class="hidden">
+                <h2>Register Pengguna Baru</h2>
+                <form id="register-form">
+                  <label for="reg-email">Email:</label><input type="email" id="reg-email" name="email" required>
+                  <label for="reg-password">Password:</label><input type="password" id="reg-password" name="password" required>
+                  <button type="submit">Register</button>
+                </form>
+                <p style="text-align:center; margin-top:1rem; font-size:0.9em;">Sudah punya akun? <a href="#" id="show-login" style="color:var(--accent);text-decoration:none;font-weight:600;">Login di sini</a></p>
+              </div>
+            </div>`;
+
+          // Tambah event listener untuk form dan link
           $('#login-form').addEventListener('submit', handleLogin);
+          $('#register-form').addEventListener('submit', handleRegister);
+          $('#show-register').addEventListener('click', (e) => {
+            e.preventDefault();
+            $('#login-view').classList.add('hidden');
+            $('#register-view').classList.remove('hidden');
+          });
+          $('#show-login').addEventListener('click', (e) => {
+            e.preventDefault();
+            $('#login-view').classList.remove('hidden');
+            $('#register-view').classList.add('hidden');
+          });
         }
       }
 
-      // Handler untuk proses login
+      // --- [FUNGSI BARU] Handler untuk Register ---
+      async function handleRegister(e) {
+        e.preventDefault();
+        const email = e.target.elements['reg-email'].value;
+        const password = e.target.elements['reg-password'].value;
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if (error) {
+          alert("Registrasi Gagal: " + error.message);
+        } else {
+          alert("Registrasi berhasil! Silakan cek email Anda untuk verifikasi.");
+          // Kembali ke form login setelah berhasil
+          $('#login-view').classList.remove('hidden');
+          $('#register-view').classList.add('hidden');
+        }
+      }
+
+      // Handler lainnya (tidak berubah)
       async function handleLogin(e) {
         e.preventDefault();
         const email = e.target.email.value;
@@ -487,79 +447,57 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         if (error) {
           alert("Login Gagal: " + error.message);
         } else {
-          setupAdminUI(); // Muat ulang UI setelah berhasil login
+          setupAdminUI();
         }
       }
-
-      // Handler untuk proses logout
       async function handleLogout() {
         await supabase.auth.signOut();
-        setupAdminUI(); // Muat ulang UI setelah berhasil logout
+        setupAdminUI();
       }
-
-      // Handler untuk proses upload postingan baru
       async function handleUpload(e) {
         e.preventDefault();
         const form = e.target;
-        const formData = new FormData(form);
-
         const postData = {
-          title: formData.get('title'),
-          description: formData.get('description'),
-          category: formData.get('category'),
-          isFeatured: formData.get('isFeatured') === 'on',
-          img: formData.get('img'),
-          links: {
-            mediafire: formData.get('mediafire'),
-            gofile: formData.get('gofile')
-          }
+          title: form.title.value,
+          description: form.description.value,
+          category: form.category.value,
+          isFeatured: form.isFeatured.checked,
+          img: form.img.value,
+          links: { mediafire: form.mediafire.value, gofile: form.gofile.value }
         };
-
         const { error } = await supabase.from('posts').insert([postData]);
-
         if (error) {
           alert('Upload Gagal: ' + error.message);
         } else {
           alert('Postingan berhasil diupload!');
           form.reset();
-          fetchPosts(); // Ambil data terbaru dari Supabase
+          fetchPosts();
         }
       }
 
-      // --- 5. FUNGSI INISIALISASI (MODIFIKASI) ---
-      
-      // Fungsi baru untuk mengambil semua posts dari Supabase dan menyimpannya di state
+      // --- FUNGSI INISIALISASI (Tidak berubah) ---
       async function fetchPosts() {
         try {
-          const { data, error } = await supabase
-            .from('posts')
-            .select('*')
-            .order('created_at', { ascending: false });
-
+          const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
           if (error) throw error;
-          
-          state.posts = data; // Simpan data ke state
-          renderPosts(); // Render postingan setelah data diterima
-
+          state.posts = data;
+          renderPosts();
         } catch (error) {
             console.error('Gagal memuat data postingan:', error);
             $('#post-grid').innerHTML = `<p style="color: var(--muted); text-align: center;">Gagal memuat data. Silakan coba lagi nanti.</p>`;
         }
       }
-      
       const init = async () => {
         const savedTheme = localStorage.getItem('luminox_theme') || '';
         if (savedTheme) {
             document.documentElement.dataset.theme = savedTheme;
             $('#theme-toggle i').className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
         }
-        
         const skeletonGrid = $('#skeleton-grid');
         const skeletonCardHTML = `<div class="skeleton-card"><div class="skeleton-img shimmer"></div><div class="skeleton-content"><div class="skeleton-line shimmer" style="width: 35%;"></div><div class="skeleton-line shimmer" style="width: 85%;"></div><div class="skeleton-line shimmer" style="width: 60%;"></div></div></div>`;
         skeletonGrid.innerHTML = Array(4).fill(skeletonCardHTML).join('');
-
-        await fetchPosts(); // Panggil fungsi untuk ambil data dari Supabase
-        setupAdminUI(); // Tampilkan form login/upload
+        await fetchPosts();
+        setupAdminUI();
       };
 
       init();
