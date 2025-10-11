@@ -3,10 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Luminox — Full CMS + Banner</title>
+  <title>Luminox — Full CMS Activated</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
-    /* ... CSS SAMA PERSIS SEPERTI SEBELUMNYA ... */
     :root {
       --bg: #f4f7fa; --card: #ffffff; --sidebar-bg: #ffffff; --text: #1a202c; --muted: #64748b; --accent: #3b82f6; --accent-dark: #2563eb; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; --ring: rgba(59, 130, 246, 0.4); --header-bg: rgba(255, 255, 255, 0.8); --border: #e2e8f0; --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
     }
@@ -128,7 +127,25 @@
 
   <div class="app-layout">
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header"><a href="#" class="sidebar-logo"><img src="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz3yx9en&st=9zczqkqw&dl=1" alt="logo"><div class="sidebar-logo-text"><h2>Luminox</h2><p>Platform Game</p></div></a></div><nav class="sidebar-menu"><p class="menu-heading">Menu</p><div class="menu-item active" data-category=""><i class="fas fa-home"></i> Semua Postingan</div><p class="menu-heading">Kategori</p><div class="menu-item" data-category="addon"><i class="fas fa-puzzle-piece"></i> Addon</div><div class="menu-item" data-category="template"><i class="fas fa-paint-brush"></i> Template</div><div class="menu-item" data-category="event"><i class="fas fa-calendar-alt"></i> Event</div></nav><div class="sidebar-footer"><div id="admin-panel"><p class="menu-heading">Panel Admin</p><div style="display: grid; gap: 0.5rem; padding: 0 0.5rem;"><button class="btn btn-primary" id="add-post-btn-desktop"><i class="fas fa-plus"></i> Tambah Post</button><button class="btn btn-ghost" id="manage-banner-btn">Kelola Banner</button><button class="btn btn-ghost" id="logout-btn-desktop"><i class="fas fa-sign-out-alt"></i> Logout</button></div></div></div>
+        <div class="sidebar-header"><a href="#" class="sidebar-logo"><img src="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz3yx9en&st=9zczqkqw&dl=1" alt="logo"><div class="sidebar-logo-text"><h2>Luminox</h2><p>Platform Game</p></div></a></div>
+        <nav class="sidebar-menu">
+            <p class="menu-heading">Menu</p>
+            <div class="menu-item active" data-category=""><i class="fas fa-home"></i> Semua Postingan</div>
+            <p class="menu-heading">Kategori</p>
+            <div class="menu-item" data-category="Addon"><i class="fas fa-puzzle-piece"></i> Addon</div>
+            <div class="menu-item" data-category="Template"><i class="fas fa-paint-brush"></i> Template</div>
+            <div class="menu-item" data-category="Event"><i class="fas fa-calendar-alt"></i> Event</div>
+        </nav>
+        <div class="sidebar-footer">
+            <div id="admin-panel">
+                <p class="menu-heading">Panel Admin</p>
+                <div style="display: grid; gap: 0.5rem; padding: 0 0.5rem;">
+                    <button class="btn btn-primary" id="add-post-btn-desktop"><i class="fas fa-plus"></i> Tambah Post</button>
+                    <button class="btn btn-ghost" id="manage-banner-btn">Kelola Banner</button>
+                    <button class="btn btn-ghost" id="logout-btn-desktop"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+            </div>
+        </div>
     </aside>
 
     <div class="content-wrapper">
@@ -156,13 +173,28 @@
   <button class="fab" id="fab-add-post"><i class="fas fa-plus"></i></button>
   <nav class="bottom-nav">
     <div class="nav-item active" data-category=""><i class="fas fa-home"></i><span class="nav-text">Home</span></div>
-    <div class="nav-item" data-category="addon"><i class="fas fa-puzzle-piece"></i><span class="nav-text">Addon</span></div>
-    <div class="nav-item" data-category="template"><i class="fas fa-paint-brush"></i><span class="nav-text">Template</span></div>
+    <div class="nav-item" data-category="Addon"><i class="fas fa-puzzle-piece"></i><span class="nav-text">Addon</span></div>
+    <div class="nav-item" data-category="Template"><i class="fas fa-paint-brush"></i><span class="nav-text">Template</span></div>
     <div class="nav-item" id="auth-nav-item"><i class="fas fa-sign-in-alt"></i><span class="nav-text">Login</span></div>
   </nav>
 
   <div id="post-modal" class="hidden">
-    <div class="modal-backdrop"></div><div class="modal-container"><div class="modal-content"><header class="modal-header"><button class="header-icon-btn close-modal"><i class="fas fa-times"></i></button><h2 class="modal-title">Detail Postingan</h2></header><div class="modal-body"><img id="post-modal-img" src=""><div class="post-details"><h3 id="modal-title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;"></h3><p id="modal-desc" style="color: var(--muted)"></p></div></div></div></div>
+    <div class="modal-backdrop"></div>
+    <div class="modal-container">
+        <div class="modal-content">
+            <header class="modal-header">
+                <button class="header-icon-btn close-modal"><i class="fas fa-times"></i></button>
+                <h2 class="modal-title">Detail Postingan</h2>
+            </header>
+            <div class="modal-body">
+                <img id="post-modal-img" src="">
+                <div class="post-details">
+                    <h3 id="modal-title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;"></h3>
+                    <p id="modal-desc" style="color: var(--muted)"></p>
+                </div>
+            </div>
+        </div>
+    </div>
   </div>
   
   <div id="post-form-modal" class="hidden">
@@ -204,7 +236,32 @@
   </div>
 
   <div id="auth-modal" class="hidden">
-    <div class="modal-backdrop"></div><div class="modal-container"><div class="modal-content"><header class="modal-header"><button class="header-icon-btn close-modal"><i class="fas fa-times"></i></button><h2 class="modal-title" id="auth-modal-title">Login</h2></header><div class="modal-body" style="padding: 1rem;"><div class="auth-tabs"><div id="tab-login" class="auth-tab active">Login</div><div id="tab-register" class="auth-tab">Register</div></div><form id="login-form"><div class="form-group"><input type="email" id="login-email" class="input" placeholder="Email" required></div><div class="form-group"><input type="password" id="login-password" class="input" placeholder="Password" required></div><button type="submit" class="btn btn-primary btn-block">Login</button></form><form id="register-form" class="hidden"><div class="form-group"><input type="email" id="register-email" class="input" placeholder="Email" required></div><div class="form-group"><input type="password" id="register-password" class="input" placeholder="Password" required></div><button type="submit" class="btn btn-primary btn-block">Register</button></form><p id="auth-error" class="auth-error hidden"></p></div></div></div>
+    <div class="modal-backdrop"></div>
+    <div class="modal-container">
+        <div class="modal-content">
+            <header class="modal-header">
+                <button class="header-icon-btn close-modal"><i class="fas fa-times"></i></button>
+                <h2 class="modal-title" id="auth-modal-title">Login</h2>
+            </header>
+            <div class="modal-body" style="padding: 1rem;">
+                <div class="auth-tabs">
+                    <div id="tab-login" class="auth-tab active">Login</div>
+                    <div id="tab-register" class="auth-tab">Register</div>
+                </div>
+                <form id="login-form">
+                    <div class="form-group"><input type="email" id="login-email" class="input" placeholder="Email" required></div>
+                    <div class="form-group"><input type="password" id="login-password" class="input" placeholder="Password" required></div>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                </form>
+                <form id="register-form" class="hidden">
+                    <div class="form-group"><input type="email" id="register-email" class="input" placeholder="Email" required></div>
+                    <div class="form-group"><input type="password" id="register-password" class="input" placeholder="Password" required></div>
+                    <button type="submit" class="btn btn-primary btn-block">Register</button>
+                </form>
+                <p id="auth-error" class="auth-error hidden"></p>
+            </div>
+        </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
@@ -213,6 +270,7 @@
         const $ = (s) => document.querySelector(s);
         const $$ = (s) => document.querySelectorAll(s);
 
+        // --- KONFIGURASI SUPABASE ---
         const SUPABASE_URL = 'https://hxhkawjfdpxasjbfdpxr.supabase.co'; // Ganti dengan URL Anda
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4aGthd2pmZHB4YXNqYmZkcHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMzQyNjQsImV4cCI6MjA3NTcxMDI2NH0.9NUYKKkTYWQ70M6z1mf4LQdul3dzmvVmtUciv_oeWvY'; // Ganti dengan Kunci Anon Anda
         
@@ -227,6 +285,7 @@
             editingPostId: null,
         };
 
+        // --- LOGIC BANNER ---
         const fetchBanner = async () => {
             const { data, error } = await supabase.from('banner').select('*').single();
             if (data) state.banner = data;
@@ -259,11 +318,16 @@
             submitBtn.innerHTML = 'Simpan';
         };
         
+        // --- LOGIC POSTINGAN (CRUD) ---
         const fetchPosts = async () => {
             showLoading(true);
             const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
-            if (error) console.error("Error fetching posts:", error);
-            else state.posts = data;
+            if (error) {
+                console.error("Error fetching posts:", error);
+                state.posts = [];
+            } else {
+                state.posts = data;
+            }
             showLoading(false);
         };
 
@@ -272,6 +336,7 @@
             const submitBtn = $('#post-form-submit-btn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = 'Menyimpan...';
+
             const postData = {
                 title: $('#post-title-input').value,
                 description: $('#post-desc-input').value,
@@ -280,16 +345,23 @@
                 link_url: $('#post-link-input').value,
                 user_id: state.currentUser.id,
             };
+
             let error;
             if (state.editingPostId) {
                 const { error: updateError } = await supabase.from('posts').update(postData).eq('id', state.editingPostId);
                 error = updateError;
             } else {
-                const { error: insertError } = await supabase.from('posts').insert(postData);
+                const { error: insertError } = await supabase.from('posts').insert([postData]);
                 error = insertError;
             }
-            if (error) alert('Error: ' + error.message);
-            else { closeModal('#post-form-modal'); fetchPosts(); }
+
+            if (error) {
+                alert('Error: ' + error.message);
+            } else {
+                closeModal('#post-form-modal');
+                fetchPosts(); // Refresh data
+            }
+
             submitBtn.disabled = false;
             submitBtn.innerHTML = 'Simpan';
         };
@@ -297,15 +369,20 @@
         const handleDeletePost = async (postId) => {
             if (confirm('Apakah Anda yakin ingin menghapus postingan ini?')) {
                 const { error } = await supabase.from('posts').delete().eq('id', postId);
-                if (error) alert('Gagal menghapus: ' + error.message);
-                else fetchPosts();
+                if (error) {
+                    alert('Gagal menghapus: ' + error.message);
+                } else {
+                    fetchPosts(); // Refresh data
+                }
             }
         };
 
+        // --- AUTHENTICATION LOGIC ---
         const handleRegister = async (email, password) => {
             const { user, error } = await supabase.auth.signUp({ email, password });
-            if (error) showAuthError(error.message);
-            else {
+            if (error) {
+                showAuthError(error.message);
+            } else if (user) {
                 const { error: insertError } = await supabase.from('users').insert({ id: user.id, email: user.email, role: 'member' });
                 if (insertError) showAuthError("Gagal menyimpan data pengguna: " + insertError.message);
                 else closeAuthModal();
@@ -331,6 +408,7 @@
             updateUI();
         });
 
+        // --- UI & RENDER FUNCTIONS ---
         const updateUI = () => {
             const isAdmin = state.currentUser?.role === 'admin';
             document.body.classList.toggle('admin-logged-in', isAdmin);
@@ -347,12 +425,12 @@
             fetchBanner();
             fetchPosts();
         };
-
+        
         const renderBanner = () => {
             const bannerSection = $('#banner-section');
-            if (state.banner) {
+            if (state.banner && state.banner.image_url) {
                 bannerSection.innerHTML = `
-                <div class="banner-card" onclick="window.open('${state.banner.link_url || '#'}', '_blank')">
+                <div class="banner-card" ${state.banner.link_url ? `onclick="window.open('${state.banner.link_url}', '_blank')"` : ''} style="cursor: ${state.banner.link_url ? 'pointer': 'default'}">
                     <img src="${state.banner.image_url}" alt="${state.banner.title}">
                     <div class="banner-card-overlay">
                         <h2 class="banner-card-title">${state.banner.title}</h2>
@@ -368,29 +446,35 @@
             const el = document.createElement('div');
             el.className = 'post-card';
             el.innerHTML = `
-                <div class="post-card-img-wrapper" onclick="openPostModal(state.posts.find(p => p.id === ${post.id}))">
+                <div class="post-card-img-wrapper post-card-clickable">
                     <img src="${post.image_url}" alt="${post.title}" class="post-card-img">
                     <div class="post-admin-controls">
                         <button class="admin-btn edit"><i class="fas fa-pen"></i></button>
                         <button class="admin-btn delete"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
-                <div class="post-card-content" onclick="openPostModal(state.posts.find(p => p.id === ${post.id}))">
+                <div class="post-card-content post-card-clickable">
                     <div class="post-card-category">${post.category || 'Lainnya'}</div>
                     <h3 class="post-card-title">${post.title}</h3>
                     <p class="post-card-desc">${post.description || ''}</p>
                 </div>`;
+
+            el.querySelector('.post-card-clickable').addEventListener('click', () => openPostModal(post));
+            
             const editBtn = el.querySelector('.edit');
-            if (editBtn) editBtn.addEventListener('click', (e) => { e.stopPropagation(); openPostFormModal(post); });
+            if(editBtn) editBtn.addEventListener('click', (e) => { e.stopPropagation(); openPostFormModal(post); });
+            
             const deleteBtn = el.querySelector('.delete');
-            if (deleteBtn) deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); handleDeletePost(post.id); });
+            if(deleteBtn) deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); handleDeletePost(post.id); });
+
             return el;
         };
-
+        
         const renderPosts = () => {
             const grid = $('#post-grid');
             grid.innerHTML = '';
-            const filteredPosts = state.posts.filter(p => !state.currentCategory || p.category.toLowerCase() === state.currentCategory.toLowerCase());
+            const filteredPosts = state.posts.filter(p => !state.currentCategory || p.category === state.currentCategory);
+            
             if (filteredPosts.length === 0 && !state.isLoading) {
                 $('#empty-state').classList.remove('hidden');
             } else {
@@ -399,15 +483,25 @@
             }
         };
 
+        const showLoading = (loading) => {
+            state.isLoading = loading;
+            $('#skeleton-grid').classList.toggle('hidden', !loading);
+            $('#post-grid').classList.toggle('hidden', loading);
+            if (!loading) {
+                renderPosts();
+            }
+        };
+        
+        // --- MODAL & FORM LOGIC ---
         const openModal = (modalId) => $(modalId).classList.remove('hidden');
         const closeModal = (modalId) => $(modalId).classList.add('hidden');
         const openAuthModal = () => openModal('#auth-modal');
-        const closeAuthModal = () => closeModal('#auth-modal');
+        const closeAuthModal = () => { closeModal('#auth-modal'); $('#auth-error').classList.add('hidden'); };
         const showAuthError = (message) => {
             $('#auth-error').textContent = message;
             $('#auth-error').classList.remove('hidden');
         }
-        window.openPostModal = (post) => {
+        const openPostModal = (post) => {
             if (!post) return;
             $('#post-modal-img').src = post.image_url;
             $('#modal-title').textContent = post.title;
@@ -416,7 +510,7 @@
         };
         const openPostFormModal = (post = null) => {
             $('#post-form').reset();
-            if (post) {
+            if (post) { // Edit mode
                 state.editingPostId = post.id;
                 $('#post-form-title').textContent = 'Edit Postingan';
                 $('#post-id-input').value = post.id;
@@ -425,7 +519,7 @@
                 $('#post-category-input').value = post.category;
                 $('#post-image-input').value = post.image_url;
                 $('#post-link-input').value = post.link_url;
-            } else {
+            } else { // Create mode
                 state.editingPostId = null;
                 $('#post-form-title').textContent = 'Tambah Postingan Baru';
             }
@@ -442,14 +536,15 @@
             openModal('#banner-form-modal');
         };
 
-        $$('.close-modal').forEach(btn => btn.closest('.modal-container').previousElementSibling.onclick = (e) => {
-             if (e.target.classList.contains('modal-backdrop')) {
-                closeModal('#post-modal'); closeModal('#auth-modal'); closeModal('#post-form-modal'); closeModal('#banner-form-modal');
-             }
-        });
-         $$('.close-modal').forEach(btn => btn.onclick = () => {
-             closeModal('#post-modal'); closeModal('#auth-modal'); closeModal('#post-form-modal'); closeModal('#banner-form-modal');
-         });
+        // --- EVENT LISTENERS ---
+        const closeModalHandler = () => {
+            closeModal('#post-modal');
+            closeModal('#auth-modal');
+            closeModal('#post-form-modal');
+            closeModal('#banner-form-modal');
+        }
+        $$('.close-modal').forEach(btn => btn.addEventListener('click', closeModalHandler));
+        $$('.modal-backdrop').forEach(backdrop => backdrop.addEventListener('click', closeModalHandler));
 
         $('#fab-add-post').addEventListener('click', () => openPostFormModal());
         $('#add-post-btn-desktop').addEventListener('click', () => openPostFormModal());
@@ -457,19 +552,16 @@
         $('#post-form').addEventListener('submit', handlePostSubmit);
         $('#banner-form').addEventListener('submit', handleBannerSubmit);
         
-        $('#tab-login').onclick = () => {$('#tab-login').classList.add('active');$('#tab-register').classList.remove('active');$('#login-form').classList.remove('hidden');$('#register-form').classList.add('hidden');$('#auth-modal-title').textContent = 'Login';$('#auth-error').classList.add('hidden');};$('#tab-register').onclick = () => {$('#tab-login').classList.remove('active');$('#tab-register').classList.add('active');$('#login-form').classList.add('hidden');$('#register-form').classList.remove('hidden');$('#auth-modal-title').textContent = 'Register';$('#auth-error').classList.add('hidden');};$('#login-form').addEventListener('submit', (e) => {e.preventDefault();handleLogin($('#login-email').value, $('#login-password').value);});$('#register-form').addEventListener('submit', (e) => {e.preventDefault();handleRegister($('#register-email').value, $('#register-password').value);});$('#theme-toggle').onclick = () => {const newTheme = document.body.dataset.theme === 'dark' ? '' : 'dark';document.body.dataset.theme = newTheme;$('#theme-toggle i').className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';localStorage.setItem('luminox_theme', newTheme);};$('#menu-toggle').onclick = () => { $('#sidebar').classList.add('open'); $('#backdrop').classList.add('active'); };$('#backdrop').onclick = () => { $('#sidebar').classList.remove('open'); $('#backdrop').classList.remove('active'); };$$('[data-category]').forEach(item => {item.onclick = (e) => {e.preventDefault();$$('[data-category]').forEach(i => i.classList.remove('active'));$$(`[data-category="${item.dataset.category}"]`).forEach(i => i.classList.add('active'));state.currentCategory = item.dataset.category;renderPosts();if(window.innerWidth < 768) {$('#sidebar').classList.remove('open');$('#backdrop').classList.remove('active');}}});$('#logout-btn-desktop').onclick = handleLogout;
-        const showLoading = (loading) => {
-            state.isLoading = loading;
-            const wasEmpty = state.posts.length === 0;
-            $('#skeleton-grid').classList.toggle('hidden', !loading);
-            $('#post-grid').classList.toggle('hidden', loading);
-            if (!loading && wasEmpty && state.posts.length === 0) {
-                $('#empty-state').classList.remove('hidden');
-            } else {
-                $('#empty-state').classList.add('hidden');
-            }
-            renderPosts();
-        };
+        $('#tab-login').onclick = () => {$('#tab-login').classList.add('active');$('#tab-register').classList.remove('active');$('#login-form').classList.remove('hidden');$('#register-form').classList.add('hidden');$('#auth-modal-title').textContent = 'Login';$('#auth-error').classList.add('hidden');};
+        $('#tab-register').onclick = () => {$('#tab-login').classList.remove('active');$('#tab-register').classList.add('active');$('#login-form').classList.add('hidden');$('#register-form').classList.remove('hidden');$('#auth-modal-title').textContent = 'Register';$('#auth-error').classList.add('hidden');};
+        $('#login-form').addEventListener('submit', (e) => {e.preventDefault();handleLogin($('#login-email').value, $('#login-password').value);});
+        $('#register-form').addEventListener('submit', (e) => {e.preventDefault();handleRegister($('#register-email').value, $('#register-password').value);});
+        $('#theme-toggle').onclick = () => {const newTheme = document.body.dataset.theme === 'dark' ? '' : 'dark';document.body.dataset.theme = newTheme;$('#theme-toggle i').className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';localStorage.setItem('luminox_theme', newTheme);};
+        $('#menu-toggle').onclick = () => { $('#sidebar').classList.add('open'); $('#backdrop').classList.add('active'); };
+        $('#backdrop').onclick = () => { $('#sidebar').classList.remove('open'); $('#backdrop').classList.remove('active'); };
+        $$('[data-category]').forEach(item => {item.onclick = (e) => {e.preventDefault();$$('[data-category]').forEach(i => i.classList.remove('active'));$$(`[data-category="${item.dataset.category}"]`).forEach(i => i.classList.add('active'));state.currentCategory = item.dataset.category;renderPosts();if(window.innerWidth < 768) {$('#sidebar').classList.remove('open');$('#backdrop').classList.remove('active');}}});
+        $('#logout-btn-desktop').onclick = handleLogout;
+        
         const init = () => {
             document.body.dataset.theme = localStorage.getItem('luminox_theme') || '';
             $('#theme-toggle i').className = document.body.dataset.theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
@@ -477,6 +569,7 @@
             const skeletonCardHTML = `<div class="skeleton-card"><div class="skeleton-img shimmer"></div><div class="skeleton-content"><div class="skeleton-line shimmer" style="width: 25%"></div><div class="skeleton-line shimmer" style="width: 75%"></div><div class="skeleton-line shimmer" style="width: 50%"></div></div></div>`;
             skeletonGrid.innerHTML = Array(4).fill(skeletonCardHTML).join('');
         };
+
         init();
     });
   </script>
