@@ -218,10 +218,13 @@
       const $$ = (s) => document.querySelectorAll(s);
 
       // --- 2. INISIALISASI SUPABASE ---
-      // GANTI DENGAN URL & KEY DARI PROYEK SUPABASE ANDA
       const SUPABASE_URL = 'https://zmhshfqpyekrcddsqhuz.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptaHNoZnFweWVrcmNkZHNxaHV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMzgxNDAsImV4cCI6MjA3NTcxNDE0MH0.I_AMK5MYj4Ett8fFnAEq-w8HHSqL9NYKnfuaTZOy4O8';
-      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      
+      // ===== PERBAIKAN DI SINI =====
+      const { createClient } = supabase;
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      // ===========================
 
 
       // --- MANAJEMEN DATA LOCALSTORAGE (Wishlist & History tetap sama) ---
