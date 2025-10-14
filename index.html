@@ -106,6 +106,15 @@
     #auth-container button { width: 100%; padding: 0.75rem; border-radius: 8px; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; transition: background .2s; }
     #auth-container button:hover { background: var(--accent-dark); }
     #auth-container #logout-btn { background-color: var(--danger); margin-top: 1rem; }
+    #auth-container p a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    #auth-container p a:hover { text-decoration: underline; }
+
+    /* --- Gaya Profile View --- */
+    .profile-header { display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+    .profile-avatar-wrapper { position: relative; }
+    .profile-avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--border); }
+    #avatar-upload-label { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; background: var(--accent); color: white; border-radius: 50%; display: grid; place-items: center; cursor: pointer; border: 2px solid var(--card); }
+    #avatar-upload-label:hover { background: var(--accent-dark); }
 
     /* --- Gaya Notifikasi Popup Baru --- */
     #notification-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
@@ -151,7 +160,7 @@
         <div class="menu-item" data-category="template"><i class="fas fa-paint-brush"></i> Template</div>
         <div class="menu-item" data-category="texturepack"><i class="fas fa-calendar-alt"></i> TexturePack</div>
         <p class="menu-heading">Akun</p>
-        <div class="menu-item" id="auth-menu-btn"><i class="fas fa-user-circle"></i><span id="auth-menu-text">Login</span></div>
+        <div class="menu-item" id="auth-menu-btn"><i class="fas fa-user-circle"></i><span id="auth-menu-text">Login/Register</span></div>
       </nav>
     </aside>
 
@@ -238,24 +247,16 @@
       const createStorageManager = (key) => ({ get: () => JSON.parse(localStorage.getItem(key)) || [], save: (data) => localStorage.setItem(key, JSON.stringify(data)), });
       const WishlistManager = { ...createStorageManager('luminox_wishlist'), add: (postId) => { const wishlist = WishlistManager.get(); if (!wishlist.includes(postId)) { wishlist.push(postId); WishlistManager.save(wishlist); } }, remove: (postId) => { let wishlist = WishlistManager.get(); wishlist = wishlist.filter(id => id !== postId); WishlistManager.save(wishlist); }, has: (postId) => WishlistManager.get().includes(postId) };
       const HistoryManager = { ...createStorageManager('luminox_history'), add: (postId) => { let history = HistoryManager.get(); history = history.filter(id => id !== postId); history.unshift(postId); if (history.length > 50) history.pop(); HistoryManager.save(history); } };
-      let state = { posts: [], currentCategory: '', searchQuery: '', isLoading: true, userRole: null };
+      let state = { posts: [], currentCategory: '', searchQuery: '', isLoading: true, user: null, profile: null };
 
-      // --- FUNGSI NOTIFIKASI POPUP BARU ---
       function showNotification(message, type = 'success', duration = 4000) {
           const container = $('#notification-container');
           const toast = document.createElement('div');
           toast.className = `toast ${type}`;
-          
-          const icons = {
-              success: 'fa-check-circle',
-              error: 'fa-times-circle'
-          };
-          
+          const icons = { success: 'fa-check-circle', error: 'fa-times-circle' };
           toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
           container.appendChild(toast);
-
-          setTimeout(() => toast.classList.add('show'), 10); // Trigger animation
-
+          setTimeout(() => toast.classList.add('show'), 10);
           setTimeout(() => {
               toast.classList.remove('show');
               toast.classList.add('hide');
@@ -268,8 +269,6 @@
       const openAuthModal = () => authModalWrapper.classList.add('open');
       const closeAuthModal = () => authModalWrapper.classList.remove('open');
 
-      $('#auth-menu-btn').addEventListener('click', openAuthModal);
-      $('#auth-bottom-nav-btn').addEventListener('click', openAuthModal);
       $('#auth-modal-close').addEventListener('click', closeAuthModal);
       $('#auth-modal-backdrop').addEventListener('click', closeAuthModal);
 
@@ -284,7 +283,7 @@
         el.className = 'post-card';
         el.dataset.postId = post.id;
         const isWishlisted = WishlistManager.has(post.id);
-        const isAdmin = state.userRole === 'admin' || state.userRole === 'moderator';
+        const isAdmin = state.profile?.role === 'admin' || state.profile?.role === 'moderator';
         const adminActionsHTML = isAdmin ? `<button class="edit-btn"><i class="fas fa-pencil-alt"></i></button>` : '';
         el.innerHTML = `<div class="post-card-img-wrapper">${adminActionsHTML}<img src="${post.img}" alt="${post.title}" class="post-card-img"><button class="wishlist-btn ${isWishlisted ? 'wishlisted' : ''}"><i class="fa-regular fa-heart"></i><i class="fa-solid fa-heart"></i></button></div><div class="post-card-content"><div class="post-card-category">${post.category}</div><h3 class="post-card-title">${post.title}</h3><p class="post-card-desc">${post.description.substring(0, 80)}...</p></div>`;
         el.addEventListener('click', (e) => { if (!e.target.closest('.wishlist-btn') && !e.target.closest('.edit-btn')) { openPostModal(post); } });
@@ -328,7 +327,12 @@
       $('#search-toggle').onclick = () => { const header = $('#app-header'); header.classList.toggle('search-active'); if (header.classList.contains('search-active')) $('#header-search-input').focus(); else { state.searchQuery = ''; renderPosts(); } };
       $('#header-search-input').addEventListener('input', (e) => { state.searchQuery = e.target.value; renderPosts(); });
       
-      async function getUserRole() { const { data: { user } } = await supabase.auth.getUser(); if (!user) return null; const { data: profile, error } = await supabase.from('profiles').select('role').eq('id', user.id).single(); return error ? null : profile.role; }
+      async function getProfile(user) {
+          if (!user) return null;
+          const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+          if (error) { console.error("Error getting profile:", error); return null; }
+          return data;
+      }
 
       function renderAdminForm(postToEdit = null) {
         const isEditing = postToEdit !== null;
@@ -341,26 +345,151 @@
       }
       
       const openEditModal = (post) => { renderAdminForm(post); openAuthModal(); };
+      
+      async function handleRegister(e) {
+        e.preventDefault();
+        const email = e.target.email.value; const password = e.target.password.value;
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) { showNotification("Pendaftaran Gagal: " + error.message, 'error'); } 
+        else { showNotification('Pendaftaran berhasil! Silakan cek email Anda untuk konfirmasi.', 'success'); renderLoginView(); }
+      }
 
-      async function setupAdminUI() {
-        if (state.userRole === 'admin' || state.userRole === 'moderator') { renderAdminForm(); $('#auth-menu-text').textContent = 'Panel Admin'; } 
-        else { authContainer.innerHTML = `<div id="login-view"><h2>Login</h2><form id="login-form"><label for="email">Email:</label><input type="email" id="email" name="email" required><label for="password">Password:</label><input type="password" id="password" name="password" required><button type="submit">Login</button></form></div>`; authContainer.querySelector('#login-form').addEventListener('submit', handleLogin); $('#auth-menu-text').textContent = 'Login'; }
+      function renderLoginView() {
+        authContainer.innerHTML = `<div id="login-view"><h2>Login</h2><form id="login-form"><label for="email">Email:</label><input type="email" id="email" name="email" required autocomplete="email"><label for="password">Password:</label><input type="password" id="password" name="password" required autocomplete="current-password"><button type="submit">Login</button></form><p style="text-align: center; margin-top: 1rem; font-size: 0.9rem;">Belum punya akun? <a href="#" id="show-register">Daftar</a></p></div>`;
+        authContainer.querySelector('#login-form').addEventListener('submit', handleLogin);
+        authContainer.querySelector('#show-register').addEventListener('click', (e) => { e.preventDefault(); renderRegisterView(); });
+      }
+
+      function renderRegisterView() {
+        authContainer.innerHTML = `<div id="register-view"><h2>Daftar Akun Baru</h2><form id="register-form"><label for="register-email">Email:</label><input type="email" id="register-email" name="email" required autocomplete="email"><label for="register-password">Password:</label><input type="password" id="register-password" name="password" required autocomplete="new-password"><button type="submit">Daftar</button></form><p style="text-align: center; margin-top: 1rem; font-size: 0.9rem;">Sudah punya akun? <a href="#" id="show-login">Login</a></p></div>`;
+        authContainer.querySelector('#register-form').addEventListener('submit', handleRegister);
+        authContainer.querySelector('#show-login').addEventListener('click', (e) => { e.preventDefault(); renderLoginView(); });
+      }
+      
+      async function renderProfileView() {
+          const user = state.user;
+          const profile = state.profile;
+          if (user && profile) {
+              const avatarSrc = profile.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${user.email}`;
+              authContainer.innerHTML = `
+                  <h2>Profil Saya</h2>
+                  <form id="profile-form">
+                      <div class="profile-header">
+                          <div class="profile-avatar-wrapper">
+                              <img src="${avatarSrc}" alt="Avatar" class="profile-avatar" id="avatar-preview">
+                              <label for="avatar-upload" id="avatar-upload-label"><i class="fas fa-camera"></i></label>
+                              <input type="file" id="avatar-upload" name="avatar" class="hidden" accept="image/png, image/jpeg">
+                          </div>
+                      </div>
+                      <label for="nickname">Nickname:</label>
+                      <input type="text" id="nickname" name="nickname" value="${profile.nickname || ''}" placeholder="Masukkan nickname Anda">
+                      <label for="email" style="margin-top:0.5rem;">Email:</label>
+                      <input type="email" id="email" name="email" value="${user.email}" disabled>
+                      <button type="submit">Simpan Perubahan</button>
+                  </form>
+                  <button id="logout-btn">Logout</button>
+              `;
+              authContainer.querySelector('#profile-form').addEventListener('submit', handleProfileUpdate);
+              authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
+              authContainer.querySelector('#avatar-upload').addEventListener('change', (e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (event) => { $('#avatar-preview').src = event.target.result; };
+                      reader.readAsDataURL(file);
+                  }
+              });
+          } else {
+              renderLoginView(); 
+          }
+      }
+
+      async function handleProfileUpdate(e) {
+          e.preventDefault();
+          const form = e.target;
+          const user = state.user;
+          const newNickname = form.nickname.value;
+          const avatarFile = form.avatar.files[0];
+          
+          let avatar_url = state.profile.avatar_url;
+
+          if (avatarFile) {
+              const fileExt = avatarFile.name.split('.').pop();
+              const fileName = `${user.id}.${fileExt}`;
+              const filePath = `${fileName}`;
+
+              const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, avatarFile, { upsert: true });
+
+              if (uploadError) {
+                  showNotification('Gagal mengunggah foto profil: ' + uploadError.message, 'error');
+                  return;
+              }
+              
+              const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+              avatar_url = urlData.publicUrl + `?t=${new Date().getTime()}`; // Cache busting
+          }
+
+          const { error: updateError } = await supabase.from('profiles').update({
+              nickname: newNickname,
+              avatar_url: avatar_url
+          }).eq('id', user.id);
+
+          if (updateError) {
+              showNotification('Gagal memperbarui profil: ' + updateError.message, 'error');
+          } else {
+              showNotification('Profil berhasil diperbarui!', 'success');
+              // Perbarui state lokal agar UI sinkron
+              state.profile.nickname = newNickname;
+              state.profile.avatar_url = avatar_url;
+              renderProfileView(); // Render ulang dengan data baru
+          }
+      }
+      
+      async function setupUIBasedOnAuth() {
+        const { data: { user } } = await supabase.auth.getUser();
+        state.user = user;
+        if (user) {
+            const profile = await getProfile(user);
+            state.profile = profile;
+            if (profile?.role === 'admin' || profile?.role === 'moderator') {
+                $('#auth-menu-text').textContent = 'Panel Admin';
+            } else {
+                $('#auth-menu-text').textContent = 'Profil Saya';
+            }
+        } else {
+            state.profile = null;
+            $('#auth-menu-text').textContent = 'Login';
+        }
+        renderPosts(); // Render postingan setelah status auth jelas
       }
 
       async function handleLogin(e) {
         e.preventDefault();
         const email = e.target.email.value; const password = e.target.password.value;
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) { showNotification("Login Gagal: " + error.message, 'error'); } 
-        else { showNotification('Login berhasil!', 'success'); state.userRole = await getUserRole(); await setupAdminUI(); renderPosts(); closeAuthModal(); }
+        const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) { 
+            showNotification("Login Gagal: " + error.message, 'error'); 
+        } else { 
+            showNotification('Login berhasil!', 'success');
+            state.user = data.user;
+            state.profile = await getProfile(data.user);
+            await setupUIBasedOnAuth();
+            
+            if (state.profile?.role === 'admin' || state.profile?.role === 'moderator') {
+                renderAdminForm();
+            } else {
+                await renderProfileView();
+            }
+        }
       }
 
       async function handleLogout() {
         await supabase.auth.signOut();
-        state.userRole = null;
-        await setupAdminUI();
-        renderPosts();
+        state.user = null;
+        state.profile = null;
+        await setupUIBasedOnAuth();
         showNotification('Anda telah logout.', 'success');
+        closeAuthModal();
       }
 
       async function handleSubmit(e) {
@@ -384,10 +513,27 @@
         const skeletonGrid = $('#skeleton-grid');
         const skeletonCardHTML = `<div class="skeleton-card"><div class="skeleton-img shimmer"></div><div class="skeleton-content"><div class="skeleton-line shimmer" style="width: 35%;"></div><div class="skeleton-line shimmer" style="width: 85%;"></div><div class="skeleton-line shimmer" style="width: 60%;"></div></div></div>`;
         skeletonGrid.innerHTML = Array(4).fill(skeletonCardHTML).join('');
-        state.userRole = await getUserRole();
+        
         await fetchPosts();
-        setupAdminUI();
+        await setupUIBasedOnAuth();
       };
+      
+      const handleAuthButtonClick = async () => {
+        if (state.user) {
+            if (state.profile?.role === 'admin' || state.profile?.role === 'moderator') {
+                renderAdminForm();
+            } else {
+                await renderProfileView();
+            }
+        } else {
+            renderLoginView();
+        }
+        openAuthModal();
+      };
+      
+      $('#auth-menu-btn').addEventListener('click', handleAuthButtonClick);
+      $('#auth-bottom-nav-btn').addEventListener('click', handleAuthButtonClick);
+
       init();
     });
 </script>
