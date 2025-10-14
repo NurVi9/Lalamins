@@ -160,7 +160,7 @@
         <div class="menu-item" data-category="template"><i class="fas fa-paint-brush"></i> Template</div>
         <div class="menu-item" data-category="texturepack"><i class="fas fa-calendar-alt"></i> TexturePack</div>
         <p class="menu-heading">Akun</p>
-        <div class="menu-item" id="auth-menu-btn"><i class="fas fa-user-circle"></i><span id="auth-menu-text">Login/Register</span></div>
+        <div class="menu-item" id="auth-menu-btn"><i class="fas fa-user-circle"></i><span id="auth-menu-text">Regid</span></div>
       </nav>
     </aside>
 
@@ -458,7 +458,7 @@
             }
         } else {
             state.profile = null;
-            $('#auth-menu-text').textContent = 'Login';
+            $('#auth-menu-text').textContent = 'Login/Register';
         }
         renderPosts(); // Render postingan setelah status auth jelas
       }
