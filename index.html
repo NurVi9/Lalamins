@@ -111,12 +111,19 @@
     #auth-container p a { color: var(--accent); text-decoration: none; font-weight: 500; }
     #auth-container p a:hover { text-decoration: underline; }
 
-    /* --- Gaya Profile View --- */
+    /* --- Gaya Profile View & User Management --- */
     .profile-header { display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
     .profile-avatar-wrapper { position: relative; }
     .profile-avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--border); }
     #avatar-upload-label { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; background: var(--accent); color: white; border-radius: 50%; display: grid; place-items: center; cursor: pointer; border: 2px solid var(--card); }
     #avatar-upload-label:hover { background: var(--accent-dark); }
+    .user-management-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+    .user-management-item { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background-color: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
+    .user-management-info { display: flex; flex-direction: column; }
+    .user-management-info .nickname { font-weight: 600; }
+    .user-management-info .email { font-size: 0.85rem; color: var(--muted); }
+    .user-management-role select { padding: 0.3rem 0.5rem; border-radius: 6px; border: 1px solid var(--border); background-color: var(--card); color: var(--text); }
+
 
     /* --- Gaya Notifikasi Popup --- */
     #notification-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
@@ -136,9 +143,9 @@
     .comment-item { display: flex; gap: .75rem; }
     .comment-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; margin-top: 2px; flex-shrink: 0; }
     .comment-content { flex: 1; }
-    .comment-header { display: flex; align-items: baseline; gap: .5rem; margin-bottom: 2px; }
+    .comment-header { display: flex; align-items: center; gap: .5rem; margin-bottom: 2px; }
     .comment-author { font-weight: 600; font-size: .9rem; }
-    .comment-date { font-size: .75rem; color: var(--muted); }
+    .comment-date { font-size: .75rem; color: var(--muted); margin-left: auto; }
     .comment-body { font-size: .95rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
     #comment-form { display: flex; gap: .75rem; align-items: flex-start; margin-bottom: 1.5rem; }
     #comment-form textarea { flex: 1; resize: vertical; min-height: 40px; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: .95rem; }
@@ -147,6 +154,21 @@
     #comment-login-prompt { text-align: center; padding: 1rem; background: var(--bg); border-radius: 8px; font-size: .9rem; color: var(--muted); margin-bottom: 1.5rem; }
     #comment-login-prompt a { color: var(--accent); font-weight: 600; cursor: pointer; text-decoration: none; }
     #comment-login-prompt a:hover { text-decoration: underline; }
+
+    /* --- Gaya Badge Role --- */
+    .role-badge {
+        font-size: .65rem;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        line-height: 1;
+        vertical-align: middle;
+    }
+    .role-badge.admin { background-color: var(--danger); color: white; }
+    .role-badge.moderator { background-color: var(--accent); color: white; }
+    .role-badge.user { background-color: var(--border); color: var(--text); }
+
 
     @media (min-width: 768px) {
       body { overflow: hidden; }
@@ -309,8 +331,8 @@
         el.className = 'post-card';
         el.dataset.postId = post.id;
         const isWishlisted = WishlistManager.has(post.id);
-        const isAdmin = state.profile?.role === 'admin' || state.profile?.role === 'moderator';
-        const adminActionsHTML = isAdmin ? `<button class="edit-btn"><i class="fas fa-pencil-alt"></i></button>` : '';
+        const isModerator = state.profile?.role === 'admin' || state.profile?.role === 'moderator';
+        const adminActionsHTML = isModerator ? `<button class="edit-btn"><i class="fas fa-pencil-alt"></i></button>` : '';
         el.innerHTML = `<div class="post-card-img-wrapper">${adminActionsHTML}<img src="${post.img}" alt="${post.title}" class="post-card-img"><button class="wishlist-btn ${isWishlisted ? 'wishlisted' : ''}"><i class="fa-regular fa-heart"></i><i class="fa-solid fa-heart"></i></button></div><div class="post-card-content"><div class="post-card-category">${post.category}</div><h3 class="post-card-title">${post.title}</h3><p class="post-card-desc">${post.description.substring(0, 80)}...</p></div>`;
         el.addEventListener('click', (e) => { if (!e.target.closest('.wishlist-btn') && !e.target.closest('.edit-btn')) { openPostModal(post); } });
         el.querySelector('.wishlist-btn').addEventListener('click', (e) => { e.stopPropagation(); const btn = e.currentTarget; btn.classList.contains('wishlisted') ? WishlistManager.remove(post.id) : WishlistManager.add(post.id); btn.classList.toggle('wishlisted'); if (['wishlist', 'history'].includes(state.currentCategory)) renderPosts(); });
@@ -386,7 +408,7 @@
           list.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 1rem 0;">Memuat komentar...</p>';
 
           const { data, error } = await supabase.from('comments')
-              .select('*, profiles(nickname, avatar_url)')
+              .select('*, profiles(nickname, avatar_url, role)')
               .eq('post_id', postId)
               .order('created_at', { ascending: true });
 
@@ -400,13 +422,20 @@
               list.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 1rem 0;">Belum ada komentar.</p>';
               return;
           }
+          
+          const createRoleBadge = (role) => {
+              if (!role || role === 'user') return '';
+              const roleClass = role.toLowerCase();
+              return `<span class="role-badge ${roleClass}">${role}</span>`;
+          };
 
           list.innerHTML = data.map(comment => {
               const profile = comment.profiles;
               const author = profile?.nickname || 'Pengguna';
               const avatar = profile?.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${author}`;
+              const role = profile?.role || 'user';
               
-              return `<div class="comment-item"><img src="${avatar}" alt="${author}" class="comment-avatar"><div class="comment-content"><div class="comment-header"><span class="comment-author">${author}</span><span class="comment-date">${timeAgo(comment.created_at)}</span></div><p class="comment-body">${comment.content}</p></div></div>`;
+              return `<div class="comment-item"><img src="${avatar}" alt="${author}" class="comment-avatar"><div class="comment-content"><div class="comment-header"><span class="comment-author">${author}</span>${createRoleBadge(role)}<span class="comment-date">${timeAgo(comment.created_at)}</span></div><p class="comment-body">${comment.content}</p></div></div>`;
           }).join('');
       }
 
@@ -439,11 +468,65 @@
         const isEditing = postToEdit !== null;
         const title = isEditing ? 'Edit Postingan' : 'Buat Postingan Baru';
         const buttonText = isEditing ? 'Simpan Perubahan' : 'Upload Postingan';
-        authContainer.innerHTML = `<a href="#" class="admin-nav-link" id="go-to-profile-view">Lihat Profil Saya</a><h2>${title}</h2><form id="upload-form" data-editing-id="${isEditing ? postToEdit.id : ''}"><label for="title">Judul:</label><input type="text" id="title" name="title" required value="${isEditing ? postToEdit.title : ''}"><label for="description">Deskripsi:</label><textarea id="description" name="description" rows="4" required>${isEditing ? postToEdit.description : ''}</textarea><label for="category">Kategori:</label><select id="category" name="category" required><option value="Template">Template</option><option value="Addon">Addon</option><option value="TexturePack">TexturePack</option></select><label for="img">URL Gambar:</label><input type="text" id="img" name="img" required value="${isEditing ? postToEdit.img : ''}"><label for="mediafire">Link MediaFire:</label><input type="url" id="mediafire" name="mediafire" required value="${isEditing ? postToEdit.links.mediafire : ''}"><label for="gofile">Link Gofile:</label><input type="url" id="gofile" name="gofile" required value="${isEditing ? postToEdit.links.gofile : ''}"><input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;"><label for="isFeatured">Jadikan Pilihan Editor?</label><br><button type="submit">${buttonText}</button></form><button id="logout-btn" style="margin-top: 1rem;">Logout</button>`;
+        authContainer.innerHTML = `<a href="#" class="admin-nav-link" id="go-to-profile-view">Kembali ke Profil</a><h2>${title}</h2><form id="upload-form" data-editing-id="${isEditing ? postToEdit.id : ''}"><label for="title">Judul:</label><input type="text" id="title" name="title" required value="${isEditing ? postToEdit.title : ''}"><label for="description">Deskripsi:</label><textarea id="description" name="description" rows="4" required>${isEditing ? postToEdit.description : ''}</textarea><label for="category">Kategori:</label><select id="category" name="category" required><option value="Template">Template</option><option value="Addon">Addon</option><option value="TexturePack">TexturePack</option></select><label for="img">URL Gambar:</label><input type="text" id="img" name="img" required value="${isEditing ? postToEdit.img : ''}"><label for="mediafire">Link MediaFire:</label><input type="url" id="mediafire" name="mediafire" required value="${isEditing ? postToEdit.links.mediafire : ''}"><label for="gofile">Link Gofile:</label><input type="url" id="gofile" name="gofile" required value="${isEditing ? postToEdit.links.gofile : ''}"><input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;"><label for="isFeatured">Jadikan Pilihan Editor?</label><br><button type="submit">${buttonText}</button></form><button id="logout-btn" style="margin-top: 1rem;">Logout</button>`;
         if (isEditing) { authContainer.querySelector('#category').value = postToEdit.category; authContainer.querySelector('#isFeatured').checked = postToEdit.isFeatured; }
         authContainer.querySelector('#upload-form').addEventListener('submit', handleSubmit);
         authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
         $('#go-to-profile-view').addEventListener('click', (e) => { e.preventDefault(); renderProfileView(); });
+      }
+
+      async function handleRoleUpdate(userId, newRole) {
+        const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId);
+        if (error) {
+            showNotification(`Gagal mengubah role: ${error.message}`, 'error');
+        } else {
+            showNotification('Role pengguna berhasil diubah.', 'success');
+        }
+      }
+
+      async function renderUserManagementView() {
+          authContainer.innerHTML = `<a href="#" class="admin-nav-link" id="go-to-profile-view">Kembali ke Profil</a><h2>Kelola Pengguna</h2><div id="user-list-container">Memuat pengguna...</div>`;
+          $('#go-to-profile-view').addEventListener('click', (e) => { e.preventDefault(); renderProfileView(); });
+          
+          const { data: profiles, error } = await supabase.from('profiles').select('id, nickname, email, role');
+
+          if (error) {
+              $('#user-list-container').innerHTML = `<p style="color:var(--danger);">Gagal memuat pengguna: ${error.message}</p>`;
+              return;
+          }
+
+          const currentAdminId = state.user.id;
+          const userListHTML = profiles.map(profile => {
+              const nickname = profile.nickname || 'Tanpa Nickname';
+              const email = profile.email || 'Tanpa Email';
+              const isCurrentUser = profile.id === currentAdminId;
+              
+              return `
+                <li class="user-management-item">
+                    <div class="user-management-info">
+                        <span class="nickname">${nickname}</span>
+                        <span class="email">${email}</span>
+                    </div>
+                    <div class="user-management-role">
+                        <select data-user-id="${profile.id}" ${isCurrentUser ? 'disabled' : ''}>
+                            <option value="user" ${profile.role === 'user' ? 'selected' : ''}>User</option>
+                            <option value="moderator" ${profile.role === 'moderator' ? 'selected' : ''}>Moderator</option>
+                            <option value="admin" ${profile.role === 'admin' ? 'selected' : ''}>Admin</option>
+                        </select>
+                    </div>
+                </li>
+              `;
+          }).join('');
+
+          $('#user-list-container').innerHTML = `<ul class="user-management-list">${userListHTML}</ul>`;
+
+          $$('.user-management-role select').forEach(select => {
+              select.addEventListener('change', (e) => {
+                  const userId = e.target.dataset.userId;
+                  const newRole = e.target.value;
+                  handleRoleUpdate(userId, newRole);
+              });
+          });
       }
       
       const openEditModal = (post) => { renderAdminForm(post); openAuthModal(); };
@@ -471,18 +554,24 @@
       async function renderProfileView() {
           const user = state.user; const profile = state.profile;
           if (user && profile) {
-              const isAdmin = profile.role === 'admin' || profile.role === 'moderator';
-              const adminButtonHTML = isAdmin ? `<button id="go-to-admin-btn" style="background-color: var(--success); margin-top: 1rem;">Panel Admin</button>` : '';
+              const isModerator = profile.role === 'admin' || profile.role === 'moderator';
+              const isAdmin = profile.role === 'admin';
+              
+              const adminPanelButtonHTML = isModerator ? `<button id="go-to-admin-btn" style="background-color: var(--success);">Panel Admin</button>` : '';
+              const userManagementButtonHTML = isAdmin ? `<button id="manage-users-btn" style="background-color: var(--accent);">Kelola Pengguna</button>` : '';
 
               const avatarSrc = profile.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${user.email}`;
-              authContainer.innerHTML = `<form id="profile-form"><h2>Profil Saya</h2><div class="profile-header"><div class="profile-avatar-wrapper"><img src="${avatarSrc}" alt="Avatar" class="profile-avatar" id="avatar-preview"><label for="avatar-upload" id="avatar-upload-label"><i class="fas fa-camera"></i></label><input type="file" id="avatar-upload" name="avatar" class="hidden" accept="image/png, image/jpeg"></div></div><label for="nickname">Nickname:</label><input type="text" id="nickname" name="nickname" value="${profile.nickname || ''}" placeholder="Masukkan nickname Anda"><label for="email" style="margin-top:0.5rem;">Email:</label><input type="email" id="email" name="email" value="${user.email}" disabled><button type="submit">Simpan Perubahan</button></form><div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">${adminButtonHTML}<button id="logout-btn">Logout</button></div>`;
+              authContainer.innerHTML = `<form id="profile-form"><h2>Profil Saya</h2><div class="profile-header"><div class="profile-avatar-wrapper"><img src="${avatarSrc}" alt="Avatar" class="profile-avatar" id="avatar-preview"><label for="avatar-upload" id="avatar-upload-label"><i class="fas fa-camera"></i></label><input type="file" id="avatar-upload" name="avatar" class="hidden" accept="image/png, image/jpeg"></div></div><label for="nickname">Nickname:</label><input type="text" id="nickname" name="nickname" value="${profile.nickname || ''}" placeholder="Masukkan nickname Anda"><label for="email" style="margin-top:0.5rem;">Email:</label><input type="email" id="email" name="email" value="${user.email}" disabled><button type="submit">Simpan Perubahan</button></form><div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">${adminPanelButtonHTML}${userManagementButtonHTML}<button id="logout-btn">Logout</button></div>`;
               
               authContainer.querySelector('#profile-form').addEventListener('submit', handleProfileUpdate);
               authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
               authContainer.querySelector('#avatar-upload').addEventListener('change', (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (event) => { $('#avatar-preview').src = event.target.result; }; reader.readAsDataURL(file); } });
               
-              if(isAdmin) {
+              if(isModerator) {
                 $('#go-to-admin-btn').addEventListener('click', (e) => { e.preventDefault(); renderAdminForm(); });
+              }
+              if(isAdmin) {
+                $('#manage-users-btn').addEventListener('click', (e) => { e.preventDefault(); renderUserManagementView(); });
               }
           } else { renderLoginView(); }
       }
@@ -580,4 +669,3 @@
 </script>
 </body>
 </html>
-
