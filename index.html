@@ -457,29 +457,15 @@
       $('#search-toggle').onclick = () => { const header = $('#app-header'); header.classList.toggle('search-active'); if (header.classList.contains('search-active')) $('#header-search-input').focus(); else { state.searchQuery = ''; renderPosts(); } };
       $('#header-search-input').addEventListener('input', (e) => { state.searchQuery = e.target.value; renderPosts(); });
       
-      // --- PERBAIKAN: Fungsi getProfile yang lebih tangguh ---
+      // --- PERBAIKAN: Fungsi getProfile disederhanakan ---
+      // Logika pembuatan profil sekarang ada di database trigger
       async function getProfile(user) {
           if (!user) return null;
-          let { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-
-          // Jika profil tidak ada, buat profil baru untuk pengguna ini
-          if (error && error.code === 'PGRST116') { // PGRST116 = 0 baris ditemukan
-              const { data: newData, error: insertError } = await supabase
-                  .from('profiles')
-                  .insert([{ id: user.id }])
-                  .select()
-                  .single();
-              
-              if (insertError) {
-                  console.error("Gagal membuat profil:", insertError);
-                  return null;
-              }
-              return newData; // Kembalikan profil yang baru dibuat
-          }
-
-          if (error) {
-              console.error("Gagal mengambil profil:", error);
-              return null;
+          const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+          
+          if (error) { 
+            console.error("Gagal mengambil profil:", error); 
+            return null; 
           }
 
           return data;
@@ -505,12 +491,10 @@
         }
       }
       
-      // --- PERBAIKAN: Fitur Kelola Pengguna ---
       async function renderUserManagementView() {
           authContainer.innerHTML = `<a href="#" class="admin-nav-link" id="go-to-profile-view">Kembali ke Profil</a><h2>Kelola Pengguna</h2><div id="user-list-container">Memuat pengguna...</div>`;
           $('#go-to-profile-view').addEventListener('click', (e) => { e.preventDefault(); renderProfileView(); });
           
-          // Memperbaiki query: hapus 'email' karena tidak ada di tabel 'profiles'
           const { data: profiles, error } = await supabase.from('profiles').select('id, nickname, role');
 
           if (error) {
