@@ -105,7 +105,9 @@
     #auth-container input, #auth-container textarea, #auth-container select { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; }
     #auth-container button { width: 100%; padding: 0.75rem; border-radius: 8px; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; transition: background .2s; }
     #auth-container button:hover { background: var(--accent-dark); }
-    #auth-container #logout-btn { background-color: var(--danger); margin-top: 1rem; }
+    #auth-container #logout-btn { background-color: var(--danger); }
+    #auth-container .admin-nav-link { display: block; text-align: center; margin-bottom: 1.5rem; color: var(--accent); font-weight: 500; cursor: pointer; }
+    #auth-container .admin-nav-link:hover { text-decoration: underline; }
     #auth-container p a { color: var(--accent); text-decoration: none; font-weight: 500; }
     #auth-container p a:hover { text-decoration: underline; }
 
@@ -344,7 +346,7 @@
         const postId = form.dataset.postId;
         if (!content) return;
         
-        const { error } = await supabase.from('comments').insert({ content: content, post_id: postId, user_id: state.user.id });
+        const { error } = await supabase.from('comments').insert({ content: content, post_id: postId, user_id: state.profile.id });
 
         if (error) {
             showNotification('Gagal mengirim komentar: ' + error.message, 'error');
@@ -400,7 +402,6 @@
           }
 
           list.innerHTML = data.map(comment => {
-              // Fallback for profiles that might not exist or be loaded
               const profile = comment.profiles;
               const author = profile?.nickname || 'Pengguna';
               const avatar = profile?.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${author}`;
@@ -438,10 +439,11 @@
         const isEditing = postToEdit !== null;
         const title = isEditing ? 'Edit Postingan' : 'Buat Postingan Baru';
         const buttonText = isEditing ? 'Simpan Perubahan' : 'Upload Postingan';
-        authContainer.innerHTML = `<h2>${title}</h2><form id="upload-form" data-editing-id="${isEditing ? postToEdit.id : ''}"><label for="title">Judul:</label><input type="text" id="title" name="title" required value="${isEditing ? postToEdit.title : ''}"><label for="description">Deskripsi:</label><textarea id="description" name="description" rows="4" required>${isEditing ? postToEdit.description : ''}</textarea><label for="category">Kategori:</label><select id="category" name="category" required><option value="Template">Template</option><option value="Addon">Addon</option><option value="TexturePack">TexturePack</option></select><label for="img">URL Gambar:</label><input type="text" id="img" name="img" required value="${isEditing ? postToEdit.img : ''}"><label for="mediafire">Link MediaFire:</label><input type="url" id="mediafire" name="mediafire" required value="${isEditing ? postToEdit.links.mediafire : ''}"><label for="gofile">Link Gofile:</label><input type="url" id="gofile" name="gofile" required value="${isEditing ? postToEdit.links.gofile : ''}"><input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;"><label for="isFeatured">Jadikan Pilihan Editor?</label><br><button type="submit">${buttonText}</button></form><button id="logout-btn">Logout</button>`;
+        authContainer.innerHTML = `<a href="#" class="admin-nav-link" id="go-to-profile-view">Lihat Profil Saya</a><h2>${title}</h2><form id="upload-form" data-editing-id="${isEditing ? postToEdit.id : ''}"><label for="title">Judul:</label><input type="text" id="title" name="title" required value="${isEditing ? postToEdit.title : ''}"><label for="description">Deskripsi:</label><textarea id="description" name="description" rows="4" required>${isEditing ? postToEdit.description : ''}</textarea><label for="category">Kategori:</label><select id="category" name="category" required><option value="Template">Template</option><option value="Addon">Addon</option><option value="TexturePack">TexturePack</option></select><label for="img">URL Gambar:</label><input type="text" id="img" name="img" required value="${isEditing ? postToEdit.img : ''}"><label for="mediafire">Link MediaFire:</label><input type="url" id="mediafire" name="mediafire" required value="${isEditing ? postToEdit.links.mediafire : ''}"><label for="gofile">Link Gofile:</label><input type="url" id="gofile" name="gofile" required value="${isEditing ? postToEdit.links.gofile : ''}"><input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;"><label for="isFeatured">Jadikan Pilihan Editor?</label><br><button type="submit">${buttonText}</button></form><button id="logout-btn" style="margin-top: 1rem;">Logout</button>`;
         if (isEditing) { authContainer.querySelector('#category').value = postToEdit.category; authContainer.querySelector('#isFeatured').checked = postToEdit.isFeatured; }
         authContainer.querySelector('#upload-form').addEventListener('submit', handleSubmit);
         authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
+        $('#go-to-profile-view').addEventListener('click', (e) => { e.preventDefault(); renderProfileView(); });
       }
       
       const openEditModal = (post) => { renderAdminForm(post); openAuthModal(); };
@@ -469,11 +471,19 @@
       async function renderProfileView() {
           const user = state.user; const profile = state.profile;
           if (user && profile) {
+              const isAdmin = profile.role === 'admin' || profile.role === 'moderator';
+              const adminButtonHTML = isAdmin ? `<button id="go-to-admin-btn" style="background-color: var(--success); margin-top: 1rem;">Panel Admin</button>` : '';
+
               const avatarSrc = profile.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${user.email}`;
-              authContainer.innerHTML = `<form id="profile-form"><h2>Profil Saya</h2><div class="profile-header"><div class="profile-avatar-wrapper"><img src="${avatarSrc}" alt="Avatar" class="profile-avatar" id="avatar-preview"><label for="avatar-upload" id="avatar-upload-label"><i class="fas fa-camera"></i></label><input type="file" id="avatar-upload" name="avatar" class="hidden" accept="image/png, image/jpeg"></div></div><label for="nickname">Nickname:</label><input type="text" id="nickname" name="nickname" value="${profile.nickname || ''}" placeholder="Masukkan nickname Anda"><label for="email" style="margin-top:0.5rem;">Email:</label><input type="email" id="email" name="email" value="${user.email}" disabled><button type="submit">Simpan Perubahan</button></form><button id="logout-btn">Logout</button>`;
+              authContainer.innerHTML = `<form id="profile-form"><h2>Profil Saya</h2><div class="profile-header"><div class="profile-avatar-wrapper"><img src="${avatarSrc}" alt="Avatar" class="profile-avatar" id="avatar-preview"><label for="avatar-upload" id="avatar-upload-label"><i class="fas fa-camera"></i></label><input type="file" id="avatar-upload" name="avatar" class="hidden" accept="image/png, image/jpeg"></div></div><label for="nickname">Nickname:</label><input type="text" id="nickname" name="nickname" value="${profile.nickname || ''}" placeholder="Masukkan nickname Anda"><label for="email" style="margin-top:0.5rem;">Email:</label><input type="email" id="email" name="email" value="${user.email}" disabled><button type="submit">Simpan Perubahan</button></form><div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">${adminButtonHTML}<button id="logout-btn">Logout</button></div>`;
+              
               authContainer.querySelector('#profile-form').addEventListener('submit', handleProfileUpdate);
               authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
               authContainer.querySelector('#avatar-upload').addEventListener('change', (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (event) => { $('#avatar-preview').src = event.target.result; }; reader.readAsDataURL(file); } });
+              
+              if(isAdmin) {
+                $('#go-to-admin-btn').addEventListener('click', (e) => { e.preventDefault(); renderAdminForm(); });
+              }
           } else { renderLoginView(); }
       }
 
@@ -499,11 +509,10 @@
         if (user) {
             const profile = await getProfile(user);
             state.profile = profile;
-            if (profile?.role === 'admin' || profile?.role === 'moderator') { $('#auth-menu-text').textContent = 'Panel Admin'; } 
-            else { $('#auth-menu-text').textContent = 'Profil Saya'; }
+            $('#auth-menu-text').textContent = 'Akun Saya';
         } else {
             state.profile = null;
-            $('#auth-menu-text').textContent = 'Login';
+            $('#auth-menu-text').textContent = 'Login/Register';
         }
         renderPosts();
       }
@@ -518,8 +527,7 @@
             state.user = data.user;
             state.profile = await getProfile(data.user);
             await setupUIBasedOnAuth();
-            if (state.profile?.role === 'admin' || state.profile?.role === 'moderator') { renderAdminForm(); } 
-            else { await renderProfileView(); }
+            await renderProfileView();
         }
       }
 
@@ -557,9 +565,10 @@
       
       const handleAuthButtonClick = async () => {
         if (state.user) {
-            if (state.profile?.role === 'admin' || state.profile?.role === 'moderator') { renderAdminForm(); } 
-            else { await renderProfileView(); }
-        } else { renderLoginView(); }
+            await renderProfileView();
+        } else {
+            renderLoginView();
+        }
         openAuthModal();
       };
       
@@ -571,3 +580,4 @@
 </script>
 </body>
 </html>
+
