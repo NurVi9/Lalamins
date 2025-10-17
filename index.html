@@ -21,7 +21,7 @@
     .sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--border); position: fixed; top: 0; left: -260px; bottom: 0; z-index: 1200; display: flex; flex-direction: column; transition: left .3s ease; box-shadow: var(--shadow); }
     .sidebar.open { left: 0; }
     .content-wrapper { flex: 1; display: flex; flex-direction: column; min-height: 100vh; padding-bottom: 80px; }
-    main { padding: 1rem; flex: 1; }
+    main, #chat-view { padding: 1rem; flex: 1; }
     .page-title { font-size: 2rem; font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.5px; }
     .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1100; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
     .backdrop.active { opacity: 1; pointer-events: auto; }
@@ -109,8 +109,6 @@
     #auth-container .admin-nav-link:hover { text-decoration: underline; }
     #auth-container p a { color: var(--accent); text-decoration: none; font-weight: 500; }
     #auth-container p a:hover { text-decoration: underline; }
-
-    /* --- Gaya Profile View & User Management --- */
     .profile-header { display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
     .profile-avatar-wrapper { position: relative; }
     .profile-avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--border); }
@@ -122,9 +120,6 @@
     .user-management-info .nickname { font-weight: 600; }
     .user-management-info .email { font-size: 0.85rem; color: var(--muted); }
     .user-management-role select { padding: 0.3rem 0.5rem; border-radius: 6px; border: 1px solid var(--border); background-color: var(--card); color: var(--text); }
-
-
-    /* --- Gaya Notifikasi Popup --- */
     #notification-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
     .toast { background: var(--card); color: var(--text); padding: 12px 20px; border-radius: 8px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 12px; border-left: 5px solid; transition: transform 0.3s ease, opacity 0.3s ease; transform: translateX(calc(100% + 20px)); }
     .toast.show { transform: translateX(0); }
@@ -134,8 +129,6 @@
     .toast.success i { color: var(--success); }
     .toast.error { border-color: var(--danger); }
     .toast.error i { color: var(--danger); }
-    
-    /* --- Gaya Baru: Bagian Komentar --- */
     .comment-section { padding: 0 1.5rem 1.5rem; border-top: 1px solid var(--border); flex: 1; overflow-y: auto; }
     .comment-section h4 { margin: 1.5rem 0 1rem; font-size: 0.9rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
     #comment-list { display: flex; flex-direction: column; gap: 1rem; }
@@ -150,25 +143,16 @@
     #comment-form textarea { flex: 1; resize: vertical; min-height: 40px; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: .95rem; }
     #comment-form button { padding: 0.5rem 1rem; border-radius: 8px; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; transition: background .2s; }
     #comment-form button:hover { background: var(--accent-dark); }
-    #comment-login-prompt { text-align: center; padding: 1rem; background: var(--bg); border-radius: 8px; font-size: .9rem; color: var(--muted); margin-bottom: 1.5rem; }
+    #comment-login-prompt, .chat-login-prompt { text-align: center; padding: 2rem 1rem; }
+    #comment-login-prompt i, .chat-login-prompt i { font-size: 2.5rem; color: var(--muted); margin-bottom: 1rem; }
+    #comment-login-prompt h3, .chat-login-prompt h3 { margin-top: 0; }
+    #comment-login-prompt p, .chat-login-prompt p { color: var(--muted); }
     #comment-login-prompt a { color: var(--accent); font-weight: 600; cursor: pointer; text-decoration: none; }
     #comment-login-prompt a:hover { text-decoration: underline; }
-
-    /* --- Gaya Badge Role --- */
-    .role-badge {
-        font-size: .65rem;
-        font-weight: 700;
-        padding: 3px 8px;
-        border-radius: 6px;
-        text-transform: uppercase;
-        line-height: 1;
-        vertical-align: middle;
-    }
+    .role-badge { font-size: .65rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; line-height: 1; vertical-align: middle; }
     .role-badge.admin { background-color: var(--danger); color: white; }
     .role-badge.moderator { background-color: var(--accent); color: white; }
     .role-badge.user { background-color: var(--border); color: var(--text); }
-
-    /* --- BAGIAN BARU: Gaya Request Management --- */
     .request-management-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; }
     .request-management-item { display: flex; flex-direction: column; padding: 1rem; background-color: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
     .request-management-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
@@ -180,14 +164,34 @@
     .request-management-actions button { width: auto; padding: 0.3rem 0.8rem; font-size: 0.8rem; }
     .request-management-actions .delete-btn { background-color: var(--danger); }
 
-
+    /* --- Tampilan Chat yang Lebih Responsif --- */
+    #chat-view { padding: 0; display: flex; justify-content: center; }
+    #chat-view-container { display: flex; flex-direction: column; height: calc(100vh - 70px); max-width: 900px; width: 100%; background: var(--card); }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; scroll-behavior: smooth; }
+    .chat-message { display: flex; gap: 1rem; max-width: 75%; align-items: flex-end; }
+    .chat-message.current-user { align-self: flex-end; flex-direction: row-reverse; }
+    .chat-message .message-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; box-shadow: var(--shadow); }
+    .message-content { display: flex; flex-direction: column; width: 100%; }
+    .message-bubble { padding: 0.75rem 1.25rem; border-radius: 18px; background: var(--bg); box-shadow: var(--shadow); line-height: 1.5; }
+    .chat-message.current-user .message-bubble { background: var(--accent); color: white; }
+    .message-meta { display: flex; justify-content: space-between; align-items: center; padding: 0 .5rem; margin-bottom: 4px; }
+    .chat-message.current-user .message-meta { flex-direction: row-reverse; }
+    .message-author { font-weight: 600; font-size: .8rem; }
+    .message-timestamp { font-size: .7rem; color: var(--muted); }
+    .chat-message.current-user .message-author { color: var(--text); opacity: 0.9; }
+    .message-text { margin: 0; white-space: pre-wrap; word-wrap: break-word; }
+    #chat-form { display: flex; gap: .75rem; padding: 1rem; border-top: 1px solid var(--border); background-color: var(--sidebar-bg); }
+    #chat-form input { flex: 1; padding: 0.85rem 1.25rem; border-radius: 99px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; }
+    #chat-form input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); outline: none; }
+    #chat-form button { width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; transition: all .2s; font-size: 1.1rem; flex-shrink: 0; }
+    #chat-form button:hover { background: var(--accent-dark); transform: scale(1.05); }
+    
     @media (min-width: 768px) {
-      body { overflow: hidden; }
+      #chat-view-container { height: calc(100vh - 85px); border: 1px solid var(--border); border-radius: 16px; margin: 1rem 0; box-shadow: var(--shadow-lg); }
+      .bottom-nav, #menu-toggle, .backdrop { display: none; }
       .app-layout { margin-left: 260px; }
       .sidebar { left: 0; box-shadow: none; }
-      .content-wrapper { padding-bottom: 0; }
       main { padding: 2rem; }
-      .bottom-nav, #menu-toggle, .backdrop { display: none; }
       #post-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
     }
     @media (hover: hover) { .post-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: var(--shadow-lg); } }
@@ -215,7 +219,8 @@
         <div class="menu-item" data-category="texturepack"><i class="fas fa-calendar-alt"></i> TexturePack</div>
         <p class="menu-heading">Interaksi</p>
         <div class="menu-item" id="request-menu-btn"><i class="fas fa-bullhorn"></i> Request</div>
-        <a href="https://linktr.ee/noirrv" target="_blank" rel="noopener noreferrer" class="menu-item"><i class="fas fa-link"></i> Linktree</a>
+        <div class="menu-item" id="chat-menu-btn"><i class="fas fa-comments"></i> Chat</div>
+        <a href="https://linktr.ee/LuminoxMC" target="_blank" rel="noopener noreferrer" class="menu-item"><i class="fas fa-link"></i> Linktree</a>
         <p class="menu-heading">Akun</p>
         <div class="menu-item" id="auth-menu-btn"><i class="fas fa-user-circle"></i><span id="auth-menu-text">Login</span></div>
       </nav>
@@ -242,6 +247,7 @@
         <section id="post-grid"></section>
         <section id="skeleton-grid" class="hidden"></section>
       </main>
+      <section id="chat-view" class="hidden"></section>
     </div>
   </div>
 
@@ -319,7 +325,7 @@
       const createStorageManager = (key) => ({ get: () => JSON.parse(localStorage.getItem(key)) || [], save: (data) => localStorage.setItem(key, JSON.stringify(data)), });
       const WishlistManager = { ...createStorageManager('luminox_wishlist'), add: (postId) => { const wishlist = WishlistManager.get(); if (!wishlist.includes(postId)) { wishlist.push(postId); WishlistManager.save(wishlist); } }, remove: (postId) => { let wishlist = WishlistManager.get(); wishlist = wishlist.filter(id => id !== postId); WishlistManager.save(wishlist); }, has: (postId) => WishlistManager.get().includes(postId) };
       const HistoryManager = { ...createStorageManager('luminox_history'), add: (postId) => { let history = HistoryManager.get(); history = history.filter(id => id !== postId); history.unshift(postId); if (history.length > 50) history.pop(); HistoryManager.save(history); } };
-      let state = { posts: [], currentCategory: '', searchQuery: '', isLoading: true, user: null, profile: null };
+      let state = { posts: [], currentCategory: '', searchQuery: '', isLoading: true, user: null, profile: null, activeChatChannel: null, activeCommentChannel: null, activePostsChannel: null };
 
       function showNotification(message, type = 'success', duration = 4000) {
           const container = $('#notification-container');
@@ -373,40 +379,35 @@
       };
 
       const renderPosts = () => {
-        showLoading(true);
-        setTimeout(() => {
-          const grid = $('#post-grid');
-          grid.innerHTML = '';
-          let filteredPosts = [];
-          if (state.currentCategory === 'wishlist') { const ids = WishlistManager.get(); filteredPosts = state.posts.filter(p => ids.includes(p.id)); } 
-          else if (state.currentCategory === 'history') { const ids = HistoryManager.get(); filteredPosts = ids.map(id => state.posts.find(p => p.id === id)).filter(Boolean); } 
-          else if (state.currentCategory === 'featured') { filteredPosts = state.posts.filter(p => p.isFeatured); } 
-          else { filteredPosts = state.posts.filter(post => { const query = state.searchQuery.toLowerCase(); const matchesSearch = post.title.toLowerCase().includes(query) || post.description.toLowerCase().includes(query); const matchesCategory = !state.currentCategory || post.category.toLowerCase() === state.currentCategory; return matchesSearch && matchesCategory; }); }
-          if (filteredPosts.length === 0) { const messages = { wishlist: 'Wishlist Anda kosong.', history: 'Riwayat unduhan kosong.', featured: 'Tidak ada pilihan editor saat ini.' }; grid.innerHTML = `<p style="color: var(--muted); text-align: center; grid-column: 1 / -1;">${messages[state.currentCategory] || 'Tidak ada postingan yang cocok.'}</p>`; } 
-          else { filteredPosts.forEach(post => grid.appendChild(createPostElement(post))); }
-          const titles = { '': 'Postingan Terbaru', wishlist: 'Wishlist Saya', history: 'Riwayat Unduhan', featured: 'Pilihan Editor', addon: 'Addons', template: 'Templates', texturepack: 'TexturePack' };
-          $('#page-title').textContent = state.searchQuery ? `Hasil untuk "${state.searchQuery}"` : (titles[state.currentCategory] || 'Postingan');
-          showLoading(false);
-        }, 300);
+        const grid = $('#post-grid');
+        grid.innerHTML = '';
+        let filteredPosts = [];
+        if (state.currentCategory === 'wishlist') { const ids = WishlistManager.get(); filteredPosts = state.posts.filter(p => ids.includes(p.id)); } 
+        else if (state.currentCategory === 'history') { const ids = HistoryManager.get(); filteredPosts = ids.map(id => state.posts.find(p => p.id === id)).filter(Boolean); } 
+        else if (state.currentCategory === 'featured') { filteredPosts = state.posts.filter(p => p.isFeatured); } 
+        else { filteredPosts = state.posts.filter(post => { const query = state.searchQuery.toLowerCase(); const matchesSearch = post.title.toLowerCase().includes(query) || post.description.toLowerCase().includes(query); const matchesCategory = !state.currentCategory || post.category.toLowerCase() === state.currentCategory; return matchesSearch && matchesCategory; }); }
+        
+        if (filteredPosts.length === 0) { const messages = { wishlist: 'Wishlist Anda kosong.', history: 'Riwayat unduhan kosong.', featured: 'Tidak ada pilihan editor saat ini.' }; grid.innerHTML = `<p style="color: var(--muted); text-align: center; grid-column: 1 / -1;">${messages[state.currentCategory] || 'Tidak ada postingan yang cocok.'}</p>`; } 
+        else { filteredPosts.forEach(post => grid.appendChild(createPostElement(post))); }
+        
+        const titles = { '': 'Postingan Terbaru', wishlist: 'Wishlist Saya', history: 'Riwayat Unduhan', featured: 'Pilihan Editor', addon: 'Addons', template: 'Templates', texturepack: 'TexturePack' };
+        $('#page-title').textContent = state.searchQuery ? `Hasil untuk "${state.searchQuery}"` : (titles[state.currentCategory] || 'Postingan');
+        
+        // Hide skeleton after rendering
+        $('#skeleton-grid').classList.add('hidden');
+        $('#post-grid').classList.remove('hidden');
       };
       
       const postModalWrapper = $('#post-modal-wrapper');
       
       async function handleCommentSubmit(e) {
         e.preventDefault();
-        const form = e.target;
-        const content = form.comment.value.trim();
-        const postId = form.dataset.postId;
-        if (!content) return;
-        
+        const form = e.target; const textarea = form.comment; const content = textarea.value.trim(); const postId = form.dataset.postId;
+        if (!content || !state.user) return;
+        textarea.value = ''; textarea.disabled = true;
         const { error } = await supabase.from('comments').insert({ content: content, post_id: postId, user_id: state.profile.id });
-
-        if (error) {
-            showNotification('Gagal mengirim komentar: ' + error.message, 'error');
-        } else {
-            form.comment.value = '';
-            loadComments(postId); 
-        }
+        textarea.disabled = false;
+        if (error) { showNotification('Gagal mengirim komentar: ' + error.message, 'error'); textarea.value = content; }
       }
 
       function renderCommentUI(postId) {
@@ -416,374 +417,256 @@
               container.innerHTML = `<form id="comment-form" data-post-id="${postId}"><img src="${userAvatar}" alt="Avatar" class="comment-avatar"><textarea name="comment" placeholder="Tulis komentar..." required></textarea><button type="submit"><i class="fas fa-paper-plane"></i></button></form>`;
               $('#comment-form').addEventListener('submit', handleCommentSubmit);
           } else {
-              container.innerHTML = `<div id="comment-login-prompt"><a id="login-to-comment">Login</a> untuk berkomentar.</div>`;
-              $('#login-to-comment').addEventListener('click', () => {
-                  postModalWrapper.classList.remove('open');
-                  handleAuthButtonClick();
-              });
+              container.innerHTML = `<div id="comment-login-prompt"><i class="fas fa-comments"></i><h3>Login untuk Berkomentar</h3><p><a id="login-to-comment">Login sekarang</a> untuk bergabung dalam diskusi.</p></div>`;
+              $('#login-to-comment').addEventListener('click', () => { closePostModal(); handleAuthButtonClick(); });
           }
       }
       
-      function timeAgo(date) {
-        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-        let interval = seconds / 31536000; if (interval > 1) return Math.floor(interval) + " tahun lalu";
-        interval = seconds / 2592000; if (interval > 1) return Math.floor(interval) + " bulan lalu";
-        interval = seconds / 86400; if (interval > 1) return Math.floor(interval) + " hari lalu";
-        interval = seconds / 3600; if (interval > 1) return Math.floor(interval) + " jam lalu";
-        interval = seconds / 60; if (interval > 1) return Math.floor(interval) + " menit lalu";
-        return "Baru saja";
+      function timeAgo(date) { const seconds = Math.floor((new Date() - new Date(date)) / 1000); let interval = seconds / 31536000; if (interval > 1) return Math.floor(interval) + " tahun lalu"; interval = seconds / 2592000; if (interval > 1) return Math.floor(interval) + " bulan lalu"; interval = seconds / 86400; if (interval > 1) return Math.floor(interval) + " hari lalu"; interval = seconds / 3600; if (interval > 1) return Math.floor(interval) + " jam lalu"; interval = seconds / 60; if (interval > 1) return Math.floor(interval) + " menit lalu"; return "Baru saja"; }
+      function formatChatTimestamp(date) { return new Date(date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }); }
+
+      function renderComment(comment) {
+        const profile = comment.profiles; const author = profile?.nickname || 'Pengguna'; const avatar = profile?.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${author}`; const role = profile?.role || 'user';
+        const createRoleBadge = (r) => { if (!r || r === 'user') return ''; const rc = r.toLowerCase(); return `<span class="role-badge ${rc}">${r}</span>`; };
+        return `<div class="comment-item"><img src="${avatar}" alt="${author}" class="comment-avatar"><div class="comment-content"><div class="comment-header"><span class="comment-author">${author}</span>${createRoleBadge(role)}<span class="comment-date">${timeAgo(comment.created_at)}</span></div><p class="comment-body">${comment.content}</p></div></div>`;
       }
-
+      
+      async function listenToComments(postId) {
+        if(state.activeCommentChannel) { state.activeCommentChannel.unsubscribe(); }
+        state.activeCommentChannel = supabase.channel(`public:comments:post_id=eq.${postId}`)
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'comments', filter: `post_id=eq.${postId}` }, async (payload) => {
+                const { data: profileData } = await supabase.from('profiles').select('nickname, avatar_url, role').eq('id', payload.new.user_id).single();
+                const newComment = { ...payload.new, profiles: profileData };
+                const commentList = $('#comment-list');
+                const emptyState = commentList.querySelector('.empty-state');
+                if (emptyState) { emptyState.remove(); }
+                commentList.insertAdjacentHTML('beforeend', renderComment(newComment));
+            })
+            .subscribe();
+      }
+      
       async function loadComments(postId) {
-          const list = $('#comment-list');
-          list.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 1rem 0;">Memuat komentar...</p>';
-
-          const { data, error } = await supabase.from('comments')
-              .select('*, profiles(nickname, avatar_url, role)')
-              .eq('post_id', postId)
-              .order('created_at', { ascending: true });
-
-          if (error) {
-              console.error('Error fetching comments:', error);
-              list.innerHTML = `<p style="color: var(--danger); text-align: center;">Gagal memuat: ${error.message}</p>`;
-              return;
-          }
-
-          if (data.length === 0) {
-              list.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 1rem 0;">Belum ada komentar.</p>';
-              return;
-          }
-          
-          const createRoleBadge = (role) => {
-              if (!role || role === 'user') return '';
-              const roleClass = role.toLowerCase();
-              return `<span class="role-badge ${roleClass}">${role}</span>`;
-          };
-
-          list.innerHTML = data.map(comment => {
-              const profile = comment.profiles;
-              const author = profile?.nickname || 'Pengguna';
-              const avatar = profile?.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${author}`;
-              const role = profile?.role || 'user';
-              
-              return `<div class="comment-item"><img src="${avatar}" alt="${author}" class="comment-avatar"><div class="comment-content"><div class="comment-header"><span class="comment-author">${author}</span>${createRoleBadge(role)}<span class="comment-date">${timeAgo(comment.created_at)}</span></div><p class="comment-body">${comment.content}</p></div></div>`;
-          }).join('');
+          const list = $('#comment-list'); list.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 1rem 0;">Memuat komentar...</p>';
+          const { data, error } = await supabase.from('comments').select('*, profiles(nickname, avatar_url, role)').eq('post_id', postId).order('created_at', { ascending: true });
+          if (error) { list.innerHTML = `<p style="color: var(--danger); text-align: center;">Gagal memuat: ${error.message}</p>`; return; }
+          if (data.length === 0) { list.innerHTML = '<p class="empty-state" style="color: var(--muted); text-align: center; padding: 1rem 0;">Belum ada komentar.</p>'; }
+          else { list.innerHTML = data.map(renderComment).join(''); }
+          listenToComments(postId);
       }
 
       const openPostModal = (post) => {
         $('#post-modal-img').src = post.img; $('#modal-category').textContent = post.category; $('#modal-title').textContent = post.title; $('#modal-desc').textContent = post.description; $('#mediafire-link').href = post.links.mediafire; $('#gofile-link').href = post.links.gofile; const downloadHandler = () => HistoryManager.add(post.id); $$('.btn-download').forEach(btn => { btn.removeEventListener('click', downloadHandler); btn.addEventListener('click', downloadHandler, { once: true }); });
-        renderCommentUI(post.id);
-        loadComments(post.id);
-        postModalWrapper.classList.add('open');
+        renderCommentUI(post.id); loadComments(post.id); postModalWrapper.classList.add('open');
       };
       
-      postModalWrapper.querySelector('.modal-backdrop').addEventListener('click', () => postModalWrapper.classList.remove('open'));
-      postModalWrapper.querySelector('.close-modal').addEventListener('click', () => postModalWrapper.classList.remove('open'));
+      const closePostModal = () => {
+        postModalWrapper.classList.remove('open');
+        if(state.activeCommentChannel) { state.activeCommentChannel.unsubscribe(); state.activeCommentChannel = null; }
+      }
+      postModalWrapper.querySelector('.modal-backdrop').addEventListener('click', closePostModal);
+      postModalWrapper.querySelector('.close-modal').addEventListener('click', closePostModal);
       
+      const switchMainView = (view) => {
+        $('main').classList.toggle('hidden', view !== 'posts');
+        $('#chat-view').classList.toggle('hidden', view !== 'chat');
+      };
+      
+      const updateActiveNav = () => {
+          $$('.menu-item').forEach(item => item.classList.remove('active'));
+          $$('.nav-item').forEach(item => item.classList.remove('active'));
+
+          if (!$('#chat-view').classList.contains('hidden')) {
+              $('#chat-menu-btn').classList.add('active');
+          } else {
+              $$(`[data-category="${state.currentCategory}"]`).forEach(item => item.classList.add('active'));
+          }
+      }
+
       $('#theme-toggle').onclick = () => { const newTheme = document.documentElement.dataset.theme === 'dark' ? '' : 'dark'; document.documentElement.dataset.theme = newTheme; $('#theme-toggle i').className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; localStorage.setItem('luminox_theme', newTheme); };
       $('#menu-toggle').onclick = () => $('#sidebar').classList.add('open') & $('#backdrop').classList.add('active');
       $('#backdrop').onclick = () => $('#sidebar').classList.remove('open') & $('#backdrop').classList.remove('active');
-      const handleCategoryClick = (e) => { state.currentCategory = e.currentTarget.dataset.category; state.searchQuery = ''; $('#header-search-input').value = ''; $('#app-header').classList.remove('search-active'); $$('[data-category]').forEach(i => i.classList.remove('active')); $$(`[data-category="${state.currentCategory}"]`).forEach(i => i.classList.add('active')); renderPosts(); if(window.innerWidth < 768) { $('#sidebar').classList.remove('open'); $('#backdrop').classList.remove('active'); } };
+      
+      const handleCategoryClick = (e) => {
+        if(state.activeChatChannel) { state.activeChatChannel.unsubscribe(); state.activeChatChannel = null; }
+        switchMainView('posts');
+        state.currentCategory = e.currentTarget.dataset.category;
+        state.searchQuery = '';
+        $('#header-search-input').value = '';
+        $('#app-header').classList.remove('search-active');
+        updateActiveNav();
+        renderPosts(); 
+        if(window.innerWidth < 768) { $('#sidebar').classList.remove('open'); $('#backdrop').classList.remove('active'); } 
+      };
+
       $$('[data-category]').forEach(item => item.addEventListener('click', handleCategoryClick));
       $('#search-toggle').onclick = () => { const header = $('#app-header'); header.classList.toggle('search-active'); if (header.classList.contains('search-active')) $('#header-search-input').focus(); else { state.searchQuery = ''; renderPosts(); } };
       $('#header-search-input').addEventListener('input', (e) => { state.searchQuery = e.target.value; renderPosts(); });
       
-      async function getProfile(user) {
-          if (!user) return null;
-          const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-          if (error) { console.error("Gagal mengambil profil:", error); return null; }
-          return data;
-      }
-
+      async function getProfile(user) { if (!user) return null; const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single(); if (error) { console.error("Gagal mengambil profil:", error); return null; } return data; }
       function renderAdminForm(postToEdit = null) {
-        const isEditing = postToEdit !== null;
-        const title = isEditing ? 'Edit Postingan' : 'Buat Postingan Baru';
-        const buttonText = isEditing ? 'Simpan Perubahan' : 'Upload Postingan';
+        const isEditing = postToEdit !== null; const title = isEditing ? 'Edit Postingan' : 'Buat Postingan Baru'; const buttonText = isEditing ? 'Simpan Perubahan' : 'Upload Postingan';
         authContainer.innerHTML = `<a href="#" class="admin-nav-link" id="go-to-profile-view">Kembali ke Profil</a><h2>${title}</h2><form id="upload-form" data-editing-id="${isEditing ? postToEdit.id : ''}"><label for="title">Judul:</label><input type="text" id="title" name="title" required value="${isEditing ? postToEdit.title : ''}"><label for="description">Deskripsi:</label><textarea id="description" name="description" rows="4" required>${isEditing ? postToEdit.description : ''}</textarea><label for="category">Kategori:</label><select id="category" name="category" required><option value="Template">Template</option><option value="Addon">Addon</option><option value="TexturePack">TexturePack</option></select><label for="img">URL Gambar:</label><input type="text" id="img" name="img" required value="${isEditing ? postToEdit.img : ''}"><label for="mediafire">Link MediaFire:</label><input type="url" id="mediafire" name="mediafire" required value="${isEditing ? postToEdit.links.mediafire : ''}"><label for="gofile">Link Gofile:</label><input type="url" id="gofile" name="gofile" required value="${isEditing ? postToEdit.links.gofile : ''}"><input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;"><label for="isFeatured">Jadikan Pilihan Editor?</label><br><button type="submit">${buttonText}</button></form><button id="logout-btn" style="margin-top: 1rem;">Logout</button>`;
         if (isEditing) { authContainer.querySelector('#category').value = postToEdit.category; authContainer.querySelector('#isFeatured').checked = postToEdit.isFeatured; }
-        authContainer.querySelector('#upload-form').addEventListener('submit', handleSubmit);
-        authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
-        $('#go-to-profile-view').addEventListener('click', (e) => { e.preventDefault(); renderProfileView(); });
+        authContainer.querySelector('#upload-form').addEventListener('submit', handleSubmit); authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout); $('#go-to-profile-view').addEventListener('click', (e) => { e.preventDefault(); renderProfileView(); });
       }
-
-      async function handleRoleUpdate(userId, newRole) {
-        const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId);
-        if (error) {
-            showNotification(`Gagal mengubah role: ${error.message}`, 'error');
-        } else {
-            showNotification('Role pengguna berhasil diubah.', 'success');
-        }
-      }
-      
+      async function handleRoleUpdate(userId, newRole) { const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId); if (error) { showNotification(`Gagal mengubah role: ${error.message}`, 'error'); } else { showNotification('Role pengguna berhasil diubah.', 'success'); } }
       async function renderUserManagementView() {
           authContainer.innerHTML = `<a href="#" class="admin-nav-link" id="go-to-profile-view">Kembali ke Profil</a><h2>Kelola Pengguna</h2><div id="user-list-container">Memuat pengguna...</div>`;
           $('#go-to-profile-view').addEventListener('click', (e) => { e.preventDefault(); renderProfileView(); });
-          
           const { data: profiles, error } = await supabase.from('profiles').select('id, nickname, role');
-
-          if (error) {
-              $('#user-list-container').innerHTML = `<p style="color:var(--danger);">Gagal memuat pengguna: ${error.message}</p>`;
-              return;
-          }
-
+          if (error) { $('#user-list-container').innerHTML = `<p style="color:var(--danger);">Gagal memuat pengguna: ${error.message}</p>`; return; }
           const currentAdminId = state.user.id;
-          const userListHTML = profiles.map(profile => {
-              const nickname = profile.nickname || 'Tanpa Nickname';
-              const isCurrentUser = profile.id === currentAdminId;
-              
-              return `
-                <li class="user-management-item">
-                    <div class="user-management-info">
-                        <span class="nickname">${nickname}</span>
-                    </div>
-                    <div class="user-management-role">
-                        <select data-user-id="${profile.id}" ${isCurrentUser ? 'disabled' : ''}>
-                            <option value="user" ${profile.role === 'user' ? 'selected' : ''}>User</option>
-                            <option value="moderator" ${profile.role === 'moderator' ? 'selected' : ''}>Moderator</option>
-                            <option value="admin" ${profile.role === 'admin' ? 'selected' : ''}>Admin</option>
-                        </select>
-                    </div>
-                </li>
-              `;
-          }).join('');
-
+          const userListHTML = profiles.map(profile => { const nickname = profile.nickname || 'Tanpa Nickname'; const isCurrentUser = profile.id === currentAdminId; return `<li class="user-management-item"><div class="user-management-info"><span class="nickname">${nickname}</span></div><div class="user-management-role"><select data-user-id="${profile.id}" ${isCurrentUser ? 'disabled' : ''}><option value="user" ${profile.role === 'user' ? 'selected' : ''}>User</option><option value="moderator" ${profile.role === 'moderator' ? 'selected' : ''}>Moderator</option><option value="admin" ${profile.role === 'admin' ? 'selected' : ''}>Admin</option></select></div></li>`; }).join('');
           $('#user-list-container').innerHTML = `<ul class="user-management-list">${userListHTML}</ul>`;
-
-          $$('.user-management-role select').forEach(select => {
-              select.addEventListener('change', (e) => {
-                  const userId = e.target.dataset.userId;
-                  const newRole = e.target.value;
-                  handleRoleUpdate(userId, newRole);
-              });
-          });
+          $$('.user-management-role select').forEach(select => { select.addEventListener('change', (e) => { const userId = e.target.dataset.userId; const newRole = e.target.value; handleRoleUpdate(userId, newRole); }); });
       }
-
       async function handleDeleteRequest(e) {
-        const requestId = e.target.dataset.id;
-        if (!confirm('Anda yakin ingin menghapus request ini?')) return;
-
+        const requestId = e.target.dataset.id; if (!confirm('Anda yakin ingin menghapus request ini?')) return;
         const { error } = await supabase.from('requests').delete().eq('id', requestId);
-
-        if (error) {
-            showNotification('Gagal menghapus request: ' + error.message, 'error');
-        } else {
-            showNotification('Request berhasil dihapus.', 'success');
-            renderRequestManagementView(); 
-        }
+        if (error) { showNotification('Gagal menghapus request: ' + error.message, 'error'); } else { showNotification('Request berhasil dihapus.', 'success'); renderRequestManagementView(); }
       }
-
       async function renderRequestManagementView() {
         authContainer.innerHTML = `<a href="#" class="admin-nav-link" id="go-to-profile-view">Kembali ke Profil</a><h2>Kelola Request Pengguna</h2><div id="request-list-container">Memuat request...</div>`;
         $('#go-to-profile-view').addEventListener('click', (e) => { e.preventDefault(); renderProfileView(); });
-        
-        const { data: requests, error } = await supabase
-            .from('requests')
-            .select('*, profiles(nickname)')
-            .order('created_at', { ascending: false });
-
-        if (error) {
-            $('#request-list-container').innerHTML = `<p style="color:var(--danger);">Gagal memuat request: ${error.message}</p>`;
-            return;
-        }
-
-        if (requests.length === 0) {
-            $('#request-list-container').innerHTML = '<p style="color:var(--muted); text-align:center;">Belum ada request dari pengguna.</p>';
-            return;
-        }
-
-        const requestListHTML = requests.map(req => {
-            const nickname = req.profiles?.nickname || 'Pengguna Anonim';
-            const description = req.description || '<em>Tidak ada deskripsi.</em>';
-            return `
-              <li class="request-management-item">
-                  <div class="request-management-header">
-                      <h4 class="request-management-title">${req.title}</h4>
-                      <span class="request-management-category">${req.category}</span>
-                  </div>
-                  <p class="request-management-user">Dari: <strong>${nickname}</strong></p>
-                  <p class="request-management-desc">${description}</p>
-                  <div class="request-management-actions">
-                      <button data-id="${req.id}" class="delete-request-btn delete-btn">Hapus</button>
-                  </div>
-              </li>
-            `;
-        }).join('');
-
+        const { data: requests, error } = await supabase.from('requests').select('*, profiles(nickname)').order('created_at', { ascending: false });
+        if (error) { $('#request-list-container').innerHTML = `<p style="color:var(--danger);">Gagal memuat request: ${error.message}</p>`; return; }
+        if (requests.length === 0) { $('#request-list-container').innerHTML = '<p style="color:var(--muted); text-align:center;">Belum ada request dari pengguna.</p>'; return; }
+        const requestListHTML = requests.map(req => { const nickname = req.profiles?.nickname || 'Pengguna Anonim'; const description = req.description || '<em>Tidak ada deskripsi.</em>'; return `<li class="request-management-item"><div class="request-management-header"><h4 class="request-management-title">${req.title}</h4><span class="request-management-category">${req.category}</span></div><p class="request-management-user">Dari: <strong>${nickname}</strong></p><p class="request-management-desc">${description}</p><div class="request-management-actions"><button data-id="${req.id}" class="delete-request-btn delete-btn">Hapus</button></div></li>`; }).join('');
         $('#request-list-container').innerHTML = `<ul class="request-management-list">${requestListHTML}</ul>`;
-
-        $$('.delete-request-btn').forEach(button => {
-            button.addEventListener('click', handleDeleteRequest);
-        });
+        $$('.delete-request-btn').forEach(button => { button.addEventListener('click', handleDeleteRequest); });
       }
-      
       const openEditModal = (post) => { renderAdminForm(post); openAuthModal(); };
-      
-      async function handleRegister(e) {
-        e.preventDefault();
-        const email = e.target.email.value; const password = e.target.password.value;
-        const { error } = await supabase.auth.signUp({ email, password });
-        if (error) { showNotification("Pendaftaran Gagal: " + error.message, 'error'); } 
-        else { showNotification('Pendaftaran berhasil! Silakan cek email Anda untuk konfirmasi.', 'success'); renderLoginView(); }
-      }
-
-      function renderLoginView() {
-        authContainer.innerHTML = `<div id="login-view"><h2>Login</h2><form id="login-form"><label for="email">Email:</label><input type="email" id="email" name="email" required autocomplete="email"><label for="password">Password:</label><input type="password" id="password" name="password" required autocomplete="current-password"><button type="submit">Login</button></form><p style="text-align: center; margin-top: 1rem; font-size: 0.9rem;">Belum punya akun? <a href="#" id="show-register">Daftar</a></p></div>`;
-        authContainer.querySelector('#login-form').addEventListener('submit', handleLogin);
-        authContainer.querySelector('#show-register').addEventListener('click', (e) => { e.preventDefault(); renderRegisterView(); });
-      }
-
-      function renderRegisterView() {
-        authContainer.innerHTML = `<div id="register-view"><h2>Daftar Akun Baru</h2><form id="register-form"><label for="register-email">Email:</label><input type="email" id="register-email" name="email" required autocomplete="email"><label for="register-password">Password:</label><input type="password" id="register-password" name="password" required autocomplete="new-password"><button type="submit">Daftar</button></form><p style="text-align: center; margin-top: 1rem; font-size: 0.9rem;">Sudah punya akun? <a href="#" id="show-login">Login</a></p></div>`;
-        authContainer.querySelector('#register-form').addEventListener('submit', handleRegister);
-        authContainer.querySelector('#show-login').addEventListener('click', (e) => { e.preventDefault(); renderLoginView(); });
-      }
-      
+      async function handleRegister(e) { e.preventDefault(); const email = e.target.email.value; const password = e.target.password.value; const { error } = await supabase.auth.signUp({ email, password }); if (error) { showNotification("Pendaftaran Gagal: " + error.message, 'error'); } else { showNotification('Pendaftaran berhasil! Silakan cek email Anda untuk konfirmasi.', 'success'); renderLoginView(); } }
+      function renderLoginView() { authContainer.innerHTML = `<div id="login-view"><h2>Login</h2><form id="login-form"><label for="email">Email:</label><input type="email" id="email" name="email" required autocomplete="email"><label for="password">Password:</label><input type="password" id="password" name="password" required autocomplete="current-password"><button type="submit">Login</button></form><p style="text-align: center; margin-top: 1rem; font-size: 0.9rem;">Belum punya akun? <a href="#" id="show-register">Daftar</a></p></div>`; authContainer.querySelector('#login-form').addEventListener('submit', handleLogin); authContainer.querySelector('#show-register').addEventListener('click', (e) => { e.preventDefault(); renderRegisterView(); }); }
+      function renderRegisterView() { authContainer.innerHTML = `<div id="register-view"><h2>Daftar Akun Baru</h2><form id="register-form"><label for="register-email">Email:</label><input type="email" id="register-email" name="email" required autocomplete="email"><label for="register-password">Password:</label><input type="password" id="register-password" name="password" required autocomplete="new-password"><button type="submit">Daftar</button></form><p style="text-align: center; margin-top: 1rem; font-size: 0.9rem;">Sudah punya akun? <a href="#" id="show-login">Login</a></p></div>`; authContainer.querySelector('#register-form').addEventListener('submit', handleRegister); authContainer.querySelector('#show-login').addEventListener('click', (e) => { e.preventDefault(); renderLoginView(); }); }
       async function renderProfileView() {
           const user = state.user; const profile = state.profile;
           if (user && profile) {
-              const isModerator = profile.role === 'admin' || profile.role === 'moderator';
-              const isAdmin = profile.role === 'admin';
-              
-              const adminPanelButtonHTML = isModerator ? `<button id="go-to-admin-btn" style="background-color: var(--success);">Panel Admin</button>` : '';
-              const userManagementButtonHTML = isAdmin ? `<button id="manage-users-btn" style="background-color: var(--accent);">Kelola Pengguna</button>` : '';
-              const requestManagementButtonHTML = isModerator ? `<button id="manage-requests-btn" style="background-color: #f39c12;">Kelola Request</button>` : '';
-
+              const isModerator = profile.role === 'admin' || profile.role === 'moderator'; const isAdmin = profile.role === 'admin';
+              const adminPanelButtonHTML = isModerator ? `<button id="go-to-admin-btn" style="background-color: var(--success);">Panel Admin</button>` : ''; const userManagementButtonHTML = isAdmin ? `<button id="manage-users-btn" style="background-color: var(--accent);">Kelola Pengguna</button>` : ''; const requestManagementButtonHTML = isModerator ? `<button id="manage-requests-btn" style="background-color: #f39c12;">Kelola Request</button>` : '';
               const avatarSrc = profile.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${user.email}`;
               authContainer.innerHTML = `<form id="profile-form"><h2>Profil Saya</h2><div class="profile-header"><div class="profile-avatar-wrapper"><img src="${avatarSrc}" alt="Avatar" class="profile-avatar" id="avatar-preview"><label for="avatar-upload" id="avatar-upload-label"><i class="fas fa-camera"></i></label><input type="file" id="avatar-upload" name="avatar" class="hidden" accept="image/png, image/jpeg"></div></div><label for="nickname">Nickname:</label><input type="text" id="nickname" name="nickname" value="${profile.nickname || ''}" placeholder="Masukkan nickname Anda"><label for="email" style="margin-top:0.5rem;">Email:</label><input type="email" id="email" name="email" value="${user.email}" disabled><button type="submit">Simpan Perubahan</button></form><div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">${adminPanelButtonHTML}${userManagementButtonHTML}${requestManagementButtonHTML}<button id="logout-btn">Logout</button></div>`;
-              
-              authContainer.querySelector('#profile-form').addEventListener('submit', handleProfileUpdate);
-              authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
-              authContainer.querySelector('#avatar-upload').addEventListener('change', (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (event) => { $('#avatar-preview').src = event.target.result; }; reader.readAsDataURL(file); } });
-              
-              if(isModerator) {
-                $('#go-to-admin-btn').addEventListener('click', (e) => { e.preventDefault(); renderAdminForm(); });
-                $('#manage-requests-btn').addEventListener('click', (e) => { e.preventDefault(); renderRequestManagementView(); });
-              }
-              if(isAdmin) {
-                $('#manage-users-btn').addEventListener('click', (e) => { e.preventDefault(); renderUserManagementView(); });
-              }
+              authContainer.querySelector('#profile-form').addEventListener('submit', handleProfileUpdate); authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout); authContainer.querySelector('#avatar-upload').addEventListener('change', (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (event) => { $('#avatar-preview').src = event.target.result; }; reader.readAsDataURL(file); } });
+              if(isModerator) { $('#go-to-admin-btn').addEventListener('click', (e) => { e.preventDefault(); renderAdminForm(); }); $('#manage-requests-btn').addEventListener('click', (e) => { e.preventDefault(); renderRequestManagementView(); }); }
+              if(isAdmin) { $('#manage-users-btn').addEventListener('click', (e) => { e.preventDefault(); renderUserManagementView(); }); }
           } else { renderLoginView(); }
       }
-
       async function handleProfileUpdate(e) {
-          e.preventDefault();
-          const form = e.target; const user = state.user; const newNickname = form.nickname.value; const avatarFile = form.avatar.files[0];
-          let avatar_url = state.profile.avatar_url;
+          e.preventDefault(); const form = e.target; const user = state.user; const newNickname = form.nickname.value; const avatarFile = form.avatar.files[0]; let avatar_url = state.profile.avatar_url;
           if (avatarFile) {
               const fileExt = avatarFile.name.split('.').pop(); const fileName = `${user.id}.${fileExt}`; const filePath = `${fileName}`;
-              const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, avatarFile, { upsert: true });
-              if (uploadError) { showNotification('Gagal mengunggah foto profil: ' + uploadError.message, 'error'); return; }
-              const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
-              avatar_url = urlData.publicUrl + `?t=${new Date().getTime()}`;
+              const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, avatarFile, { upsert: true }); if (uploadError) { showNotification('Gagal mengunggah foto profil: ' + uploadError.message, 'error'); return; }
+              const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath); avatar_url = urlData.publicUrl + `?t=${new Date().getTime()}`;
           }
           const { error: updateError } = await supabase.from('profiles').update({ nickname: newNickname, avatar_url: avatar_url }).eq('id', user.id);
-          if (updateError) { showNotification('Gagal memperbarui profil: ' + updateError.message, 'error'); } 
-          else { showNotification('Profil berhasil diperbarui!', 'success'); state.profile.nickname = newNickname; state.profile.avatar_url = avatar_url; renderProfileView(); }
+          if (updateError) { showNotification('Gagal memperbarui profil: ' + updateError.message, 'error'); } else { showNotification('Profil berhasil diperbarui!', 'success'); state.profile.nickname = newNickname; state.profile.avatar_url = avatar_url; renderProfileView(); }
       }
-      
       async function setupUIBasedOnAuth() {
-        const { data: { user } } = await supabase.auth.getUser();
-        state.user = user;
-        if (user) {
-            const profile = await getProfile(user);
-            state.profile = profile;
-            $('#auth-menu-text').textContent = 'Akun Saya';
-        } else {
-            state.profile = null;
-            $('#auth-menu-text').textContent = 'Login/Register';
-        }
+        const { data: { user } } = await supabase.auth.getUser(); state.user = user;
+        if (user) { const profile = await getProfile(user); state.profile = profile; $('#auth-menu-text').textContent = 'Akun Saya'; }
+        else { state.profile = null; $('#auth-menu-text').textContent = 'Login/Register'; }
         renderPosts();
       }
-
       async function handleLogin(e) {
-        e.preventDefault();
-        const email = e.target.email.value; const password = e.target.password.value;
+        e.preventDefault(); const email = e.target.email.value; const password = e.target.password.value;
         const { error, data } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) { showNotification("Login Gagal: " + error.message, 'error'); } 
-        else { 
-            showNotification('Login berhasil!', 'success');
-            state.user = data.user;
-            state.profile = await getProfile(data.user);
-            await setupUIBasedOnAuth();
-            await renderProfileView();
-        }
+        if (error) { showNotification("Login Gagal: " + error.message, 'error'); } else { showNotification('Login berhasil!', 'success'); state.user = data.user; state.profile = await getProfile(data.user); await setupUIBasedOnAuth(); await renderProfileView(); }
       }
-
-      async function handleLogout() {
-        await supabase.auth.signOut();
-        state.user = null; state.profile = null;
-        await setupUIBasedOnAuth();
-        showNotification('Anda telah logout.', 'success');
-        closeAuthModal();
-      }
-
+      async function handleLogout() { await supabase.auth.signOut(); state.user = null; state.profile = null; await setupUIBasedOnAuth(); showNotification('Anda telah logout.', 'success'); closeAuthModal(); }
       async function handleSubmit(e) {
-        e.preventDefault();
-        const form = e.target; const editingId = form.dataset.editingId;
+        e.preventDefault(); const form = e.target; const editingId = form.dataset.editingId;
         const postData = { title: form.title.value, description: form.description.value, category: form.category.value, isFeatured: form.isFeatured.checked, img: form.img.value, links: { mediafire: form.mediafire.value, gofile: form.gofile.value } };
         const { error } = editingId ? await supabase.from('posts').update(postData).eq('id', editingId) : await supabase.from('posts').insert([postData]);
-        if (error) { showNotification('Operasi Gagal: ' + error.message, 'error'); } 
-        else { showNotification(`Postingan berhasil ${editingId ? 'diperbarui' : 'diupload'}!`, 'success'); form.reset(); closeAuthModal(); fetchPosts(); }
+        if (error) { showNotification('Operasi Gagal: ' + error.message, 'error'); } else { showNotification(`Postingan berhasil ${editingId ? 'diperbarui' : 'diupload'}!`, 'success'); form.reset(); closeAuthModal(); }
+      }
+      async function fetchPosts() { try { const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false }); if (error) throw error; state.posts = data; renderPosts(); } catch (error) { console.error('Gagal memuat data postingan:', error); $('#post-grid').innerHTML = `<p style="color: var(--muted); text-align: center;">Gagal memuat data. Silakan coba lagi nanti.</p>`; showNotification('Gagal memuat data postingan.', 'error'); } }
+      function renderRequestView() {
+        if (state.user) { requestContainer.innerHTML = `<h2>Buat Request</h2><p style="font-size: 0.9rem; color: var(--muted); margin-top: -0.5rem; margin-bottom: 1.5rem;">Ingin Addon, Template, atau TexturePack yang kalian mau? Silahkan ajukan request Anda!</p><form id="request-form"><label for="request-title">Nama Item/Game:</label><input type="text" id="request-title" name="title" required placeholder="Contoh: Shader Realistis"><label for="request-category">Kategori:</label><select id="request-category" name="category" required><option value="" disabled selected>Pilih Kategori</option><option value="Addon">Addon</option><option value="Template">Template</option><option value="TexturePack">TexturePack</option></select><label for="request-description">Deskripsi (Opsional):</label><textarea id="request-description" name="description" rows="3" placeholder="Jelaskan lebih detail tentang request Anda..."></textarea><button type="submit">Kirim Request</button></form>`; $('#request-form').addEventListener('submit', handleRequestSubmit); }
+        else { requestContainer.innerHTML = `<div class="chat-login-prompt"><i class="fas fa-lock"></i><h3>Login Diperlukan</h3><p>Anda harus login terlebih dahulu untuk dapat mengajukan request.</p><button id="login-from-request" style="width: auto; padding: 0.6rem 1.5rem;">Login Sekarang</button></div>`; $('#login-from-request').addEventListener('click', () => { closeRequestModal(); handleAuthButtonClick(); }); }
+      }
+      async function handleRequestSubmit(e) {
+          e.preventDefault(); const form = e.target;
+          const requestData = { title: form.title.value, category: form.category.value, description: form.description.value, user_id: state.user.id };
+          const { error } = await supabase.from('requests').insert([requestData]);
+          if (error) { showNotification('Gagal mengirim request: ' + error.message, 'error'); } else { showNotification('Request Anda berhasil dikirim!', 'success'); closeRequestModal(); }
       }
 
-      async function fetchPosts() {
-        try { const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false }); if (error) throw error; state.posts = data; renderPosts(); } 
-        catch (error) { console.error('Gagal memuat data postingan:', error); $('#post-grid').innerHTML = `<p style="color: var(--muted); text-align: center;">Gagal memuat data. Silakan coba lagi nanti.</p>`; showNotification('Gagal memuat data postingan.', 'error'); }
+      function renderChatMessage(message) {
+          const profile = message.profiles;
+          const author = profile?.nickname || 'Pengguna';
+          const avatar = profile?.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${author}`;
+          const isCurrentUser = state.user && message.user_id === state.user.id;
+          return `<div class="chat-message ${isCurrentUser ? 'current-user' : ''}"><img src="${avatar}" alt="${author}" class="message-avatar"><div class="message-content"><div class="message-meta"><span class="message-author">${author}</span><span class="message-timestamp">${formatChatTimestamp(message.created_at)}</span></div><div class="message-bubble"><p class="message-text">${message.content}</p></div></div></div>`;
+      }
+      async function handleChatSubmit(e) {
+        e.preventDefault();
+        const form = e.target; const input = form.message; const content = input.value.trim();
+        if (!content || !state.user) return;
+        input.value = '';
+        const { error } = await supabase.from('messages').insert({ content, user_id: state.user.id });
+        if (error) { console.error("Error sending message:", error); showNotification('Gagal mengirim pesan: ' + error.message, 'error'); input.value = content; }
+      }
+      async function renderChatView() {
+          $('#page-title').textContent = 'Global Chat';
+          const chatView = $('#chat-view');
+          
+          if (!state.user) {
+              chatView.innerHTML = `<div class="chat-login-prompt"><i class="fas fa-comments"></i><h3>Login untuk Chat</h3><p>Anda harus login untuk bisa bergabung di chat global.</p><button id="login-from-chat" style="width: auto; padding: 0.6rem 1.5rem;">Login Sekarang</button></div>`;
+              $('#login-from-chat').addEventListener('click', handleAuthButtonClick);
+              return;
+          }
+
+          chatView.innerHTML = `<div id="chat-view-container"><div class="chat-messages" id="chat-messages-container"><p style="text-align:center; color: var(--muted);">Memuat pesan...</p></div><form id="chat-form"><input type="text" name="message" placeholder="Ketik pesan..." autocomplete="off" required><button type="submit" aria-label="Kirim Pesan"><i class="fas fa-paper-plane"></i></button></form></div>`;
+          $('#chat-form').addEventListener('submit', handleChatSubmit);
+
+          const messagesContainer = $('#chat-messages-container');
+          const scrollToBottom = () => { messagesContainer.scrollTop = messagesContainer.scrollHeight; };
+          
+          const { data, error } = await supabase.from('messages').select('*, profiles(nickname, avatar_url)').order('created_at').limit(100);
+          if (error) { messagesContainer.innerHTML = `<p style="text-align:center; color:var(--danger)">Gagal memuat pesan: ${error.message}</p>`; return; }
+
+          if(data.length === 0) { messagesContainer.innerHTML = `<p class="empty-state" style="text-align:center; color: var(--muted);">Jadilah yang pertama mengirim pesan!</p>`; }
+          else { messagesContainer.innerHTML = data.map(renderChatMessage).join(''); scrollToBottom(); }
+          
+          if(state.activeChatChannel) { state.activeChatChannel.unsubscribe(); }
+
+          state.activeChatChannel = supabase.channel('public:messages')
+              .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
+                  const { data: profileData } = await supabase.from('profiles').select('nickname, avatar_url').eq('id', payload.new.user_id).single();
+                  const emptyState = messagesContainer.querySelector('.empty-state');
+                  if (emptyState) { emptyState.remove(); }
+                  const messageWithProfile = { ...payload.new, profiles: profileData };
+                  messagesContainer.insertAdjacentHTML('beforeend', renderChatMessage(messageWithProfile));
+                  scrollToBottom();
+              })
+              .subscribe();
       }
       
-      function renderRequestView() {
-        if (state.user) {
-            requestContainer.innerHTML = `
-                <h2>Buat Request</h2>
-                <p style="font-size: 0.9rem; color: var(--muted); margin-top: -0.5rem; margin-bottom: 1.5rem;">Ingin Addon, Template, atau TexturePack yang kalian mau? Silahkan ajukan request Anda!</p>
-                <form id="request-form">
-                    <label for="request-title">Nama Item/Game:</label>
-                    <input type="text" id="request-title" name="title" required placeholder="Contoh: Shader Realistis">
-                    <label for="request-category">Kategori:</label>
-                    <select id="request-category" name="category" required>
-                        <option value="" disabled selected>Pilih Kategori</option>
-                        <option value="Addon">Addon</option>
-                        <option value="Template">Template</option>
-                        <option value="TexturePack">TexturePack</option>
-                    </select>
-                    <label for="request-description">Deskripsi (Opsional):</label>
-                    <textarea id="request-description" name="description" rows="3" placeholder="Jelaskan lebih detail tentang request Anda..."></textarea>
-                    <button type="submit">Kirim Request</button>
-                </form>
-            `;
-            $('#request-form').addEventListener('submit', handleRequestSubmit);
-        } else {
-            requestContainer.innerHTML = `
-                <div id="request-login-prompt" style="text-align: center; padding: 2rem 1rem;">
-                    <i class="fas fa-lock" style="font-size: 2.5rem; color: var(--muted); margin-bottom: 1rem;"></i>
-                    <h3 style="margin-top: 0;">Login Diperlukan</h3>
-                    <p style="color: var(--muted);">Anda harus login terlebih dahulu untuk dapat mengajukan request.</p>
-                    <button id="login-from-request" style="width: auto; padding: 0.6rem 1.5rem;">Login Sekarang</button>
-                </div>
-            `;
-            $('#login-from-request').addEventListener('click', () => {
-                closeRequestModal();
-                handleAuthButtonClick();
-            });
-        }
-      }
-
-      async function handleRequestSubmit(e) {
-          e.preventDefault();
-          const form = e.target;
-          const requestData = {
-              title: form.title.value,
-              category: form.category.value,
-              description: form.description.value,
-              user_id: state.user.id
-          };
-          const { error } = await supabase.from('requests').insert([requestData]);
-          if (error) {
-              showNotification('Gagal mengirim request: ' + error.message, 'error');
-          } else {
-              showNotification('Request Anda berhasil dikirim!', 'success');
-              closeRequestModal();
-          }
+      // --- FUNGSI BARU UNTUK REAL-TIME POSTS ---
+      function listenToPosts() {
+          if (state.activePostsChannel) return; // Prevent multiple listeners
+          state.activePostsChannel = supabase.channel('public:posts')
+              .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, (payload) => {
+                  console.log('Perubahan postingan diterima!', payload);
+                  switch (payload.eventType) {
+                      case 'INSERT':
+                          // Tambahkan postingan baru ke awal daftar
+                          state.posts.unshift(payload.new);
+                          break;
+                      case 'UPDATE':
+                          // Cari dan perbarui postingan yang ada
+                          const index = state.posts.findIndex(p => p.id === payload.new.id);
+                          if (index !== -1) state.posts[index] = payload.new;
+                          break;
+                      case 'DELETE':
+                          // Hapus postingan dari daftar
+                          state.posts = state.posts.filter(p => p.id !== payload.old.id);
+                          break;
+                  }
+                  // Render ulang daftar postingan dengan data yang sudah diperbarui
+                  renderPosts();
+              })
+              .subscribe();
       }
       
       const init = async () => {
@@ -792,27 +675,25 @@
         const skeletonGrid = $('#skeleton-grid');
         const skeletonCardHTML = `<div class="skeleton-card"><div class="skeleton-img shimmer"></div><div class="skeleton-content"><div class="skeleton-line shimmer" style="width: 35%;"></div><div class="skeleton-line shimmer" style="width: 85%;"></div><div class="skeleton-line shimmer" style="width: 60%;"></div></div></div>`;
         skeletonGrid.innerHTML = Array(4).fill(skeletonCardHTML).join('');
+        
         await fetchPosts();
         await setupUIBasedOnAuth();
+        listenToPosts(); // Panggil listener setelah data awal dimuat
       };
       
-      const handleAuthButtonClick = async () => {
-        if (state.user) {
-            await renderProfileView();
-        } else {
-            renderLoginView();
-        }
-        openAuthModal();
-      };
-      
-      const handleRequestButtonClick = () => {
-        renderRequestView();
-        openRequestModal();
+      const handleAuthButtonClick = async () => { if (state.user) { await renderProfileView(); } else { renderLoginView(); } openAuthModal(); };
+      const handleRequestButtonClick = () => { renderRequestView(); openRequestModal(); };
+      const handleChatButtonClick = () => {
+        switchMainView('chat');
+        updateActiveNav();
+        renderChatView();
+        if(window.innerWidth < 768) { $('#sidebar').classList.remove('open'); $('#backdrop').classList.remove('active'); }
       };
       
       $('#auth-menu-btn').addEventListener('click', handleAuthButtonClick);
       $('#auth-bottom-nav-btn').addEventListener('click', handleAuthButtonClick);
       $('#request-menu-btn').addEventListener('click', handleRequestButtonClick);
+      $('#chat-menu-btn').addEventListener('click', handleChatButtonClick);
       
       init();
     });
