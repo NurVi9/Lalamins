@@ -215,6 +215,7 @@
         <div class="menu-item" data-category="texturepack"><i class="fas fa-calendar-alt"></i> TexturePack</div>
         <p class="menu-heading">Interaksi</p>
         <div class="menu-item" id="request-menu-btn"><i class="fas fa-bullhorn"></i> Request</div>
+        <a href="https://linktr.ee/noirrv" target="_blank" rel="noopener noreferrer" class="menu-item"><i class="fas fa-link"></i> Linktree</a>
         <p class="menu-heading">Akun</p>
         <div class="menu-item" id="auth-menu-btn"><i class="fas fa-user-circle"></i><span id="auth-menu-text">Login</span></div>
       </nav>
@@ -249,7 +250,7 @@
   <nav class="bottom-nav">
     <div class="nav-item active" data-category=""><i class="fas fa-home"></i><span class="nav-text">Home</span></div>
     <div class="nav-item" data-category="featured"><i class="fas fa-star"></i><span class="nav-text">Pilihan</span></div>
-    <div class="nav-item" id="request-bottom-nav-btn"><i class="fas fa-bullhorn"></i><span class="nav-text">Request</span></div>
+    <div class="nav-item" data-category="wishlist"><i class="fas fa-heart"></i><span class="nav-text">Wishlist</span></div>
     <div class="nav-item" id="auth-bottom-nav-btn"><i class="fas fa-user-circle"></i><span class="nav-text">Akun</span></div>
   </nav>
 
@@ -812,7 +813,6 @@
       $('#auth-menu-btn').addEventListener('click', handleAuthButtonClick);
       $('#auth-bottom-nav-btn').addEventListener('click', handleAuthButtonClick);
       $('#request-menu-btn').addEventListener('click', handleRequestButtonClick);
-      $('#request-bottom-nav-btn').addEventListener('click', handleRequestButtonClick);
       
       init();
     });
