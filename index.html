@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-t" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Luminox — DLC Game</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -164,28 +164,41 @@
     .request-management-actions button { width: auto; padding: 0.3rem 0.8rem; font-size: 0.8rem; }
     .request-management-actions .delete-btn { background-color: var(--danger); }
 
-    /* --- Tampilan Chat yang Lebih Responsif --- */
+    /* --- Tampilan Chat & Menu Edit/Hapus --- */
     #chat-view { padding: 0; display: flex; justify-content: center; }
     #chat-view-container { display: flex; flex-direction: column; height: calc(100vh - 70px); max-width: 900px; width: 100%; background: var(--card); }
     .chat-messages { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; scroll-behavior: smooth; }
-    .chat-message { display: flex; gap: 1rem; max-width: 75%; align-items: flex-end; }
+    .chat-message { display: flex; gap: 1rem; max-width: 75%; align-items: flex-end; user-select: none; -webkit-user-select: none; }
     .chat-message.current-user { align-self: flex-end; flex-direction: row-reverse; }
     .chat-message .message-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; box-shadow: var(--shadow); }
     .message-content { display: flex; flex-direction: column; width: 100%; }
-    .message-bubble { padding: 0.75rem 1.25rem; border-radius: 18px; background: var(--bg); box-shadow: var(--shadow); line-height: 1.5; }
-    .chat-message.current-user .message-bubble { background: var(--accent); color: white; }
+    .message-bubble { position: relative; padding: 0.75rem 1.25rem; border-radius: 18px; background: var(--bg); box-shadow: var(--shadow); line-height: 1.5; }
+    .chat-message.current-user .message-bubble { background: var(--accent); color: white; cursor: pointer; }
     .message-meta { display: flex; justify-content: space-between; align-items: center; padding: 0 .5rem; margin-bottom: 4px; }
     .chat-message.current-user .message-meta { flex-direction: row-reverse; }
     .message-author { font-weight: 600; font-size: .8rem; }
     .message-timestamp { font-size: .7rem; color: var(--muted); }
     .chat-message.current-user .message-author { color: var(--text); opacity: 0.9; }
     .message-text { margin: 0; white-space: pre-wrap; word-wrap: break-word; }
+    .message-edited-tag { font-size: 0.7rem; color: var(--muted); opacity: 0.8; margin-left: 5px; }
+    .chat-message.current-user .message-edited-tag { color: white; }
     #chat-form { display: flex; gap: .75rem; padding: 1rem; border-top: 1px solid var(--border); background-color: var(--sidebar-bg); }
     #chat-form input { flex: 1; padding: 0.85rem 1.25rem; border-radius: 99px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; }
     #chat-form input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); outline: none; }
     #chat-form button { width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; transition: all .2s; font-size: 1.1rem; flex-shrink: 0; }
     #chat-form button:hover { background: var(--accent-dark); transform: scale(1.05); }
+
+    .message-context-menu { position: fixed; z-index: 1500; background: var(--card); border-radius: 8px; box-shadow: var(--shadow-lg); overflow: hidden; display: none; }
+    .context-menu-btn { padding: 0.75rem 1.25rem; background: none; border: none; color: var(--text); display: flex; align-items: center; gap: 0.75rem; width: 100%; text-align: left; cursor: pointer; }
+    .context-menu-btn:hover { background: var(--bg); }
+    .context-menu-btn.delete { color: var(--danger); }
     
+    .message-edit-form { display: flex; flex-direction: column; gap: 0.5rem; }
+    .message-edit-form textarea { width: 100%; resize: vertical; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem; }
+    .message-edit-form .edit-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
+    .message-edit-form button { background: var(--accent); color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; }
+    .message-edit-form .cancel-btn { background: var(--muted); }
+
     @media (min-width: 768px) {
       #chat-view-container { height: calc(100vh - 85px); border: 1px solid var(--border); border-radius: 16px; margin: 1rem 0; box-shadow: var(--shadow-lg); }
       .bottom-nav, #menu-toggle, .backdrop { display: none; }
@@ -259,6 +272,11 @@
     <div class="nav-item" data-category="wishlist"><i class="fas fa-heart"></i><span class="nav-text">Wishlist</span></div>
     <div class="nav-item" id="auth-bottom-nav-btn"><i class="fas fa-user-circle"></i><span class="nav-text">Akun</span></div>
   </nav>
+  
+  <div id="message-context-menu" class="message-context-menu">
+      <button id="edit-msg-btn" class="context-menu-btn"><i class="fas fa-pencil-alt"></i> Edit</button>
+      <button id="delete-msg-btn" class="context-menu-btn delete"><i class="fas fa-trash"></i> Hapus</button>
+  </div>
 
   <div id="post-modal-wrapper">
     <div class="modal-backdrop"></div>
@@ -379,23 +397,16 @@
       };
 
       const renderPosts = () => {
-        const grid = $('#post-grid');
-        grid.innerHTML = '';
-        let filteredPosts = [];
+        const grid = $('#post-grid'); grid.innerHTML = ''; let filteredPosts = [];
         if (state.currentCategory === 'wishlist') { const ids = WishlistManager.get(); filteredPosts = state.posts.filter(p => ids.includes(p.id)); } 
         else if (state.currentCategory === 'history') { const ids = HistoryManager.get(); filteredPosts = ids.map(id => state.posts.find(p => p.id === id)).filter(Boolean); } 
         else if (state.currentCategory === 'featured') { filteredPosts = state.posts.filter(p => p.isFeatured); } 
         else { filteredPosts = state.posts.filter(post => { const query = state.searchQuery.toLowerCase(); const matchesSearch = post.title.toLowerCase().includes(query) || post.description.toLowerCase().includes(query); const matchesCategory = !state.currentCategory || post.category.toLowerCase() === state.currentCategory; return matchesSearch && matchesCategory; }); }
-        
         if (filteredPosts.length === 0) { const messages = { wishlist: 'Wishlist Anda kosong.', history: 'Riwayat unduhan kosong.', featured: 'Tidak ada pilihan editor saat ini.' }; grid.innerHTML = `<p style="color: var(--muted); text-align: center; grid-column: 1 / -1;">${messages[state.currentCategory] || 'Tidak ada postingan yang cocok.'}</p>`; } 
         else { filteredPosts.forEach(post => grid.appendChild(createPostElement(post))); }
-        
         const titles = { '': 'Postingan Terbaru', wishlist: 'Wishlist Saya', history: 'Riwayat Unduhan', featured: 'Pilihan Editor', addon: 'Addons', template: 'Templates', texturepack: 'TexturePack' };
         $('#page-title').textContent = state.searchQuery ? `Hasil untuk "${state.searchQuery}"` : (titles[state.currentCategory] || 'Postingan');
-        
-        // Hide skeleton after rendering
-        $('#skeleton-grid').classList.add('hidden');
-        $('#post-grid').classList.remove('hidden');
+        $('#skeleton-grid').classList.add('hidden'); $('#post-grid').classList.remove('hidden');
       };
       
       const postModalWrapper = $('#post-modal-wrapper');
@@ -478,7 +489,8 @@
           if (!$('#chat-view').classList.contains('hidden')) {
               $('#chat-menu-btn').classList.add('active');
           } else {
-              $$(`[data-category="${state.currentCategory}"]`).forEach(item => item.classList.add('active'));
+              const activeItems = $$(`[data-category="${state.currentCategory}"]`);
+              activeItems.forEach(item => item.classList.add('active'));
           }
       }
 
@@ -596,7 +608,23 @@
           const author = profile?.nickname || 'Pengguna';
           const avatar = profile?.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${author}`;
           const isCurrentUser = state.user && message.user_id === state.user.id;
-          return `<div class="chat-message ${isCurrentUser ? 'current-user' : ''}"><img src="${avatar}" alt="${author}" class="message-avatar"><div class="message-content"><div class="message-meta"><span class="message-author">${author}</span><span class="message-timestamp">${formatChatTimestamp(message.created_at)}</span></div><div class="message-bubble"><p class="message-text">${message.content}</p></div></div></div>`;
+          const editedTag = message.updated_at && message.created_at !== message.updated_at ? `<span class="message-edited-tag">(diedit)</span>` : '';
+
+          const messageNode = document.createElement('div');
+          messageNode.className = `chat-message ${isCurrentUser ? 'current-user' : ''}`;
+          messageNode.dataset.messageId = message.id;
+          messageNode.innerHTML = `<img src="${avatar}" alt="${author}" class="message-avatar"><div class="message-content"><div class="message-meta"><span class="message-author">${author}</span><span class="message-timestamp">${formatChatTimestamp(message.created_at)} ${editedTag}</span></div><div class="message-bubble"><p class="message-text">${message.content}</p></div></div>`;
+          
+          if(isCurrentUser) {
+              let pressTimer;
+              const bubble = messageNode.querySelector('.message-bubble');
+              bubble.addEventListener('mousedown', (e) => { pressTimer = window.setTimeout(() => showMessageContextMenu(e, message), 500); });
+              bubble.addEventListener('touchstart', (e) => { pressTimer = window.setTimeout(() => showMessageContextMenu(e, message), 500); });
+              bubble.addEventListener('mouseup', () => clearTimeout(pressTimer));
+              bubble.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+              bubble.addEventListener('touchend', () => clearTimeout(pressTimer));
+          }
+          return messageNode;
       }
       async function handleChatSubmit(e) {
         e.preventDefault();
@@ -626,49 +654,131 @@
           if (error) { messagesContainer.innerHTML = `<p style="text-align:center; color:var(--danger)">Gagal memuat pesan: ${error.message}</p>`; return; }
 
           if(data.length === 0) { messagesContainer.innerHTML = `<p class="empty-state" style="text-align:center; color: var(--muted);">Jadilah yang pertama mengirim pesan!</p>`; }
-          else { messagesContainer.innerHTML = data.map(renderChatMessage).join(''); scrollToBottom(); }
+          else { messagesContainer.innerHTML = ''; data.forEach(msg => messagesContainer.appendChild(renderChatMessage(msg))); scrollToBottom(); }
           
           if(state.activeChatChannel) { state.activeChatChannel.unsubscribe(); }
 
+          // --- MODIFIED CODE BLOCK ---
           state.activeChatChannel = supabase.channel('public:messages')
-              .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
-                  const { data: profileData } = await supabase.from('profiles').select('nickname, avatar_url').eq('id', payload.new.user_id).single();
-                  const emptyState = messagesContainer.querySelector('.empty-state');
-                  if (emptyState) { emptyState.remove(); }
-                  const messageWithProfile = { ...payload.new, profiles: profileData };
-                  messagesContainer.insertAdjacentHTML('beforeend', renderChatMessage(messageWithProfile));
-                  scrollToBottom();
+              .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, async (payload) => {
+                  const messagesContainer = $('#chat-messages-container');
+                  switch (payload.eventType) {
+                      case 'INSERT':
+                          const { data: profileData } = await supabase.from('profiles').select('nickname, avatar_url').eq('id', payload.new.user_id).single();
+                          const emptyState = messagesContainer.querySelector('.empty-state');
+                          if (emptyState) { emptyState.remove(); }
+                          const messageWithProfile = { ...payload.new, profiles: profileData };
+                          messagesContainer.appendChild(renderChatMessage(messageWithProfile));
+                          scrollToBottom();
+                          break;
+                      case 'UPDATE':
+                          const updatedMsgNode = $(`[data-message-id="${payload.new.id}"]`);
+                          if (updatedMsgNode) {
+                              updatedMsgNode.querySelector('.message-text').textContent = payload.new.content;
+                              const timestampNode = updatedMsgNode.querySelector('.message-timestamp');
+                              if (!timestampNode.querySelector('.message-edited-tag')) {
+                                  timestampNode.innerHTML += ' <span class="message-edited-tag">(diedit)</span>';
+                              }
+                          }
+                          break;
+                      case 'DELETE':
+                          const deletedMsgNode = $(`[data-message-id="${payload.old.id}"]`);
+                          if(deletedMsgNode) deletedMsgNode.remove();
+                          break;
+                  }
               })
               .subscribe();
       }
       
-      // --- FUNGSI BARU UNTUK REAL-TIME POSTS ---
       function listenToPosts() {
-          if (state.activePostsChannel) return; // Prevent multiple listeners
+          if (state.activePostsChannel) return;
           state.activePostsChannel = supabase.channel('public:posts')
               .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, (payload) => {
                   console.log('Perubahan postingan diterima!', payload);
                   switch (payload.eventType) {
-                      case 'INSERT':
-                          // Tambahkan postingan baru ke awal daftar
-                          state.posts.unshift(payload.new);
-                          break;
-                      case 'UPDATE':
-                          // Cari dan perbarui postingan yang ada
-                          const index = state.posts.findIndex(p => p.id === payload.new.id);
-                          if (index !== -1) state.posts[index] = payload.new;
-                          break;
-                      case 'DELETE':
-                          // Hapus postingan dari daftar
-                          state.posts = state.posts.filter(p => p.id !== payload.old.id);
-                          break;
+                      case 'INSERT': state.posts.unshift(payload.new); break;
+                      case 'UPDATE': const index = state.posts.findIndex(p => p.id === payload.new.id); if (index !== -1) state.posts[index] = payload.new; break;
+                      case 'DELETE': state.posts = state.posts.filter(p => p.id !== payload.old.id); break;
                   }
-                  // Render ulang daftar postingan dengan data yang sudah diperbarui
                   renderPosts();
               })
               .subscribe();
       }
       
+      // --- Fungsi baru untuk Edit/Delete Pesan ---
+      const contextMenu = $('#message-context-menu');
+
+      function showMessageContextMenu(e, message) {
+          e.preventDefault();
+          contextMenu.style.display = 'block';
+          const rect = e.target.getBoundingClientRect();
+          // Position menu relative to the bubble, avoiding screen edges
+          let top = e.pageY || e.touches[0].pageY;
+          let left = e.pageX || e.touches[0].pageX;
+          
+          contextMenu.style.top = `${top}px`;
+          contextMenu.style.left = `${left}px`;
+          
+          // Adjust if menu goes off-screen
+          const menuRect = contextMenu.getBoundingClientRect();
+          if (menuRect.right > window.innerWidth) {
+            contextMenu.style.left = `${window.innerWidth - menuRect.width - 5}px`;
+          }
+           if (menuRect.bottom > window.innerHeight) {
+            contextMenu.style.top = `${window.innerHeight - menuRect.height - 5}px`;
+          }
+
+          $('#edit-msg-btn').onclick = () => startEditMessage(message.id);
+          $('#delete-msg-btn').onclick = () => deleteMessage(message.id);
+
+          setTimeout(() => { document.addEventListener('click', hideContextMenu, { once: true }); }, 100);
+      }
+
+      function hideContextMenu() { contextMenu.style.display = 'none'; }
+
+      async function deleteMessage(messageId) {
+          if (confirm('Anda yakin ingin menghapus pesan ini?')) {
+              const { error } = await supabase.from('messages').delete().eq('id', messageId);
+              if (error) { showNotification('Gagal menghapus pesan: ' + error.message, 'error'); }
+          }
+      }
+
+      function startEditMessage(messageId) {
+          const messageNode = $(`[data-message-id="${messageId}"]`);
+          const bubble = messageNode.querySelector('.message-bubble');
+          const currentText = messageNode.querySelector('.message-text').textContent;
+          
+          bubble.innerHTML = `
+              <form class="message-edit-form">
+                  <textarea required>${currentText}</textarea>
+                  <div class="edit-actions">
+                      <button type="button" class="cancel-btn">Batal</button>
+                      <button type="submit">Simpan</button>
+                  </div>
+              </form>
+          `;
+          
+          const form = bubble.querySelector('form');
+          const textarea = form.querySelector('textarea');
+          textarea.focus();
+          textarea.setSelectionRange(currentText.length, currentText.length); // Pindahkan kursor ke akhir
+
+          form.querySelector('.cancel-btn').addEventListener('click', () => {
+              bubble.innerHTML = `<p class="message-text">${currentText}</p>`;
+          });
+
+          form.addEventListener('submit', async (e) => {
+              e.preventDefault();
+              const newText = textarea.value.trim();
+              if (newText && newText !== currentText) {
+                  const { error } = await supabase.from('messages').update({ content: newText, updated_at: new Date().toISOString() }).eq('id', messageId);
+                  if (error) { showNotification('Gagal mengedit pesan: ' + error.message, 'error'); }
+              } else {
+                  bubble.innerHTML = `<p class="message-text">${currentText}</p>`;
+              }
+          });
+      }
+
       const init = async () => {
         const savedTheme = localStorage.getItem('luminox_theme') || '';
         if (savedTheme) { document.documentElement.dataset.theme = savedTheme; $('#theme-toggle i').className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; }
@@ -678,7 +788,7 @@
         
         await fetchPosts();
         await setupUIBasedOnAuth();
-        listenToPosts(); // Panggil listener setelah data awal dimuat
+        listenToPosts();
       };
       
       const handleAuthButtonClick = async () => { if (state.user) { await renderProfileView(); } else { renderLoginView(); } openAuthModal(); };
