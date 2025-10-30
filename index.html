@@ -40,9 +40,7 @@
     .header-icon-btn { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: transparent; color: var(--muted); font-size: 1.1rem; cursor: pointer; border: none; transition: all .2s; }
     .header-icon-btn:hover { background: var(--border); color: var(--text); }
     
-    /* --- CSS BARU UNTUK TOMBOL LONCENG --- */
     #notifications-toggle.subscribed { color: var(--success); }
-    /* --- AKHIR CSS BARU --- */
     
     .sidebar-header { padding: 1.5rem 1rem; border-bottom: 1px solid var(--border); }
     .sidebar-logo { display: flex; align-items: center; gap: .75rem; text-decoration: none; color: var(--text); }
@@ -425,7 +423,7 @@
     <div class="popup-backdrop"></div>
     <div class="popup-content">
       <button class="popup-close-btn">&times;</button>
-      <img src="1001609846.jpg" alt="Butuh Admin Telegram">
+      <img src="https://res.cloudinary.com/do3yj5r1m/image/upload/v1761787740/ox8f0ei4w2uvpaelytcw.png" alt="Butuh Admin Telegram">
     </div>
   </div>
 
@@ -437,7 +435,7 @@
       const SUPABASE_URL = 'https://zmhshfqpyekrcddsqhuz.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptaHNoZnFweWVrcmNkZHNxaHV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMzgxNDAsImV4cCI6MjA3NTcxNDE0MH0.I_AMK5MYj4Ett8fFnAEq-w8HHSqL9NYKnfuaTZOy4O8';
       
-      const VAPID_PUBLIC_KEY = 'BJPmbgeeLhcQIeo2CSt5vjqVy0WQ1qNjclpwcUD2Qrq2Duz_7zCyxFz9-zzC-tR8qn188pRo4pSoxnb4F0qotgo';
+      const VAPID_PUBLIC_KEY = 'MASUKKAN_VAPID_PUBLIC_KEY_ANDA_DI_SINI';
 
       const { createClient } = window.supabase;
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -477,9 +475,7 @@
       $('#request-modal-close').addEventListener('click', closeRequestModal);
       $('#request-modal-backdrop').addEventListener('click', closeRequestModal);
 
-      // --- FUNGSI BARU UNTUK PUSH NOTIFICATION ---
-
-      // Helper function untuk VAPID key
+      // --- FUNGSI PUSH NOTIFICATION ---
       function urlBase64ToUint8Array(base64String) {
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
         const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -491,7 +487,6 @@
         return outputArray;
       }
 
-      // 1. Mendaftarkan Service Worker
       async function registerServiceWorker() {
         if (!('serviceWorker' in navigator)) {
           showNotification('Browser Anda tidak mendukung notifikasi.', 'error');
@@ -508,7 +503,6 @@
         }
       }
 
-      // 2. Meminta Izin Notifikasi
       async function askNotificationPermission() {
         if (!('Notification' in window)) {
           showNotification('Browser Anda tidak mendukung notifikasi.', 'error');
@@ -526,7 +520,6 @@
         }
       }
 
-      // 3. Mendaftarkan Pengguna ke Push Notification
       async function subscribeUserToPush() {
         const registration = await navigator.serviceWorker.ready;
         if (!registration) {
@@ -549,7 +542,7 @@
           console.log('Berhasil subscribe:', subscription);
           state.pushSubscription = subscription;
           await saveSubscriptionToSupabase(subscription);
-          $('#notifications-toggle').classList.add('subscribed'); // Tandai lonceng jadi hijau
+          $('#notifications-toggle').classList.add('subscribed');
 
         } catch (error) {
           console.error('Gagal subscribe:', error);
@@ -557,19 +550,29 @@
         }
       }
 
-      // 4. Menyimpan Langganan ke Supabase
+      // --- FUNGSI DIPERBARUI: saveSubscriptionToSupabase ---
       async function saveSubscriptionToSupabase(subscription) {
         const subData = {
-          subscription_details: subscription.toJSON(), // Simpan detail langganan
+          subscription_details: subscription.toJSON(),
           user_id: state.user ? state.user.id : null,
           role: state.profile ? state.profile.role : null
         };
 
-        // Kita gunakan 'upsert' untuk menghindari duplikat jika user login/logout
-        // 'onConflict' menggunakan 'unique_user_subscription' yang kita buat di SQL
-        const { data, error } = await supabase
-          .from('push_subscriptions')
-          .upsert(subData, { onConflict: 'user_id' }); 
+        let query;
+        if (state.user) {
+          // Pengguna login: Gunakan upsert untuk update/insert berdasarkan user_id
+          // 'onConflict' sekarang merujuk ke 'unique_user_subscription_not_null'
+          query = supabase
+            .from('push_subscriptions')
+            .upsert(subData, { onConflict: 'user_id' }); 
+        } else {
+          // Pengguna tamu: Selalu insert. RLS "Allow public insert" akan mengizinkan ini.
+          query = supabase
+            .from('push_subscriptions')
+            .insert(subData);
+        }
+
+        const { data, error } = await query;
 
         if (error) {
           console.error('Gagal menyimpan langganan:', error);
@@ -579,25 +582,29 @@
           showNotification('Anda berhasil berlangganan notifikasi!', 'success');
         }
       }
+      // --- AKHIR FUNGSI DIPERBARUI ---
       
-      // 5. Cek status langganan saat load
       async function checkSubscriptionStatus() {
         if (!('serviceWorker' in navigator)) return;
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription();
-        if (subscription) {
-          console.log('Pengguna sudah berlangganan.');
-          state.pushSubscription = subscription;
-          $('#notifications-toggle').classList.add('subscribed');
-          // Update data user/role jika mereka login
-          await saveSubscriptionToSupabase(subscription);
-        } else {
-          $('#notifications-toggle').classList.remove('subscribed');
+        
+        try {
+          const registration = await navigator.serviceWorker.ready;
+          const subscription = await registration.pushManager.getSubscription();
+          
+          if (subscription) {
+            console.log('Pengguna sudah berlangganan.');
+            state.pushSubscription = subscription;
+            $('#notifications-toggle').classList.add('subscribed');
+            // Update data user/role jika mereka login
+            await saveSubscriptionToSupabase(subscription);
+          } else {
+            $('#notifications-toggle').classList.remove('subscribed');
+          }
+        } catch (error) {
+          console.error('Gagal cek status subscription:', error);
         }
       }
-
       // --- AKHIR FUNGSI PUSH NOTIFICATION ---
-
 
       const showLoading = (loading) => {
         state.isLoading = loading;
@@ -821,8 +828,7 @@
           state.profile = null; 
           $('#auth-menu-text').textContent = 'Login/Register'; 
         }
-        // Cek status notifikasi SETELAH user login/logout
-        checkSubscriptionStatus();
+        await checkSubscriptionStatus(); // Pindahkan ke sini agar dipanggil setelah auth selesai
         renderPosts();
       }
       async function handleLogin(e) {
@@ -832,7 +838,7 @@
           showNotification('Login berhasil!', 'success'); 
           state.user = data.user; 
           state.profile = await getProfile(data.user); 
-          await setupUIBasedOnAuth(); // Ini akan memanggil checkSubscriptionStatus()
+          await setupUIBasedOnAuth();
           await renderProfileView(); 
         }
       }
@@ -840,7 +846,7 @@
         await supabase.auth.signOut(); 
         state.user = null; 
         state.profile = null; 
-        await setupUIBasedOnAuth(); // Ini juga akan memanggil checkSubscriptionStatus()
+        await setupUIBasedOnAuth();
         showNotification('Anda telah logout.', 'success'); 
         closeAuthModal(); 
       }
@@ -860,7 +866,6 @@
           const requestData = { title: form.title.value, category: form.category.value, description: form.description.value, user_id: state.user.id };
           const { error } = await supabase.from('requests').insert([requestData]);
           if (error) { showNotification('Gagal mengirim request: ' + error.message, 'error'); } else { showNotification('Request Anda berhasil dikirim!', 'success'); closeRequestModal(); }
-          // BAGIAN 4 (Backend) akan dipicu oleh 'insert' ini
       }
 
       function renderChatMessage(message) {
@@ -1071,10 +1076,10 @@
         const skeletonCardHTML = `<div class="skeleton-card"><div class="skeleton-img shimmer"></div><div class="skeleton-content"><div class="skeleton-line shimmer" style="width: 35%;"></div><div class="skeleton-line shimmer" style="width: 85%;"></div><div class="skeleton-line shimmer" style="width: 60%;"></div></div></div>`;
         skeletonGrid.innerHTML = Array(4).fill(skeletonCardHTML).join('');
         
+        await registerServiceWorker(); // Daftarkan service worker dulu
         await fetchPosts();
         await setupUIBasedOnAuth(); // setupUIBasedOnAuth akan memanggil checkSubscriptionStatus
         listenToPosts();
-        await registerServiceWorker(); // Daftarkan service worker saat init
       };
       
       const handleAuthButtonClick = async () => { if (state.user) { await renderProfileView(); } else { renderLoginView(); } openAuthModal(); };
@@ -1091,7 +1096,6 @@
       $('#request-menu-btn').addEventListener('click', handleRequestButtonClick);
       $('#chat-menu-btn').addEventListener('click', handleChatButtonClick);
       
-      // --- Event Listener untuk Tombol Lonceng ---
       $('#notifications-toggle').addEventListener('click', () => {
         if ($('#notifications-toggle').classList.contains('subscribed')) {
           showNotification('Anda sudah berlangganan notifikasi.', 'success');
