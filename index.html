@@ -555,13 +555,15 @@
         }
       }
 
-      // --- FUNGSI DIPERBARUI: saveSubscriptionToSupabase (UNTUK DEBUGGING) ---
+      // --- FUNGSI DIPERBARUI: saveSubscriptionToSupabase (TYPO DIPERBAIKI) ---
       async function saveSubscriptionToSupabase(subscription) {
         const subData = {
-          subscription_details: subscription.toJSON(),
+          // --- PERUBAHAN DI SINI: 'subscription_details' diubah menjadi 'subscription_data' ---
+          subscription_data: subscription.toJSON(),
           user_id: state.user ? state.user.id : null,
           role: state.profile ? state.profile.role : null
         };
+        // --- AKHIR PERUBAHAN ---
 
         let query;
         if (state.user) {
@@ -579,10 +581,8 @@
         if (error) {
           console.error('Gagal menyimpan langganan:', error);
           
-          // --- PERUBAHAN DI SINI ---
-          // Tampilkan pesan error yang sebenarnya dari Supabase di toast
-          const errorMessage = `Gagal: ${error.message}`;
-          showNotification(errorMessage, 'error', 6000); // Tampilkan error selama 6 detik
+          // --- PERUBAHAN DI SINI: Mengembalikan pesan error generik ---
+          showNotification('Gagal menyimpan pendaftaran notifikasi.', 'error');
           // --- AKHIR PERUBAHAN ---
 
           return false;
