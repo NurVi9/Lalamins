@@ -541,8 +541,16 @@
           
           console.log('Berhasil subscribe:', subscription);
           state.pushSubscription = subscription;
-          await saveSubscriptionToSupabase(subscription);
-          $('#notifications-toggle').classList.add('subscribed');
+          
+          // --- KODE DIPERBAIKI ---
+          // Cek apakah penyimpanan ke Supabase berhasil
+          const isSaved = await saveSubscriptionToSupabase(subscription);
+          
+          if (isSaved) {
+            // Hanya set ikon hijau JIKA penyimpanan berhasil
+            $('#notifications-toggle').classList.add('subscribed');
+          }
+          // --- AKHIR PERBAIKAN ---
 
         } catch (error) {
           console.error('Gagal subscribe:', error);
@@ -551,6 +559,7 @@
       }
 
       // --- FUNGSI DIPERBARUI: saveSubscriptionToSupabase ---
+      // Sekarang mengembalikan true (sukses) atau false (gagal)
       async function saveSubscriptionToSupabase(subscription) {
         const subData = {
           subscription_details: subscription.toJSON(),
@@ -561,7 +570,6 @@
         let query;
         if (state.user) {
           // Pengguna login: Gunakan upsert untuk update/insert berdasarkan user_id
-          // 'onConflict' sekarang merujuk ke 'unique_user_subscription_not_null'
           query = supabase
             .from('push_subscriptions')
             .upsert(subData, { onConflict: 'user_id' }); 
@@ -577,9 +585,11 @@
         if (error) {
           console.error('Gagal menyimpan langganan:', error);
           showNotification('Gagal menyimpan pendaftaran notifikasi.', 'error');
+          return false; // <-- KEMBALIKAN false JIKA GAGAL
         } else {
           console.log('Langganan berhasil disimpan:', data);
           showNotification('Anda berhasil berlangganan notifikasi!', 'success');
+          return true; // <-- KEMBALIKAN true JIKA SUKSES
         }
       }
       // --- AKHIR FUNGSI DIPERBARUI ---
