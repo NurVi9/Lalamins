@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-t" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Luminox — DLC Game</title>
   
   <link rel="icon" href="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=6cfbpj8t&dl=1">
@@ -317,6 +316,7 @@
         <div class="menu-item" data-category="addon"><i class="fas fa-puzzle-piece"></i> Addon</div>
         <div class="menu-item" data-category="template"><i class="fas fa-paint-brush"></i> Template</div>
         <div class="menu-item" data-category="texturepack"><i class="fas fa-calendar-alt"></i> TexturePack</div>
+        <div class="menu-item" data-category="informasi"><i class="fas fa-info-circle"></i> Informasi</div>
         <p class="menu-heading">Interaksi</p>
         <div class="menu-item" id="request-menu-btn"><i class="fas fa-bullhorn"></i> Request</div>
         <div class="menu-item" id="chat-menu-btn"><i class="fas fa-comments"></i> Chat</div>
@@ -594,6 +594,7 @@
       }
       // --- AKHIR FUNGSI DIPERBARUI ---
       
+      // --- FUNGSI DIPERBARUI: checkSubscriptionStatus ---
       async function checkSubscriptionStatus() {
         if (!('serviceWorker' in navigator)) return;
         
@@ -602,11 +603,19 @@
           const subscription = await registration.pushManager.getSubscription();
           
           if (subscription) {
-            console.log('Pengguna sudah berlangganan.');
+            console.log('Pengguna sudah berlangganan (menurut browser).');
             state.pushSubscription = subscription;
-            $('#notifications-toggle').classList.add('subscribed');
-            // Update data user/role jika mereka login
-            await saveSubscriptionToSupabase(subscription);
+            
+            // Coba simpan/update ke Supabase
+            const isSaved = await saveSubscriptionToSupabase(subscription);
+            
+            if (isSaved) {
+              // HANYA set hijau jika *berhasil* disimpan ke database
+              $('#notifications-toggle').classList.add('subscribed'); 
+            } else {
+              // Jika gagal simpan, jangan tandai sebagai subscribed
+              $('#notifications-toggle').classList.remove('subscribed'); 
+            }
           } else {
             $('#notifications-toggle').classList.remove('subscribed');
           }
@@ -614,7 +623,7 @@
           console.error('Gagal cek status subscription:', error);
         }
       }
-      // --- AKHIR FUNGSI PUSH NOTIFICATION ---
+      // --- AKHIR FUNGSI DIPERBARUI ---
 
       const showLoading = (loading) => {
         state.isLoading = loading;
@@ -642,10 +651,10 @@
         if (state.currentCategory === 'wishlist') { const ids = WishlistManager.get(); filteredPosts = state.posts.filter(p => ids.includes(p.id)); } 
         else if (state.currentCategory === 'history') { const ids = HistoryManager.get(); filteredPosts = ids.map(id => state.posts.find(p => p.id === id)).filter(Boolean); } 
         else if (state.currentCategory === 'featured') { filteredPosts = state.posts.filter(p => p.isFeatured); } 
-        else { filteredPosts = state.posts.filter(post => { const query = state.searchQuery.toLowerCase(); const matchesSearch = post.title.toLowerCase().includes(query) || post.description.toLowerCase().includes(query); const matchesCategory = !state.currentCategory || post.category.toLowerCase() === state.currentCategory; return matchesSearch && matchesCategory; }); }
+        else { filteredPosts = state.posts.filter(post => { const query = state.searchQuery.toLowerCase(); const matchesSearch = post.title.toLowerCase().includes(query) || post.description.toLowerCase().includes(query); const matchesCategory = !state.currentCategory || post.category.toLowerCase() === state.currentCategory.toLowerCase(); return matchesSearch && matchesCategory; }); } // perbaikan: toLowerCase() untuk category
         if (filteredPosts.length === 0) { const messages = { wishlist: 'Wishlist Anda kosong.', history: 'Riwayat unduhan kosong.', featured: 'Tidak ada pilihan editor saat ini.' }; grid.innerHTML = `<p style="color: var(--muted); text-align: center; grid-column: 1 / -1;">${messages[state.currentCategory] || 'Tidak ada postingan yang cocok.'}</p>`; } 
         else { filteredPosts.forEach(post => grid.appendChild(createPostElement(post))); }
-        const titles = { '': 'Postingan Terbaru', wishlist: 'Wishlist Saya', history: 'Riwayat Unduhan', featured: 'Pilihan Editor', addon: 'Addons', template: 'Templates', texturepack: 'TexturePack' };
+        const titles = { '': 'Postingan Terbaru', wishlist: 'Wishlist Saya', history: 'Riwayat Unduhan', featured: 'Pilihan Editor', addon: 'Addons', template: 'Templates', texturepack: 'TexturePack', informasi: 'Informasi' }; // perbaikan: tambah title 'informasi'
         $('#page-title').textContent = state.searchQuery ? `Hasil untuk "${state.searchQuery}"` : (titles[state.currentCategory] || 'Postingan');
         $('#skeleton-grid').classList.add('hidden'); $('#post-grid').classList.remove('hidden');
       };
@@ -770,7 +779,7 @@
       async function getProfile(user) { if (!user) return null; const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single(); if (error) { console.error("Gagal mengambil profil:", error); return null; } return data; }
       function renderAdminForm(postToEdit = null) {
         const isEditing = postToEdit !== null; const title = isEditing ? 'Edit Postingan' : 'Buat Postingan Baru'; const buttonText = isEditing ? 'Simpan Perubahan' : 'Upload Postingan';
-        authContainer.innerHTML = `<a href="#" class="admin-nav-link" id="go-to-profile-view">Kembali ke Profil</a><h2>${title}</h2><form id="upload-form" data-editing-id="${isEditing ? postToEdit.id : ''}"><label for="title">Judul:</label><input type="text" id="title" name="title" required value="${isEditing ? postToEdit.title : ''}"><label for="description">Deskripsi:</label><textarea id="description" name="description" rows="4" required>${isEditing ? postToEdit.description : ''}</textarea><label for="category">Kategori:</label><select id="category" name="category" required><option value="Template">Template</option><option value="Addon">Addon</option><option value="TexturePack">TexturePack</option></select><label for="img">URL Gambar:</label><input type="text" id="img" name="img" required value="${isEditing ? postToEdit.img : ''}"><label for="mediafire">Link MediaFire:</label><input type="url" id="mediafire" name="mediafire" required value="${isEditing ? postToEdit.links.mediafire : ''}"><label for="gofile">Link Gofile:</label><input type="url" id="gofile" name="gofile" required value="${isEditing ? postToEdit.links.gofile : ''}"><input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;"><label for="isFeatured">Jadikan Pilihan Editor?</label><br><button type="submit">${buttonText}</button></form><button id="logout-btn" style="margin-top: 1rem;">Logout</button>`;
+        authContainer.innerHTML = `<a href="#" class="admin-nav-link" id="go-to-profile-view">Kembali ke Profil</a><h2>${title}</h2><form id="upload-form" data-editing-id="${isEditing ? postToEdit.id : ''}"><label for="title">Judul:</label><input type="text" id="title" name="title" required value="${isEditing ? postToEdit.title : ''}"><label for="description">Deskripsi:</label><textarea id="description" name="description" rows="4" required>${isEditing ? postToEdit.description : ''}</textarea><label for="category">Kategori:</label><select id="category" name="category" required><option value="Template">Template</option><option value="Addon">Addon</option><option value="TexturePack">TexturePack</option><option value="Informasi">Informasi</option></select><label for="img">URL Gambar:</label><input type="text" id="img" name="img" required value="${isEditing ? postToEdit.img : ''}"><label for="mediafire">Link MediaFire:</label><input type="url" id="mediafire" name="mediafire" required value="${isEditing ? postToEdit.links.mediafire : ''}"><label for="gofile">Link Gofile:</label><input type="url" id="gofile" name="gofile" required value="${isEditing ? postToEdit.links.gofile : ''}"><input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;"><label for="isFeatured">Jadikan Pilihan Editor?</label><br><button type="submit">${buttonText}</button></form><button id="logout-btn" style="margin-top: 1rem;">Logout</button>`; // Perbaikan: tambah kategori 'Informasi' di form
         if (isEditing) { authContainer.querySelector('#category').value = postToEdit.category; authContainer.querySelector('#isFeatured').checked = postToEdit.isFeatured; }
         authContainer.querySelector('#upload-form').addEventListener('submit', handleSubmit); authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout); $('#go-to-profile-view').addEventListener('click', (e) => { e.preventDefault(); renderProfileView(); });
       }
@@ -868,7 +877,7 @@
       }
       async function fetchPosts() { try { const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false }); if (error) throw error; state.posts = data; renderPosts(); } catch (error) { console.error('Gagal memuat data postingan:', error); $('#post-grid').innerHTML = `<p style="color: var(--muted); text-align: center;">Gagal memuat data. Silakan coba lagi nanti.</p>`; showNotification('Gagal memuat data postingan.', 'error'); } }
       function renderRequestView() {
-        if (state.user) { requestContainer.innerHTML = `<h2>Buat Request</h2><p style="font-size: 0.9rem; color: var(--muted); margin-top: -0.5rem; margin-bottom: 1.5rem;">Ingin Addon, Template, atau TexturePack yang kalian mau? Silahkan ajukan request Anda!</p><form id="request-form"><label for="request-title">Nama Item/Game:</label><input type="text" id="request-title" name="title" required placeholder="Contoh: Shader Realistis"><label for="request-category">Kategori:</label><select id="request-category" name="category" required><option value="" disabled selected>Pilih Kategori</option><option value="Addon">Addon</option><option value="Template">Template</option><option value="TexturePack">TexturePack</option></select><label for="request-description">Deskripsi (Opsional):</label><textarea id="request-description" name="description" rows="3" placeholder="Jelaskan lebih detail tentang request Anda..."></textarea><button type="submit">Kirim Request</button></form>`; $('#request-form').addEventListener('submit', handleRequestSubmit); }
+        if (state.user) { requestContainer.innerHTML = `<h2>Buat Request</h2><p style="font-size: 0.9rem; color: var(--muted); margin-top: -0.5rem; margin-bottom: 1.5rem;">Ingin Addon, Template, atau TexturePack yang kalian mau? Silahkan ajukan request Anda!</p><form id="request-form"><label for="request-title">Nama Item/Game:</label><input type="text" id="request-title" name="title" required placeholder="Contoh: Shader Realistis"><label for="request-category">Kategori:</label><select id="request-category" name="category" required><option value="" disabled selected>Pilih Kategori</option><option value="Addon">Addon</option><option value="Template">Template</option><option value="TexturePack">TexturePack</option><option value="Informasi">Informasi</option></select><label for="request-description">Deskripsi (Opsional):</label><textarea id="request-description" name="description" rows="3" placeholder="Jelaskan lebih detail tentang request Anda..."></textarea><button type="submit">Kirim Request</button></form>`; $('#request-form').addEventListener('submit', handleRequestSubmit); } // Perbaikan: tambah 'Informasi' di request
         else { requestContainer.innerHTML = `<div class="chat-login-prompt"><i class="fas fa-lock"></i><h3>Login Diperlukan</h3><p>Anda harus login terlebih dahulu untuk dapat mengajukan request.</p><button id="login-from-request" style="width: auto; padding: 0.6rem 1.5rem;">Login Sekarang</button></div>`; $('#login-from-request').addEventListener('click', () => { closeRequestModal(); handleAuthButtonClick(); }); }
       }
       async function handleRequestSubmit(e) {
