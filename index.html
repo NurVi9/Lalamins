@@ -4,6 +4,9 @@
   <meta charset="utf-t" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Luminox — DLC Game</title>
+  
+  <link rel="icon" href="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=6cfbpj8t&dl=1">
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -36,6 +39,11 @@
     .app-header.search-active #search-toggle .fa-times { display: block; }
     .header-icon-btn { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: transparent; color: var(--muted); font-size: 1.1rem; cursor: pointer; border: none; transition: all .2s; }
     .header-icon-btn:hover { background: var(--border); color: var(--text); }
+    
+    /* --- CSS BARU UNTUK TOMBOL LONCENG --- */
+    #notifications-toggle.subscribed { color: var(--success); }
+    /* --- AKHIR CSS BARU --- */
+    
     .sidebar-header { padding: 1.5rem 1rem; border-bottom: 1px solid var(--border); }
     .sidebar-logo { display: flex; align-items: center; gap: .75rem; text-decoration: none; color: var(--text); }
     .sidebar-logo img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; box-shadow: var(--shadow); }
@@ -114,6 +122,16 @@
     .profile-avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--border); }
     #avatar-upload-label { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; background: var(--accent); color: white; border-radius: 50%; display: grid; place-items: center; cursor: pointer; border: 2px solid var(--card); }
     #avatar-upload-label:hover { background: var(--accent-dark); }
+    
+    #auth-container {
+        overflow-y: auto;
+        flex: 1;
+        padding: 1.5rem;
+    }
+    #user-list-container {
+        padding-right: 5px;
+    }
+    
     .user-management-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; }
     .user-management-item { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background-color: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
     .user-management-info { display: flex; flex-direction: column; }
@@ -208,6 +226,77 @@
       #post-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
     }
     @media (hover: hover) { .post-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: var(--shadow-lg); } }
+
+    /* --- CSS POPUP --- */
+    #welcome-popup-wrapper {
+      position: fixed;
+      inset: 0;
+      z-index: 2100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s ease;
+    }
+    #welcome-popup-wrapper.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #welcome-popup-wrapper .popup-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      cursor: pointer;
+    }
+    #welcome-popup-wrapper .popup-content {
+      position: relative;
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 320px; 
+      overflow: hidden;
+      transform: scale(0.9);
+      transition: transform .3s ease;
+    }
+    #welcome-popup-wrapper.open .popup-content {
+      transform: scale(1);
+    }
+    #welcome-popup-wrapper .popup-content img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    #welcome-popup-wrapper .popup-close-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0,0,0,0.4);
+      color: white;
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 36px;
+      text-align: center;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      z-index: 10;
+      transition: all .2s;
+    }
+    #welcome-popup-wrapper .popup-close-btn:hover {
+      background: rgba(0,0,0,0.7);
+      transform: scale(1.1);
+    }
+    /* --- AKHIR CSS POPUP --- */
+
   </style>
 </head>
 <body>
@@ -251,6 +340,9 @@
             <button id="search-toggle" class="header-icon-btn">
                 <i class="fas fa-search"></i>
                 <i class="fas fa-times"></i>
+            </button>
+            <button id="notifications-toggle" class="header-icon-btn" title="Aktifkan Notifikasi">
+                <i class="fas fa-bell"></i>
             </button>
             <button id="theme-toggle" class="header-icon-btn"><i class="fas fa-moon"></i></button>
         </div>
@@ -310,9 +402,9 @@
   <div id="auth-modal-wrapper">
     <div class="modal-backdrop" id="auth-modal-backdrop"></div>
     <div class="modal-container">
-      <div class="modal-content" style="max-width: 420px; position: relative; max-height: none;">
+      <div class="modal-content" style="max-width: 420px; position: relative;">
         <button id="auth-modal-close" class="header-icon-btn" style="position:absolute; top:0.5rem; right:0.5rem; z-index:10;"><i class="fas fa-times"></i></button>
-        <div id="auth-container" style="padding: 1.5rem;"></div>
+        <div id="auth-container"></div>
       </div>
     </div>
   </div>
@@ -329,6 +421,14 @@
 
   <div id="notification-container"></div>
 
+  <div id="welcome-popup-wrapper">
+    <div class="popup-backdrop"></div>
+    <div class="popup-content">
+      <button class="popup-close-btn">&times;</button>
+      <img src="1001609846.jpg" alt="Butuh Admin Telegram">
+    </div>
+  </div>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
       const $ = (s) => document.querySelector(s);
@@ -337,13 +437,15 @@
       const SUPABASE_URL = 'https://zmhshfqpyekrcddsqhuz.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptaHNoZnFweWVrcmNkZHNxaHV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMzgxNDAsImV4cCI6MjA3NTcxNDE0MH0.I_AMK5MYj4Ett8fFnAEq-w8HHSqL9NYKnfuaTZOy4O8';
       
+      const VAPID_PUBLIC_KEY = 'BJPmbgeeLhcQIeo2CSt5vjqVy0WQ1qNjclpwcUD2Qrq2Duz_7zCyxFz9-zzC-tR8qn188pRo4pSoxnb4F0qotgo';
+
       const { createClient } = window.supabase;
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       const createStorageManager = (key) => ({ get: () => JSON.parse(localStorage.getItem(key)) || [], save: (data) => localStorage.setItem(key, JSON.stringify(data)), });
       const WishlistManager = { ...createStorageManager('luminox_wishlist'), add: (postId) => { const wishlist = WishlistManager.get(); if (!wishlist.includes(postId)) { wishlist.push(postId); WishlistManager.save(wishlist); } }, remove: (postId) => { let wishlist = WishlistManager.get(); wishlist = wishlist.filter(id => id !== postId); WishlistManager.save(wishlist); }, has: (postId) => WishlistManager.get().includes(postId) };
       const HistoryManager = { ...createStorageManager('luminox_history'), add: (postId) => { let history = HistoryManager.get(); history = history.filter(id => id !== postId); history.unshift(postId); if (history.length > 50) history.pop(); HistoryManager.save(history); } };
-      let state = { posts: [], currentCategory: '', searchQuery: '', isLoading: true, user: null, profile: null, activeChatChannel: null, activeCommentChannel: null, activePostsChannel: null };
+      let state = { posts: [], currentCategory: '', searchQuery: '', isLoading: true, user: null, profile: null, activeChatChannel: null, activeCommentChannel: null, activePostsChannel: null, pushSubscription: null };
 
       function showNotification(message, type = 'success', duration = 4000) {
           const container = $('#notification-container');
@@ -374,6 +476,128 @@
       $('#auth-modal-backdrop').addEventListener('click', closeAuthModal);
       $('#request-modal-close').addEventListener('click', closeRequestModal);
       $('#request-modal-backdrop').addEventListener('click', closeRequestModal);
+
+      // --- FUNGSI BARU UNTUK PUSH NOTIFICATION ---
+
+      // Helper function untuk VAPID key
+      function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) {
+          outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+      }
+
+      // 1. Mendaftarkan Service Worker
+      async function registerServiceWorker() {
+        if (!('serviceWorker' in navigator)) {
+          showNotification('Browser Anda tidak mendukung notifikasi.', 'error');
+          return null;
+        }
+        try {
+          const registration = await navigator.serviceWorker.register('/service-worker.js');
+          console.log('Service Worker terdaftar:', registration);
+          return registration;
+        } catch (error) {
+          console.error('Gagal mendaftarkan Service Worker:', error);
+          showNotification('Gagal mendaftarkan Service Worker.', 'error');
+          return null;
+        }
+      }
+
+      // 2. Meminta Izin Notifikasi
+      async function askNotificationPermission() {
+        if (!('Notification' in window)) {
+          showNotification('Browser Anda tidak mendukung notifikasi.', 'error');
+          return;
+        }
+        
+        const permission = await Notification.requestPermission();
+        
+        if (permission === 'granted') {
+          console.log('Izin notifikasi diberikan.');
+          await subscribeUserToPush();
+        } else {
+          console.log('Izin notifikasi ditolak.');
+          showNotification('Anda menolak izin notifikasi.', 'error');
+        }
+      }
+
+      // 3. Mendaftarkan Pengguna ke Push Notification
+      async function subscribeUserToPush() {
+        const registration = await navigator.serviceWorker.ready;
+        if (!registration) {
+          showNotification('Service Worker tidak siap.', 'error');
+          return;
+        }
+
+        if (VAPID_PUBLIC_KEY === 'MASUKKAN_VAPID_PUBLIC_KEY_ANDA_DI_SINI') {
+            console.error('VAPID_PUBLIC_KEY belum diatur!');
+            showNotification('Konfigurasi notifikasi di sisi admin belum selesai.', 'error');
+            return;
+        }
+
+        try {
+          const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+          });
+          
+          console.log('Berhasil subscribe:', subscription);
+          state.pushSubscription = subscription;
+          await saveSubscriptionToSupabase(subscription);
+          $('#notifications-toggle').classList.add('subscribed'); // Tandai lonceng jadi hijau
+
+        } catch (error) {
+          console.error('Gagal subscribe:', error);
+          showNotification('Gagal berlangganan notifikasi.', 'error');
+        }
+      }
+
+      // 4. Menyimpan Langganan ke Supabase
+      async function saveSubscriptionToSupabase(subscription) {
+        const subData = {
+          subscription_details: subscription.toJSON(), // Simpan detail langganan
+          user_id: state.user ? state.user.id : null,
+          role: state.profile ? state.profile.role : null
+        };
+
+        // Kita gunakan 'upsert' untuk menghindari duplikat jika user login/logout
+        // 'onConflict' menggunakan 'unique_user_subscription' yang kita buat di SQL
+        const { data, error } = await supabase
+          .from('push_subscriptions')
+          .upsert(subData, { onConflict: 'user_id' }); 
+
+        if (error) {
+          console.error('Gagal menyimpan langganan:', error);
+          showNotification('Gagal menyimpan pendaftaran notifikasi.', 'error');
+        } else {
+          console.log('Langganan berhasil disimpan:', data);
+          showNotification('Anda berhasil berlangganan notifikasi!', 'success');
+        }
+      }
+      
+      // 5. Cek status langganan saat load
+      async function checkSubscriptionStatus() {
+        if (!('serviceWorker' in navigator)) return;
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) {
+          console.log('Pengguna sudah berlangganan.');
+          state.pushSubscription = subscription;
+          $('#notifications-toggle').classList.add('subscribed');
+          // Update data user/role jika mereka login
+          await saveSubscriptionToSupabase(subscription);
+        } else {
+          $('#notifications-toggle').classList.remove('subscribed');
+        }
+      }
+
+      // --- AKHIR FUNGSI PUSH NOTIFICATION ---
+
 
       const showLoading = (loading) => {
         state.isLoading = loading;
@@ -438,7 +662,19 @@
 
       function renderComment(comment) {
         const profile = comment.profiles; const author = profile?.nickname || 'Pengguna'; const avatar = profile?.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${author}`; const role = profile?.role || 'user';
-        const createRoleBadge = (r) => { if (!r || r === 'user') return ''; const rc = r.toLowerCase(); return `<span class="role-badge ${rc}">${r}</span>`; };
+        
+        const createRoleBadge = (r) => {
+            if (!r) return '';
+            const rc = r.toLowerCase();
+            let displayText = 'User';
+            if (rc === 'admin') {
+                displayText = 'Owner';
+            } else if (rc === 'moderator') {
+                displayText = 'Admin';
+            }
+            return `<span class="role-badge ${rc}">${displayText}</span>`;
+        };
+
         return `<div class="comment-item"><img src="${avatar}" alt="${author}" class="comment-avatar"><div class="comment-content"><div class="comment-header"><span class="comment-author">${author}</span>${createRoleBadge(role)}<span class="comment-date">${timeAgo(comment.created_at)}</span></div><p class="comment-body">${comment.content}</p></div></div>`;
       }
       
@@ -528,7 +764,9 @@
           const { data: profiles, error } = await supabase.from('profiles').select('id, nickname, role');
           if (error) { $('#user-list-container').innerHTML = `<p style="color:var(--danger);">Gagal memuat pengguna: ${error.message}</p>`; return; }
           const currentAdminId = state.user.id;
-          const userListHTML = profiles.map(profile => { const nickname = profile.nickname || 'Tanpa Nickname'; const isCurrentUser = profile.id === currentAdminId; return `<li class="user-management-item"><div class="user-management-info"><span class="nickname">${nickname}</span></div><div class="user-management-role"><select data-user-id="${profile.id}" ${isCurrentUser ? 'disabled' : ''}><option value="user" ${profile.role === 'user' ? 'selected' : ''}>User</option><option value="moderator" ${profile.role === 'moderator' ? 'selected' : ''}>Moderator</option><option value="admin" ${profile.role === 'admin' ? 'selected' : ''}>Admin</option></select></div></li>`; }).join('');
+          
+          const userListHTML = profiles.map(profile => { const nickname = profile.nickname || 'Tanpa Nickname'; const isCurrentUser = profile.id === currentAdminId; return `<li class="user-management-item"><div class="user-management-info"><span class="nickname">${nickname}</span></div><div class="user-management-role"><select data-user-id="${profile.id}" ${isCurrentUser ? 'disabled' : ''}><option value="user" ${profile.role === 'user' ? 'selected' : ''}>User</option><option value="moderator" ${profile.role === 'moderator' ? 'selected' : ''}>Admin</option><option value="admin" ${profile.role === 'admin' ? 'selected' : ''}>Owner</option></select></div></li>`; }).join('');
+          
           $('#user-list-container').innerHTML = `<ul class="user-management-list">${userListHTML}</ul>`;
           $$('.user-management-role select').forEach(select => { select.addEventListener('change', (e) => { const userId = e.target.dataset.userId; const newRole = e.target.value; handleRoleUpdate(userId, newRole); }); });
       }
@@ -575,16 +813,37 @@
       }
       async function setupUIBasedOnAuth() {
         const { data: { user } } = await supabase.auth.getUser(); state.user = user;
-        if (user) { const profile = await getProfile(user); state.profile = profile; $('#auth-menu-text').textContent = 'Akun Saya'; }
-        else { state.profile = null; $('#auth-menu-text').textContent = 'Login/Register'; }
+        if (user) { 
+          const profile = await getProfile(user); 
+          state.profile = profile; 
+          $('#auth-menu-text').textContent = 'Akun Saya'; 
+        } else { 
+          state.profile = null; 
+          $('#auth-menu-text').textContent = 'Login/Register'; 
+        }
+        // Cek status notifikasi SETELAH user login/logout
+        checkSubscriptionStatus();
         renderPosts();
       }
       async function handleLogin(e) {
         e.preventDefault(); const email = e.target.email.value; const password = e.target.password.value;
         const { error, data } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) { showNotification("Login Gagal: " + error.message, 'error'); } else { showNotification('Login berhasil!', 'success'); state.user = data.user; state.profile = await getProfile(data.user); await setupUIBasedOnAuth(); await renderProfileView(); }
+        if (error) { showNotification("Login Gagal: " + error.message, 'error'); } else { 
+          showNotification('Login berhasil!', 'success'); 
+          state.user = data.user; 
+          state.profile = await getProfile(data.user); 
+          await setupUIBasedOnAuth(); // Ini akan memanggil checkSubscriptionStatus()
+          await renderProfileView(); 
+        }
       }
-      async function handleLogout() { await supabase.auth.signOut(); state.user = null; state.profile = null; await setupUIBasedOnAuth(); showNotification('Anda telah logout.', 'success'); closeAuthModal(); }
+      async function handleLogout() { 
+        await supabase.auth.signOut(); 
+        state.user = null; 
+        state.profile = null; 
+        await setupUIBasedOnAuth(); // Ini juga akan memanggil checkSubscriptionStatus()
+        showNotification('Anda telah logout.', 'success'); 
+        closeAuthModal(); 
+      }
       async function handleSubmit(e) {
         e.preventDefault(); const form = e.target; const editingId = form.dataset.editingId;
         const postData = { title: form.title.value, description: form.description.value, category: form.category.value, isFeatured: form.isFeatured.checked, img: form.img.value, links: { mediafire: form.mediafire.value, gofile: form.gofile.value } };
@@ -601,6 +860,7 @@
           const requestData = { title: form.title.value, category: form.category.value, description: form.description.value, user_id: state.user.id };
           const { error } = await supabase.from('requests').insert([requestData]);
           if (error) { showNotification('Gagal mengirim request: ' + error.message, 'error'); } else { showNotification('Request Anda berhasil dikirim!', 'success'); closeRequestModal(); }
+          // BAGIAN 4 (Backend) akan dipicu oleh 'insert' ini
       }
 
       function renderChatMessage(message) {
@@ -658,7 +918,6 @@
           
           if(state.activeChatChannel) { state.activeChatChannel.unsubscribe(); }
 
-          // --- MODIFIED CODE BLOCK ---
           state.activeChatChannel = supabase.channel('public:messages')
               .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, async (payload) => {
                   const messagesContainer = $('#chat-messages-container');
@@ -705,21 +964,18 @@
               .subscribe();
       }
       
-      // --- Fungsi baru untuk Edit/Delete Pesan ---
       const contextMenu = $('#message-context-menu');
 
       function showMessageContextMenu(e, message) {
           e.preventDefault();
           contextMenu.style.display = 'block';
           const rect = e.target.getBoundingClientRect();
-          // Position menu relative to the bubble, avoiding screen edges
           let top = e.pageY || e.touches[0].pageY;
           let left = e.pageX || e.touches[0].pageX;
           
           contextMenu.style.top = `${top}px`;
           contextMenu.style.left = `${left}px`;
           
-          // Adjust if menu goes off-screen
           const menuRect = contextMenu.getBoundingClientRect();
           if (menuRect.right > window.innerWidth) {
             contextMenu.style.left = `${window.innerWidth - menuRect.width - 5}px`;
@@ -761,7 +1017,7 @@
           const form = bubble.querySelector('form');
           const textarea = form.querySelector('textarea');
           textarea.focus();
-          textarea.setSelectionRange(currentText.length, currentText.length); // Pindahkan kursor ke akhir
+          textarea.setSelectionRange(currentText.length, currentText.length);
 
           form.querySelector('.cancel-btn').addEventListener('click', () => {
               bubble.innerHTML = `<p class="message-text">${currentText}</p>`;
@@ -779,6 +1035,35 @@
           });
       }
 
+      const welcomePopup = $('#welcome-popup-wrapper');
+      if (welcomePopup) {
+          const welcomePopupBackdrop = welcomePopup.querySelector('.popup-backdrop');
+          const welcomePopupClose = welcomePopup.querySelector('.popup-close-btn');
+
+          const openWelcomePopup = () => welcomePopup.classList.add('open');
+          const closeWelcomePopup = () => {
+              welcomePopup.classList.remove('open');
+              try {
+                  sessionStorage.setItem('luminoxPopupShown', 'true');
+              } catch (e) {
+                  console.warn('Gagal menyimpan ke sessionStorage:', e);
+              }
+          };
+
+          welcomePopupClose.addEventListener('click', closeWelcomePopup);
+          welcomePopupBackdrop.addEventListener('click', closeWelcomePopup);
+
+          try {
+              if (!sessionStorage.getItem('luminoxPopupShown')) {
+                  setTimeout(openWelcomePopup, 1000);
+              }
+          } catch (e) {
+              console.warn('Gagal mengakses sessionStorage:', e);
+              setTimeout(openWelcomePopup, 1000);
+          }
+      }
+
+
       const init = async () => {
         const savedTheme = localStorage.getItem('luminox_theme') || '';
         if (savedTheme) { document.documentElement.dataset.theme = savedTheme; $('#theme-toggle i').className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; }
@@ -787,8 +1072,9 @@
         skeletonGrid.innerHTML = Array(4).fill(skeletonCardHTML).join('');
         
         await fetchPosts();
-        await setupUIBasedOnAuth();
+        await setupUIBasedOnAuth(); // setupUIBasedOnAuth akan memanggil checkSubscriptionStatus
         listenToPosts();
+        await registerServiceWorker(); // Daftarkan service worker saat init
       };
       
       const handleAuthButtonClick = async () => { if (state.user) { await renderProfileView(); } else { renderLoginView(); } openAuthModal(); };
@@ -804,6 +1090,15 @@
       $('#auth-bottom-nav-btn').addEventListener('click', handleAuthButtonClick);
       $('#request-menu-btn').addEventListener('click', handleRequestButtonClick);
       $('#chat-menu-btn').addEventListener('click', handleChatButtonClick);
+      
+      // --- Event Listener untuk Tombol Lonceng ---
+      $('#notifications-toggle').addEventListener('click', () => {
+        if ($('#notifications-toggle').classList.contains('subscribed')) {
+          showNotification('Anda sudah berlangganan notifikasi.', 'success');
+        } else {
+          askNotificationPermission();
+        }
+      });
       
       init();
     });
