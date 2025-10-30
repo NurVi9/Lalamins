@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Luminox — DLC Game</title>
+  <title>Luminox — For you (alpha)</title>
   
   <link rel="icon" href="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=6cfbpj8t&dl=1">
 
@@ -424,7 +424,7 @@
     <div class="popup-backdrop"></div>
     <div class="popup-content">
       <button class="popup-close-btn">&times;</button>
-      <img src="https://res.cloudinary.com/do3yj5r1m/image/upload/v1761787740/ox8f0ei4w2uvpaelytcw.png" alt="Butuh Admin Telegram">
+      <img src="https://res.cloudinary.com/do3yj5r1m/image/upload/v1761833724/y1q52qc2ctuixjwtvhfm.png" alt="Selamat Datang">
     </div>
   </div>
 
@@ -619,6 +619,55 @@
           console.error('Gagal cek status subscription:', error);
         }
       }
+
+      // --- FUNGSI BARU DITAMBAHKAN ---
+      async function unsubscribeUserFromPush() {
+        if (!('serviceWorker' in navigator)) {
+          showNotification('Browser Anda tidak mendukung fitur ini.', 'error');
+          return;
+        }
+
+        try {
+          const registration = await navigator.serviceWorker.ready;
+          const subscription = await registration.pushManager.getSubscription();
+
+          if (!subscription) {
+            // Jika karena alasan tertentu browser bilang tidak subscribe
+            showNotification('Anda memang belum berlangganan.', 'success');
+            $('#notifications-toggle').classList.remove('subscribed');
+            return;
+          }
+
+          // 1. Berhenti berlangganan dari sisi browser
+          const unsubscribed = await subscription.unsubscribe();
+          if (!unsubscribed) {
+            throw new Error('Gagal berhenti berlangganan di browser.');
+          }
+
+          // 2. Hapus langganan dari database Supabase
+          //    Kita gunakan 'endpoint' sebagai pengenal unik
+          const endpoint = subscription.endpoint;
+          const { error: dbError } = await supabase
+            .from('push_subscriptions')
+            .delete()
+            .eq('subscription_data->>endpoint', endpoint); // Ini adalah cara query data di dalam JSON
+
+          if (dbError) {
+            console.error('Gagal menghapus langganan dari DB:', dbError);
+            // Tetap lanjutkan, karena user sudah unsub dari browser
+          }
+
+          // 3. Update UI dan state
+          state.pushSubscription = null;
+          $('#notifications-toggle').classList.remove('subscribed');
+          showNotification('Anda berhasil berhenti berlangganan notifikasi.', 'success');
+
+        } catch (error) {
+          console.error('Gagal berhenti berlangganan:', error);
+          showNotification('Gagal berhenti berlangganan: ' + error.message, 'error');
+        }
+      }
+      // --- AKHIR FUNGSI BARU ---
 
       const showLoading = (loading) => {
         state.isLoading = loading;
@@ -868,7 +917,32 @@
         e.preventDefault(); const form = e.target; const editingId = form.dataset.editingId;
         const postData = { title: form.title.value, description: form.description.value, category: form.category.value, isFeatured: form.isFeatured.checked, img: form.img.value, links: { mediafire: form.mediafire.value, gofile: form.gofile.value } };
         const { error } = editingId ? await supabase.from('posts').update(postData).eq('id', editingId) : await supabase.from('posts').insert([postData]);
-        if (error) { showNotification('Operasi Gagal: ' + error.message, 'error'); } else { showNotification(`Postingan berhasil ${editingId ? 'diperbarui' : 'diupload'}!`, 'success'); form.reset(); closeAuthModal(); }
+        if (error) { showNotification('Operasi Gagal: ' + error.message, 'error'); } else { 
+            showNotification(`Postingan berhasil ${editingId ? 'diperbarui' : 'diupload'}!`, 'success'); 
+            form.reset(); 
+            closeAuthModal(); 
+
+            // !!! INI ADALAH KODE YANG MENGIRIM NOTIFIKASI KE USER !!!
+            // Hanya kirim notif jika ini adalah postingan BARU (bukan edit)
+            if (!editingId) {
+                try {
+                    console.log('Mengirim notifikasi push ke pengguna...');
+                    const { error: funcError } = await supabase.functions.invoke('send-push-notification', {
+                        body: { 
+                            title: 'Postingan Baru!', 
+                            body: `Cek ${postData.category} terbaru: ${postData.title}`
+                        }
+                    });
+                    if (funcError) {
+                        throw funcError;
+                    }
+                    console.log('Perintah kirim notifikasi push berhasil.');
+                } catch (error) {
+                    console.error('Gagal memicu fungsi notifikasi:', error);
+                    // Tidak perlu menakuti admin, jadi cukup log di console
+                }
+            }
+        }
       }
       async function fetchPosts() { try { const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false }); if (error) throw error; state.posts = data; renderPosts(); } catch (error) { console.error('Gagal memuat data postingan:', error); $('#post-grid').innerHTML = `<p style="color: var(--muted); text-align: center;">Gagal memuat data. Silakan coba lagi nanti.</p>`; showNotification('Gagal memuat data postingan.', 'error'); } }
       function renderRequestView() {
@@ -1110,13 +1184,19 @@
       $('#request-menu-btn').addEventListener('click', handleRequestButtonClick);
       $('#chat-menu-btn').addEventListener('click', handleChatButtonClick);
       
+      // --- LISTENER DIPERBARUI ---
       $('#notifications-toggle').addEventListener('click', () => {
         if ($('#notifications-toggle').classList.contains('subscribed')) {
-          showNotification('Anda sudah berlangganan notifikasi.', 'success');
+          // Jika sudah subscribe, tampilkan konfirmasi untuk unsub
+          if (confirm('Anda yakin ingin berhenti berlangganan notifikasi?')) {
+            unsubscribeUserFromPush(); // Panggil fungsi baru
+          }
         } else {
+          // Jika belum subscribe, jalankan proses subscribe
           askNotificationPermission();
         }
       });
+      // --- AKHIR LISTENER DIPERBARUI ---
       
       init();
     });
