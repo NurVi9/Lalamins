@@ -123,7 +123,7 @@
     #modal-title { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.5rem; }
     #modal-desc { color: var(--muted); font-size: 0.95rem; line-height: 1.6; margin: 0 0 1.5rem; }
     .download-section h4 { margin: 0 0 1rem; font-size: 0.9rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
-    .download-buttons { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.75rem; } /* DIUBAH */
+    .download-buttons { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.75rem; }
     .btn-download { display: flex; align-items: center; justify-content: center; text-decoration: none; padding: 0.75rem; border-radius: 8px; font-weight: 600; transition: all .2s ease; }
     .btn-download i { margin-right: 0.5rem; font-size: 1.1rem; }
     .btn-mediafire { background-color: #0099e5; color: white; }
@@ -131,7 +131,6 @@
     .btn-gofile { background-color: #215ff3; color: white; }
     .btn-gofile:hover { background-color: #1a4ccc; transform: translateY(-2px); }
     
-    /* --- CSS BARU UNTUK TOMBOL DOWNLOAD DINAMIS --- */
     .btn-dynamic {
       background-color: var(--muted);
       color: var(--text);
@@ -147,7 +146,6 @@
       color: white;
       transform: translateY(-2px);
     }
-    /* --- AKHIR CSS BARU --- */
 
     #auth-container input, #auth-container textarea, #auth-container select, #request-container input, #request-container textarea, #request-container select { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; }
     #auth-container button, #request-container button { width: 100%; padding: 0.75rem; border-radius: 8px; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; transition: background .2s; }
@@ -203,7 +201,6 @@
         margin-top: 0.5rem;
     }
 
-    /* --- CSS BARU UNTUK FORM LINK DINAMIS --- */
     #dynamic-links-container .link-entry {
       display: flex;
       gap: 0.5rem;
@@ -237,7 +234,6 @@
       margin-top: -0.5rem;
       margin-bottom: 1rem;
     }
-    /* --- AKHIR CSS BARU --- */
 
     #auth-container {
         overflow-y: auto;
@@ -540,7 +536,7 @@
     <div class="popup-backdrop"></div>
     <div class="popup-content">
       <button class="popup-close-btn">&times;</button>
-      <img src="https://res.cloudinary.com/do3yj5r1m/image/upload/v1761833724/y1q52qc2ctuixjwtvhfm.png" alt="Selamat Datang">
+      <img src="https://res.cloudinary.com/do3yj5r1m/image/upload/v1761787740/ox8f0ei4w2uvpaelytcw.png" alt="Butuh Admin Telegram">
     </div>
   </div>
 
@@ -552,7 +548,7 @@
       const SUPABASE_URL = 'https://zmhshfqpyekrcddsqhuz.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptaHNoZnFweWVrcmNkZHNxaHV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMzgxNDAsImV4cCI6MjA3NTcxNDE0MH0.I_AMK5MYj4Ett8fFnAEq-w8HHSqL9NYKnfuaTZOy4O8';
       
-      const VAPID_PUBLIC_KEY = 'BJPmbgeeLhcQIeo2CSt5vjqVy0WQ1qNjclpwcUD2Qrq2Duz_7zCyxFz9-zzC-tR8qn188pRo4pSoxnb4F0qotgo';
+      const VAPID_PUBLIC_KEY = 'BOGxyDihJa42olM4Y_rO3za2VQ6cojG89XkE3O38V1p_vLxzeYPaa2PS2QX7ciJfwpt0bEdDQPjB_qMOAQhN_KY';
 
       const { createClient } = window.supabase;
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -604,14 +600,30 @@
         return outputArray;
       }
 
+      // --- KODE DIPERBARUI DARI tes.js ---
       async function registerServiceWorker() {
         if (!('serviceWorker' in navigator)) {
           showNotification('Browser Anda tidak mendukung notifikasi.', 'error');
           return null;
         }
         try {
-          const registration = await navigator.serviceWorker.register('/service-worker.js');
+          // Pastikan path ke service worker benar
+          const registration = await navigator.serviceWorker.register('/service-worker.js', {
+            scope: '/'
+          });
           console.log('Service Worker terdaftar:', registration);
+          
+          // Cek status subscription setelah service worker aktif
+          if (registration.active) {
+            await checkSubscriptionStatus();
+          } else {
+            registration.addEventListener('statechange', (e) => {
+              if (e.target.state === 'activated') {
+                checkSubscriptionStatus();
+              }
+            });
+          }
+          
           return registration;
         } catch (error) {
           console.error('Gagal mendaftarkan Service Worker:', error);
@@ -619,6 +631,7 @@
           return null;
         }
       }
+      // --- AKHIR KODE DIPERBARUI ---
 
       async function askNotificationPermission() {
         if (!('Notification' in window)) {
@@ -769,6 +782,26 @@
         }
       }
 
+      // --- KODE BARU DARI tes.js ---
+      async function sendTestNotification() {
+        try {
+          const { error } = await supabase.functions.invoke('send-push-notification', {
+            body: { 
+              title: 'Test Notifikasi', 
+              body: 'Ini adalah test notifikasi dari Luminox!',
+              url: window.location.href
+            }
+          });
+          
+          if (error) throw error;
+          showNotification('Test notifikasi berhasil dikirim!', 'success');
+        } catch (error) {
+          console.error('Gagal mengirim test notifikasi:', error);
+          showNotification('Gagal mengirim test notifikasi.', 'error');
+        }
+      }
+      // --- AKHIR KODE BARU ---
+
       const showLoading = (loading) => {
         state.isLoading = loading;
         $('#skeleton-grid').classList.toggle('hidden', !loading);
@@ -886,7 +919,6 @@
           listenToComments(postId);
       }
 
-      // --- FUNGSI openPostModal DIPERBARUI (Tombol Download Dinamis) ---
       const openPostModal = (post) => {
         $('#post-modal-img').src = post.img; 
         $('#modal-category').textContent = post.category; 
@@ -895,15 +927,15 @@
         
         const downloadHandler = () => HistoryManager.add(post.id);
         const buttonsContainer = $('#modal-download-buttons');
-        buttonsContainer.innerHTML = ''; // Kosongkan tombol lama
+        buttonsContainer.innerHTML = ''; 
 
         if (post.links && typeof post.links === 'object' && Object.keys(post.links).length > 0) {
           for (const [name, url] of Object.entries(post.links)) {
-            if (url) { // Hanya tampilkan jika URL ada
+            if (url) { 
               const btn = document.createElement('a');
               btn.href = url;
               btn.target = '_blank';
-              btn.className = 'btn-download btn-dynamic'; // Menggunakan style generic baru
+              btn.className = 'btn-download btn-dynamic'; 
               btn.innerHTML = `<i class="fa-solid fa-download"></i> ${name}`;
               btn.addEventListener('click', downloadHandler, { once: true });
               buttonsContainer.appendChild(btn);
@@ -917,7 +949,6 @@
         loadComments(post.id); 
         postModalWrapper.classList.add('open');
       };
-      // --- AKHIR FUNGSI DIPERBARUI ---
       
       const closePostModal = () => {
         postModalWrapper.classList.remove('open');
@@ -965,7 +996,6 @@
       
       async function getProfile(user) { if (!user) return null; const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single(); if (error) { console.error("Gagal mengambil profil:", error); return null; } return data; }
       
-      // --- FUNGSI renderAdminForm DIPERBARUI (Link Dinamis) ---
       function renderAdminForm(postToEdit = null, formType = 'dlc') {
         const isEditing = postToEdit !== null;
         let title = '';
@@ -975,7 +1005,7 @@
           title = isEditing ? 'Edit Informasi' : 'Buat Informasi Baru';
           categoryHTML = `<input type="hidden" id="category" name="category" value="Informasi">
                           <label style="display: block; margin-bottom: 1rem; color: var(--muted);">Kategori: Informasi</label>`;
-        } else { // 'dlc' form
+        } else { 
           title = isEditing ? 'Edit Postingan' : 'Buat Postingan Baru';
           categoryHTML = `
             <label for="category">Kategori:</label>
@@ -1013,7 +1043,6 @@
           <button id="logout-btn" style="margin-top: 1rem;">Logout</button>
         `;
 
-        // Atur nilai kategori dan featured jika mode edit
         if (isEditing) {
           if (formType === 'dlc') {
             authContainer.querySelector('#category').value = postToEdit.category;
@@ -1021,7 +1050,6 @@
           authContainer.querySelector('#isFeatured').checked = postToEdit.isFeatured;
         }
 
-        // --- Logika untuk Link Dinamis ---
         const linksContainer = $('#dynamic-links-container');
             
         const addLinkRow = (name = '', url = '') => {
@@ -1047,16 +1075,13 @@
             }
           }
         } else if (!isEditing) {
-          // Jika form baru, tambahkan satu baris kosong
           addLinkRow(); 
         }
-        // --- Akhir Logika Link Dinamis ---
 
         authContainer.querySelector('#upload-form').addEventListener('submit', handleSubmit);
         authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
         $('#go-to-profile-view').addEventListener('click', (e) => { e.preventDefault(); renderProfileView(); });
       }
-      // --- AKHIR FUNGSI DIPERBARUI ---
 
       async function handleRoleUpdate(userId, newRole) { const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId); if (error) { showNotification(`Gagal mengubah role: ${error.message}`, 'error'); } else { showNotification('Role pengguna berhasil diubah.', 'success'); } }
       async function renderUserManagementView() {
@@ -1097,6 +1122,7 @@
       function renderLoginView() { authContainer.innerHTML = `<div id="login-view"><h2>Login</h2><form id="login-form"><label for="email">Email:</label><input type="email" id="email" name="email" required autocomplete="email"><label for="password">Password:</label><input type="password" id="password" name="password" required autocomplete="current-password"><button type="submit">Login</button></form><p style="text-align: center; margin-top: 1rem; font-size: 0.9rem;">Belum punya akun? <a href="#" id="show-register">Daftar</a></p></div>`; authContainer.querySelector('#login-form').addEventListener('submit', handleLogin); authContainer.querySelector('#show-register').addEventListener('click', (e) => { e.preventDefault(); renderRegisterView(); }); }
       function renderRegisterView() { authContainer.innerHTML = `<div id="register-view"><h2>Daftar Akun Baru</h2><form id="register-form"><label for="register-email">Email:</label><input type="email" id="register-email" name="email" required autocomplete="email"><label for="register-password">Password:</label><input type="password" id="register-password" name="password" required autocomplete="new-password"><button type="submit">Daftar</button></form><p style="text-align: center; margin-top: 1rem; font-size: 0.9rem;">Sudah punya akun? <a href="#" id="show-login">Login</a></p></div>`; authContainer.querySelector('#register-form').addEventListener('submit', handleRegister); authContainer.querySelector('#show-login').addEventListener('click', (e) => { e.preventDefault(); renderLoginView(); }); }
       
+      // --- KODE DIPERBARUI DARI tes.js ---
       async function renderProfileView() {
           const user = state.user; const profile = state.profile;
           if (user && profile) {
@@ -1125,6 +1151,13 @@
                     <i class="fas fa-inbox"></i>
                     <span>Kelola Request</span>
                  </button>` : '';
+              
+              // KODE BARU: Tombol Test Notifikasi
+              const testNotificationButtonHTML = isModerator ? 
+                `<button id="test-notification-btn" class="admin-action-btn">
+                    <i class="fas fa-bell"></i>
+                    <span>Test Notif</span>
+                 </button>` : '';
 
               authContainer.innerHTML = `
                 <form id="profile-form">
@@ -1148,7 +1181,7 @@
                     ${uploadInfoButtonHTML}
                     ${userManagementButtonHTML}
                     ${requestManagementButtonHTML}
-                </div>
+                    ${testNotificationButtonHTML} </div>
                 
                 <button id="logout-btn">Logout</button>
               `;
@@ -1173,6 +1206,10 @@
                   
                   const reqBtn = $('#manage-requests-btn');
                   if (reqBtn) reqBtn.addEventListener('click', (e) => { e.preventDefault(); renderRequestManagementView(); });
+                  
+                  // KODE BARU: Event listener untuk tombol test notif
+                  const testBtn = $('#test-notification-btn');
+                  if (testBtn) testBtn.addEventListener('click', sendTestNotification);
               }
               if(isAdmin) { 
                   const userBtn = $('#manage-users-btn');
@@ -1182,6 +1219,7 @@
               renderLoginView(); 
           }
       }
+      // --- AKHIR KODE DIPERBARUI ---
 
       async function handleProfileUpdate(e) {
           e.preventDefault(); const form = e.target; const user = state.user; const newNickname = form.nickname.value; const avatarFile = form.avatar.files[0]; let avatar_url = state.profile.avatar_url;
@@ -1226,11 +1264,9 @@
         closeAuthModal(); 
       }
 
-      // --- FUNGSI handleSubmit DIPERBARUI (Link Dinamis) ---
       async function handleSubmit(e) {
         e.preventDefault(); const form = e.target; const editingId = form.dataset.editingId;
         
-        // --- KODE BARU UNTUK MENGAMBIL LINK DINAMIS ---
         const links = {};
         $$('#dynamic-links-container .link-entry').forEach(entry => {
           const name = entry.querySelector('.link-name-input').value.trim();
@@ -1239,7 +1275,6 @@
             links[name] = url;
           }
         });
-        // --- AKHIR KODE BARU ---
 
         const postData = { 
           title: form.title.value, 
@@ -1247,7 +1282,7 @@
           category: form.category.value, 
           isFeatured: form.isFeatured.checked, 
           img: form.img.value, 
-          links: links // Menggunakan objek 'links' yang baru
+          links: links 
         };
 
         const { error } = editingId ? await supabase.from('posts').update(postData).eq('id', editingId) : await supabase.from('posts').insert([postData]);
@@ -1275,7 +1310,6 @@
             }
         }
       }
-      // --- AKHIR FUNGSI DIPERBARUI ---
 
       async function handleDeletePost(post) {
         if (!confirm(`Anda yakin ingin menghapus postingan "${post.title}"? Tindakan ini tidak bisa dibatalkan.`)) {
@@ -1303,16 +1337,87 @@
       }
 
       async function fetchPosts() { try { const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false }); if (error) throw error; state.posts = data; renderPosts(); } catch (error) { console.error('Gagal memuat data postingan:', error); $('#post-grid').innerHTML = `<p style="color: var(--muted); text-align: center;">Gagal memuat data. Silakan coba lagi nanti.</p>`; showNotification('Gagal memuat data postingan.', 'error'); } }
+      
       function renderRequestView() {
-        if (state.user) { requestContainer.innerHTML = `<h2>Buat Request</h2><p style="font-size: 0.9rem; color: var(--muted); margin-top: -0.5rem; margin-bottom: 1.5rem;">Ingin Addon, Template, atau TexturePack yang kalian mau? Silahkan ajukan request Anda!</p><form id="request-form"><label for="request-title">Nama Item/Game:</label><input type="text" id="request-title" name="title" required placeholder="Contoh: Shader Realistis"><label for="request-category">Kategori:</label><select id="request-category" name="category" required><option value="" disabled selected>Pilih Kategori</option><option value="Addon">Addon</option><option value="Template">Template</option><option value="TexturePack">TexturePack</option><option value="Informasi">Informasi</option></select><label for="request-description">Deskripsi (Opsional):</label><textarea id="request-description" name="description" rows="3" placeholder="Jelaskan lebih detail tentang request Anda..."></textarea><button type="submit">Kirim Request</button></form>`; $('#request-form').addEventListener('submit', handleRequestSubmit); }
-        else { requestContainer.innerHTML = `<div class="chat-login-prompt"><i class="fas fa-lock"></i><h3>Login Diperlukan</h3><p>Anda harus login terlebih dahulu untuk dapat mengajukan request.</p><button id="login-from-request" style="width: auto; padding: 0.6rem 1.5rem;">Login Sekarang</button></div>`; $('#login-from-request').addEventListener('click', () => { closeRequestModal(); handleAuthButtonClick(); }); }
+        if (state.user) { 
+          requestContainer.innerHTML = `
+            <h2>Buat Request</h2>
+            <p style="font-size: 0.9rem; color: var(--muted); margin-top: -0.5rem; margin-bottom: 1.5rem;">Ingin Addon, Template, atau TexturePack yang kalian mau? Silahkan ajukan request Anda!</p>
+            <form id="request-form">
+              <label for="request-title">Nama Item/Game:</label>
+              <input type="text" id="request-title" name="title" required placeholder="Contoh: Shader Realistis">
+              <label for="request-category">Kategori:</label>
+              <select id="request-category" name="category" required>
+                <option value="" disabled selected>Pilih Kategori</option>
+                <option value="Addon">Addon</option>
+                <option value="Template">Template</option>
+                <option value="TexturePack">TexturePack</option>
+              </select>
+              <label for="request-description">Deskripsi (Opsional):</label>
+              <textarea id="request-description" name="description" rows="3" placeholder="Jelaskan lebih detail tentang request Anda..."></textarea>
+              <button type="submit">Kirim Request</button>
+            </form>
+          `; 
+          $('#request-form').addEventListener('submit', handleRequestSubmit); 
+        }
+        else { 
+          requestContainer.innerHTML = `
+            <div class="chat-login-prompt">
+              <i class="fas fa-lock"></i>
+              <h3>Login Diperlukan</h3>
+              <p>Anda harus login terlebih dahulu untuk dapat mengajukan request.</p>
+              <button id="login-from-request" style="width: auto; padding: 0.6rem 1.5rem;">Login Sekarang</button>
+            </div>
+          `; 
+          $('#login-from-request').addEventListener('click', () => { closeRequestModal(); handleAuthButtonClick(); }); 
+        }
       }
+      
+      // --- FUNGSI handleRequestSubmit DIPERBARUI (PERBAIKAN TOTAL) ---
       async function handleRequestSubmit(e) {
           e.preventDefault(); const form = e.target;
-          const requestData = { title: form.title.value, category: form.category.value, description: form.description.value, user_id: state.user.id };
-          const { error } = await supabase.from('requests').insert([requestData]);
-          if (error) { showNotification('Gagal mengirim request: ' + error.message, 'error'); } else { showNotification('Request Anda berhasil dikirim!', 'success'); closeRequestModal(); }
+          const requestData = { 
+            title: form.title.value, 
+            category: form.category.value, 
+            description: form.description.value, 
+            user_id: state.user.id 
+          };
+
+          // 1. Insert data dan minta datanya kembali
+          const { data: newRecord, error } = await supabase
+            .from('requests')
+            .insert(requestData)
+            .select()  // Meminta data yang baru di-insert kembali
+            .single(); // Kita hanya insert satu, jadi ambil 'single'
+
+          if (error) { 
+              // Cek jika ini error RLS lagi (sebagai jaring pengaman)
+              if (error.message.includes('row-level security')) {
+                  showNotification('Gagal mengirim request: Periksa aturan keamanan (RLS) di tabel "requests".', 'error');
+              } else {
+                  showNotification('Gagal mengirim request: ' + error.message, 'error'); 
+              }
+          } else { 
+              showNotification('Request Anda berhasil dikirim!', 'success'); 
+              closeRequestModal();
+              
+              // 2. Jika insert berhasil, SEKARANG panggil Edge Function dari client
+              //    Ini adalah perbaikan untuk error libcurl/cross-database
+              try {
+                  console.log('Memicu notifikasi admin untuk request baru...');
+                  // Kirim data yang baru saja dibuat ke Edge Function
+                  const { error: funcError } = await supabase.functions.invoke('notify-on-request', {
+                      body: { record: newRecord } 
+                  });
+                  if (funcError) throw funcError;
+                  console.log('Notifikasi admin berhasil dipicu.');
+              } catch (invokeError) {
+                  console.error('Gagal memicu fungsi notifikasi request:', invokeError);
+                  // Jangan tampilkan error ke user, cukup log di console admin
+              }
+          }
       }
+      // --- AKHIR FUNGSI DIPERBARUI ---
 
       function renderChatMessage(message) {
           const profile = message.profiles;

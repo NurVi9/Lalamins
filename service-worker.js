@@ -1,79 +1,101 @@
-// Listener saat service worker di-install
-self.addEventListener('install', (event) => {
-  console.log('Service Worker berhasil di-install.');
-  // Langsung aktifkan service worker baru tanpa menunggu
-  event.waitUntil(self.skipWaiting());
-});
+// service-worker.js
+self.addEventListener('push', function(event) {
+  if (!event.data) return;
 
-// Listener saat service worker di-aktifkan
-self.addEventListener('activate', (event) => {
-  console.log('Service Worker berhasil di-aktifkan.');
-  // Ambil alih kontrol halaman yang ada
-  event.waitUntil(self.clients.claim());
-});
-
-self.addEventListener('push', (event) => {
-  console.log('Menerima pesan push:', event);
-
-  let payload;
-  try {
-    // Coba parse data JSON yang dikirim dari Edge Function Anda
-    payload = event.data.json();
-  } catch (e) {
-    // Jika gagal, buat payload default
-    payload = {
-      title: 'Luminox Update',
-      body: 'Ada sesuatu yang baru, cek sekarang!',
-      icon: 'https.www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=6cfbpj8t&dl=1',
-      data: {
-        url: self.registration.scope // URL default ke halaman utama
-      }
-    };
-  }
-
-  const title = payload.title;
+  const data = event.data.json();
   const options = {
-    body: payload.body,
-    icon: payload.icon,
-    badge: 'https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=6cfbpj8t&dl=1', // Ikon kecil di status bar
+    body: data.body || 'Ada update baru nih',
+    icon: 'https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=6cfbpj8t&dl=1',
+    badge: 'https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=6cfbpj8t&dl=1',
+    image: data.image || null,
+    tag: 'luminox-notification',
+    renotify: true,
+    requireInteraction: true,
+    actions: data.actions || [
+      {
+        action: 'open',
+        title: 'Buka Aplikasi'
+      },
+      {
+        action: 'close',
+        title: 'Tutup'
+      }
+    ],
     data: {
-      url: payload.data.url // URL yang akan dibuka saat notif diklik
+      url: data.url || '/'
     }
   };
 
-  // Tampilkan notifikasi ke pengguna
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Luminox', options)
+  );
 });
 
-/**
- * Listener saat pengguna MENGKLIK notifikasi
- */
-self.addEventListener('notificationclick', (event) => {
-  console.log('Notifikasi diklik:', event);
-  
-  // Tutup notifikasi yang diklik
+self.addEventListener('notificationclick', function(event) {
   event.notification.close();
 
-  // Ambil URL dari data notifikasi
-  const urlToOpen = event.notification.data.url;
-
-  // Buka tab browser baru ke URL tersebut
-  event.waitUntil(
-    clients.matchAll({
-      type: 'window',
-      includeUncontrolled: true
-    }).then((clientList) => {
-      // Jika tab website sudah terbuka, fokus ke tab itu
-      for (let i = 0; i < clientList.length; i++) {
-        let client = clientList[i];
-        if (client.url === urlToOpen && 'focus' in client) {
-          return client.focus();
+  if (event.action === 'open') {
+    event.waitUntil(
+      clients.matchAll({ type: 'window' }).then(function(clientList) {
+        for (let client of clientList) {
+          if (client.url === '/' && 'focus' in client) {
+            return client.focus();
+          }
         }
-      }
-      // Jika tidak ada tab yang terbuka, buka tab baru
-      if (clients.openWindow) {
-        return clients.openWindow(urlToOpen);
-      }
+        if (clients.openWindow) {
+          return clients.openWindow(event.notification.data.url || '/');
+        }
+      })
+    );
+  } else if (event.action === 'close') {
+    // Tidak melakukan apa-apa, notifikasi sudah ditutup
+  } else {
+    // Klik pada body notifikasi
+    event.waitUntil(
+      clients.matchAll({ type: 'window' }).then(function(clientList) {
+        for (let client of clientList) {
+          if (client.url === '/' && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        if (clients.openWindow) {
+          return clients.openWindow(event.notification.data.url || '/');
+        }
+      })
+    );
+  }
+});
+
+self.addEventListener('pushsubscriptionchange', function(event) {
+  event.waitUntil(
+    self.registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array('BJPmbgeeLhcQIeo2CSt5vjqVy0WQ1qNjclpwcUD2Qrq2Duz_7zCyxFz9-zzC-tR8qn188pRo4pSoxnb4F0qotgo')
+    }).then(function(subscription) {
+      // Kirim subscription baru ke server
+      return fetch('/api/update-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          old_subscription: event.oldSubscription,
+          new_subscription: subscription
+        })
+      });
     })
   );
 });
+
+// Helper function untuk konversi base64 to Uint8Array
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
