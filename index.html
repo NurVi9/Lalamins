@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Luminox — For you (alpha)</title>
+  <title>Luminox — DLC Game</title>
   
   <link rel="icon" href="https://www.dropbox.com/scl/fi/yz8831kakxyc5f3t5f0dl/f8968f32c554ba5cd6bcab519fc0fae8.jpg?rlkey=398wt14ned3ugz41gjz3yx9en&st=6cfbpj8t&dl=1">
 
@@ -77,6 +77,29 @@
     @keyframes heartbeat { 0% {transform: scale(1);} 50% {transform: scale(1.3);} 100% {transform: scale(1);} }
     .edit-btn { position: absolute; top: 0.75rem; left: 0.75rem; width: 40px; height: 40px; border-radius: 50%; background-color: rgba(0,0,0,0.4); color: white; border: none; cursor: pointer; display: grid; place-items: center; font-size: 1rem; transition: transform 0.2s ease, background-color 0.2s ease; z-index: 5; }
     .edit-btn:hover { transform: scale(1.1); background-color: rgba(0, 123, 255, 0.8); }
+    
+    .delete-btn { 
+      position: absolute; 
+      top: 0.75rem; 
+      left: 4.25rem; /* (40px tombol edit) + (0.75rem jarak) */
+      width: 40px; 
+      height: 40px; 
+      border-radius: 50%; 
+      background-color: rgba(0,0,0,0.4); 
+      color: white; 
+      border: none; 
+      cursor: pointer; 
+      display: grid; 
+      place-items: center; 
+      font-size: 1rem; 
+      transition: all 0.2s ease; 
+      z-index: 5; 
+    }
+    .delete-btn:hover { 
+      transform: scale(1.1); 
+      background-color: var(--danger); 
+    }
+
     .skeleton-card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
     .skeleton-img { height: 200px; background: var(--border); }
     .skeleton-content { padding: 1.25rem; }
@@ -100,13 +123,32 @@
     #modal-title { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.5rem; }
     #modal-desc { color: var(--muted); font-size: 0.95rem; line-height: 1.6; margin: 0 0 1.5rem; }
     .download-section h4 { margin: 0 0 1rem; font-size: 0.9rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
-    .download-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .download-buttons { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.75rem; } /* DIUBAH */
     .btn-download { display: flex; align-items: center; justify-content: center; text-decoration: none; padding: 0.75rem; border-radius: 8px; font-weight: 600; transition: all .2s ease; }
     .btn-download i { margin-right: 0.5rem; font-size: 1.1rem; }
     .btn-mediafire { background-color: #0099e5; color: white; }
     .btn-mediafire:hover { background-color: #0077b2; transform: translateY(-2px); }
     .btn-gofile { background-color: #215ff3; color: white; }
     .btn-gofile:hover { background-color: #1a4ccc; transform: translateY(-2px); }
+    
+    /* --- CSS BARU UNTUK TOMBOL DOWNLOAD DINAMIS --- */
+    .btn-dynamic {
+      background-color: var(--muted);
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    [data-theme="dark"] .btn-dynamic {
+      color: var(--bg);
+    }
+    .btn-dynamic:hover {
+      background-color: var(--accent);
+      color: white;
+      transform: translateY(-2px);
+    }
+    /* --- AKHIR CSS BARU --- */
+
     #auth-container input, #auth-container textarea, #auth-container select, #request-container input, #request-container textarea, #request-container select { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; }
     #auth-container button, #request-container button { width: 100%; padding: 0.75rem; border-radius: 8px; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; transition: background .2s; }
     #auth-container button:hover, #request-container button:hover { background: var(--accent-dark); }
@@ -121,6 +163,82 @@
     #avatar-upload-label { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; background: var(--accent); color: white; border-radius: 50%; display: grid; place-items: center; cursor: pointer; border: 2px solid var(--card); }
     #avatar-upload-label:hover { background: var(--accent-dark); }
     
+    .admin-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .admin-action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      background-color: transparent; 
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--muted); 
+      font-size: 0.75rem;
+      font-weight: 500;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .admin-action-btn:hover {
+      color: var(--accent); 
+      background-color: var(--bg); 
+    }
+    .admin-action-btn i {
+      font-size: 1.25rem;
+      width: 30px; 
+      text-align: center;
+      margin-bottom: 2px;
+    }
+
+    #logout-btn {
+        background-color: var(--danger) !important;
+        margin-top: 0.5rem;
+    }
+
+    /* --- CSS BARU UNTUK FORM LINK DINAMIS --- */
+    #dynamic-links-container .link-entry {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      align-items: center;
+    }
+    #dynamic-links-container .link-entry input[type="text"] {
+      width: 40%;
+      margin-bottom: 0;
+      flex-shrink: 1;
+    }
+    #dynamic-links-container .link-entry input[type="url"] {
+      width: 60%;
+      margin-bottom: 0;
+      flex: 1;
+    }
+    .remove-link-btn {
+      padding: 0.5rem 0.75rem;
+      background: var(--danger);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    #add-link-btn {
+      width: auto;
+      background: var(--success);
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      margin-top: -0.5rem;
+      margin-bottom: 1rem;
+    }
+    /* --- AKHIR CSS BARU --- */
+
     #auth-container {
         overflow-y: auto;
         flex: 1;
@@ -383,10 +501,8 @@
                 <p id="modal-desc"></p>
                 <div class="download-section">
                     <h4>Unduh File</h4>
-                    <div class="download-buttons">
-                        <a href="#" id="mediafire-link" target="_blank" class="btn-download btn-mediafire"><i class="fa-solid fa-cloud-arrow-down"></i> MediaFire</a>
-                        <a href="#" id="gofile-link" target="_blank" class="btn-download btn-gofile"><i class="fa-solid fa-rocket"></i> Gofile</a>
-                    </div>
+                    <div class="download-buttons" id="modal-download-buttons">
+                        </div>
                 </div>
             </div>
             <div class="comment-section">
@@ -555,15 +671,12 @@
         }
       }
 
-      // --- FUNGSI DIPERBARUI: saveSubscriptionToSupabase (TYPO DIPERBAIKI) ---
       async function saveSubscriptionToSupabase(subscription) {
         const subData = {
-          // --- PERUBAHAN DI SINI: 'subscription_details' diubah menjadi 'subscription_data' ---
           subscription_data: subscription.toJSON(),
           user_id: state.user ? state.user.id : null,
           role: state.profile ? state.profile.role : null
         };
-        // --- AKHIR PERUBAHAN ---
 
         let query;
         if (state.user) {
@@ -580,11 +693,7 @@
 
         if (error) {
           console.error('Gagal menyimpan langganan:', error);
-          
-          // --- PERUBAHAN DI SINI: Mengembalikan pesan error generik ---
           showNotification('Gagal menyimpan pendaftaran notifikasi.', 'error');
-          // --- AKHIR PERUBAHAN ---
-
           return false;
         } else {
           console.log('Langganan berhasil disimpan:', data);
@@ -592,7 +701,6 @@
           return true;
         }
       }
-      // --- AKHIR FUNGSI DIPERBARUI ---
       
       async function checkSubscriptionStatus() {
         if (!('serviceWorker' in navigator)) return;
@@ -620,7 +728,6 @@
         }
       }
 
-      // --- FUNGSI BARU DITAMBAHKAN ---
       async function unsubscribeUserFromPush() {
         if (!('serviceWorker' in navigator)) {
           showNotification('Browser Anda tidak mendukung fitur ini.', 'error');
@@ -632,32 +739,26 @@
           const subscription = await registration.pushManager.getSubscription();
 
           if (!subscription) {
-            // Jika karena alasan tertentu browser bilang tidak subscribe
             showNotification('Anda memang belum berlangganan.', 'success');
             $('#notifications-toggle').classList.remove('subscribed');
             return;
           }
 
-          // 1. Berhenti berlangganan dari sisi browser
           const unsubscribed = await subscription.unsubscribe();
           if (!unsubscribed) {
             throw new Error('Gagal berhenti berlangganan di browser.');
           }
 
-          // 2. Hapus langganan dari database Supabase
-          //    Kita gunakan 'endpoint' sebagai pengenal unik
           const endpoint = subscription.endpoint;
           const { error: dbError } = await supabase
             .from('push_subscriptions')
             .delete()
-            .eq('subscription_data->>endpoint', endpoint); // Ini adalah cara query data di dalam JSON
+            .eq('subscription_data->>endpoint', endpoint); 
 
           if (dbError) {
             console.error('Gagal menghapus langganan dari DB:', dbError);
-            // Tetap lanjutkan, karena user sudah unsub dari browser
           }
 
-          // 3. Update UI dan state
           state.pushSubscription = null;
           $('#notifications-toggle').classList.remove('subscribed');
           showNotification('Anda berhasil berhenti berlangganan notifikasi.', 'success');
@@ -667,7 +768,6 @@
           showNotification('Gagal berhenti berlangganan: ' + error.message, 'error');
         }
       }
-      // --- AKHIR FUNGSI BARU ---
 
       const showLoading = (loading) => {
         state.isLoading = loading;
@@ -681,12 +781,27 @@
         el.dataset.postId = post.id;
         const isWishlisted = WishlistManager.has(post.id);
         const isModerator = state.profile?.role === 'admin' || state.profile?.role === 'moderator';
-        const adminActionsHTML = isModerator ? `<button class="edit-btn"><i class="fas fa-pencil-alt"></i></button>` : '';
+        
+        const adminActionsHTML = isModerator ? 
+            `<button class="edit-btn" title="Edit"><i class="fas fa-pencil-alt"></i></button>
+             <button class="delete-btn" title="Hapus"><i class="fas fa-trash"></i></button>` 
+            : '';
+
         el.innerHTML = `<div class="post-card-img-wrapper">${adminActionsHTML}<img src="${post.img}" alt="${post.title}" class="post-card-img"><button class="wishlist-btn ${isWishlisted ? 'wishlisted' : ''}"><i class="fa-regular fa-heart"></i><i class="fa-solid fa-heart"></i></button></div><div class="post-card-content"><div class="post-card-category">${post.category}</div><h3 class="post-card-title">${post.title}</h3><p class="post-card-desc">${post.description.substring(0, 80)}...</p></div>`;
-        el.addEventListener('click', (e) => { if (!e.target.closest('.wishlist-btn') && !e.target.closest('.edit-btn')) { openPostModal(post); } });
+        el.addEventListener('click', (e) => { if (!e.target.closest('.wishlist-btn') && !e.target.closest('.edit-btn') && !e.target.closest('.delete-btn')) { openPostModal(post); } });
         el.querySelector('.wishlist-btn').addEventListener('click', (e) => { e.stopPropagation(); const btn = e.currentTarget; btn.classList.contains('wishlisted') ? WishlistManager.remove(post.id) : WishlistManager.add(post.id); btn.classList.toggle('wishlisted'); if (['wishlist', 'history'].includes(state.currentCategory)) renderPosts(); });
+        
         const editBtn = el.querySelector('.edit-btn');
         if (editBtn) { editBtn.addEventListener('click', (e) => { e.stopPropagation(); openEditModal(post); }); }
+
+        const deleteBtn = el.querySelector('.delete-btn');
+        if (deleteBtn) { 
+          deleteBtn.addEventListener('click', (e) => { 
+            e.stopPropagation(); 
+            handleDeletePost(post); 
+          }); 
+        }
+
         return el;
       };
 
@@ -771,10 +886,38 @@
           listenToComments(postId);
       }
 
+      // --- FUNGSI openPostModal DIPERBARUI (Tombol Download Dinamis) ---
       const openPostModal = (post) => {
-        $('#post-modal-img').src = post.img; $('#modal-category').textContent = post.category; $('#modal-title').textContent = post.title; $('#modal-desc').textContent = post.description; $('#mediafire-link').href = post.links.mediafire; $('#gofile-link').href = post.links.gofile; const downloadHandler = () => HistoryManager.add(post.id); $$('.btn-download').forEach(btn => { btn.removeEventListener('click', downloadHandler); btn.addEventListener('click', downloadHandler, { once: true }); });
-        renderCommentUI(post.id); loadComments(post.id); postModalWrapper.classList.add('open');
+        $('#post-modal-img').src = post.img; 
+        $('#modal-category').textContent = post.category; 
+        $('#modal-title').textContent = post.title; 
+        $('#modal-desc').textContent = post.description; 
+        
+        const downloadHandler = () => HistoryManager.add(post.id);
+        const buttonsContainer = $('#modal-download-buttons');
+        buttonsContainer.innerHTML = ''; // Kosongkan tombol lama
+
+        if (post.links && typeof post.links === 'object' && Object.keys(post.links).length > 0) {
+          for (const [name, url] of Object.entries(post.links)) {
+            if (url) { // Hanya tampilkan jika URL ada
+              const btn = document.createElement('a');
+              btn.href = url;
+              btn.target = '_blank';
+              btn.className = 'btn-download btn-dynamic'; // Menggunakan style generic baru
+              btn.innerHTML = `<i class="fa-solid fa-download"></i> ${name}`;
+              btn.addEventListener('click', downloadHandler, { once: true });
+              buttonsContainer.appendChild(btn);
+            }
+          }
+        } else {
+          buttonsContainer.innerHTML = '<p style="color: var(--muted); font-size: 0.9rem;">Tidak ada link unduhan.</p>';
+        }
+        
+        renderCommentUI(post.id); 
+        loadComments(post.id); 
+        postModalWrapper.classList.add('open');
       };
+      // --- AKHIR FUNGSI DIPERBARUI ---
       
       const closePostModal = () => {
         postModalWrapper.classList.remove('open');
@@ -821,12 +964,100 @@
       $('#header-search-input').addEventListener('input', (e) => { state.searchQuery = e.target.value; renderPosts(); });
       
       async function getProfile(user) { if (!user) return null; const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single(); if (error) { console.error("Gagal mengambil profil:", error); return null; } return data; }
-      function renderAdminForm(postToEdit = null) {
-        const isEditing = postToEdit !== null; const title = isEditing ? 'Edit Postingan' : 'Buat Postingan Baru'; const buttonText = isEditing ? 'Simpan Perubahan' : 'Upload Postingan';
-        authContainer.innerHTML = `<a href="#" class="admin-nav-link" id="go-to-profile-view">Kembali ke Profil</a><h2>${title}</h2><form id="upload-form" data-editing-id="${isEditing ? postToEdit.id : ''}"><label for="title">Judul:</label><input type="text" id="title" name="title" required value="${isEditing ? postToEdit.title : ''}"><label for="description">Deskripsi:</label><textarea id="description" name="description" rows="4" required>${isEditing ? postToEdit.description : ''}</textarea><label for="category">Kategori:</label><select id="category" name="category" required><option value="Template">Template</option><option value="Addon">Addon</option><option value="TexturePack">TexturePack</option><option value="Informasi">Informasi</option></select><label for="img">URL Gambar:</label><input type="text" id="img" name="img" required value="${isEditing ? postToEdit.img : ''}"><label for="mediafire">Link MediaFire:</label><input type="url" id="mediafire" name="mediafire" required value="${isEditing ? postToEdit.links.mediafire : ''}"><label for="gofile">Link Gofile:</label><input type="url" id="gofile" name="gofile" required value="${isEditing ? postToEdit.links.gofile : ''}"><input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;"><label for="isFeatured">Jadikan Pilihan Editor?</label><br><button type="submit">${buttonText}</button></form><button id="logout-btn" style="margin-top: 1rem;">Logout</button>`;
-        if (isEditing) { authContainer.querySelector('#category').value = postToEdit.category; authContainer.querySelector('#isFeatured').checked = postToEdit.isFeatured; }
-        authContainer.querySelector('#upload-form').addEventListener('submit', handleSubmit); authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout); $('#go-to-profile-view').addEventListener('click', (e) => { e.preventDefault(); renderProfileView(); });
+      
+      // --- FUNGSI renderAdminForm DIPERBARUI (Link Dinamis) ---
+      function renderAdminForm(postToEdit = null, formType = 'dlc') {
+        const isEditing = postToEdit !== null;
+        let title = '';
+        let categoryHTML = '';
+
+        if (formType === 'info') {
+          title = isEditing ? 'Edit Informasi' : 'Buat Informasi Baru';
+          categoryHTML = `<input type="hidden" id="category" name="category" value="Informasi">
+                          <label style="display: block; margin-bottom: 1rem; color: var(--muted);">Kategori: Informasi</label>`;
+        } else { // 'dlc' form
+          title = isEditing ? 'Edit Postingan' : 'Buat Postingan Baru';
+          categoryHTML = `
+            <label for="category">Kategori:</label>
+            <select id="category" name="category" required>
+              <option value="Template">Template</option>
+              <option value="Addon">Addon</option>
+              <option value="TexturePack">TexturePack</option>
+            </select>
+          `;
+        }
+        
+        authContainer.innerHTML = `
+          <a href="#" class="admin-nav-link" id="go-to-profile-view">Kembali ke Profil</a>
+          <h2>${title}</h2>
+          <form id="upload-form" data-editing-id="${isEditing ? postToEdit.id : ''}">
+            <label for="title">Judul:</label>
+            <input type="text" id="title" name="title" required value="${isEditing ? postToEdit.title : ''}">
+            <label for="description">Deskripsi:</label>
+            <textarea id="description" name="description" rows="4" required>${isEditing ? postToEdit.description : ''}</textarea>
+            
+            ${categoryHTML} 
+            
+            <label for="img">URL Gambar:</label>
+            <input type="text" id="img" name="img" required value="${isEditing ? postToEdit.img : ''}">
+            
+            <label>Link Unduhan:</label>
+            <div id="dynamic-links-container">
+              </div>
+            <button type="button" id="add-link-btn"><i class="fas fa-plus"></i> Tambah Link</button>
+            
+            <input type="checkbox" id="isFeatured" name="isFeatured" style="width: auto; margin-bottom: 1rem;">
+            <label for="isFeatured">Jadikan Pilihan Editor?</label><br>
+            <button type="submit">${isEditing ? 'Simpan Perubahan' : 'Upload Postingan'}</button>
+          </form>
+          <button id="logout-btn" style="margin-top: 1rem;">Logout</button>
+        `;
+
+        // Atur nilai kategori dan featured jika mode edit
+        if (isEditing) {
+          if (formType === 'dlc') {
+            authContainer.querySelector('#category').value = postToEdit.category;
+          }
+          authContainer.querySelector('#isFeatured').checked = postToEdit.isFeatured;
+        }
+
+        // --- Logika untuk Link Dinamis ---
+        const linksContainer = $('#dynamic-links-container');
+            
+        const addLinkRow = (name = '', url = '') => {
+          const linkEntry = document.createElement('div');
+          linkEntry.className = 'link-entry';
+          linkEntry.innerHTML = `
+            <input type="text" class="link-name-input" placeholder="Nama Link (cth: MediaFire)" value="${name}" required>
+            <input type="url" class="link-url-input" placeholder="URL Link" value="${url}" required>
+            <button type="button" class="remove-link-btn" title="Hapus link ini"><i class="fas fa-trash"></i></button>
+          `;
+          linksContainer.appendChild(linkEntry);
+          linkEntry.querySelector('.remove-link-btn').addEventListener('click', () => {
+            linkEntry.remove();
+          });
+        };
+
+        $('#add-link-btn').addEventListener('click', () => addLinkRow());
+
+        if (isEditing && postToEdit.links && typeof postToEdit.links === 'object') {
+          for (const [name, url] of Object.entries(postToEdit.links)) {
+            if (url) {
+              addLinkRow(name, url);
+            }
+          }
+        } else if (!isEditing) {
+          // Jika form baru, tambahkan satu baris kosong
+          addLinkRow(); 
+        }
+        // --- Akhir Logika Link Dinamis ---
+
+        authContainer.querySelector('#upload-form').addEventListener('submit', handleSubmit);
+        authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout);
+        $('#go-to-profile-view').addEventListener('click', (e) => { e.preventDefault(); renderProfileView(); });
       }
+      // --- AKHIR FUNGSI DIPERBARUI ---
+
       async function handleRoleUpdate(userId, newRole) { const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId); if (error) { showNotification(`Gagal mengubah role: ${error.message}`, 'error'); } else { showNotification('Role pengguna berhasil diubah.', 'success'); } }
       async function renderUserManagementView() {
           authContainer.innerHTML = `<a href="#" class="admin-nav-link" id="go-to-profile-view">Kembali ke Profil</a><h2>Kelola Pengguna</h2><div id="user-list-container">Memuat pengguna...</div>`;
@@ -855,22 +1086,103 @@
         $('#request-list-container').innerHTML = `<ul class="request-management-list">${requestListHTML}</ul>`;
         $$('.delete-request-btn').forEach(button => { button.addEventListener('click', handleDeleteRequest); });
       }
-      const openEditModal = (post) => { renderAdminForm(post); openAuthModal(); };
+
+      const openEditModal = (post) => {
+        const formType = (post.category.toLowerCase() === 'informasi') ? 'info' : 'dlc';
+        renderAdminForm(post, formType);
+        openAuthModal();
+      };
+
       async function handleRegister(e) { e.preventDefault(); const email = e.target.email.value; const password = e.target.password.value; const { error } = await supabase.auth.signUp({ email, password }); if (error) { showNotification("Pendaftaran Gagal: " + error.message, 'error'); } else { showNotification('Pendaftaran berhasil! Silakan cek email Anda untuk konfirmasi.', 'success'); renderLoginView(); } }
       function renderLoginView() { authContainer.innerHTML = `<div id="login-view"><h2>Login</h2><form id="login-form"><label for="email">Email:</label><input type="email" id="email" name="email" required autocomplete="email"><label for="password">Password:</label><input type="password" id="password" name="password" required autocomplete="current-password"><button type="submit">Login</button></form><p style="text-align: center; margin-top: 1rem; font-size: 0.9rem;">Belum punya akun? <a href="#" id="show-register">Daftar</a></p></div>`; authContainer.querySelector('#login-form').addEventListener('submit', handleLogin); authContainer.querySelector('#show-register').addEventListener('click', (e) => { e.preventDefault(); renderRegisterView(); }); }
       function renderRegisterView() { authContainer.innerHTML = `<div id="register-view"><h2>Daftar Akun Baru</h2><form id="register-form"><label for="register-email">Email:</label><input type="email" id="register-email" name="email" required autocomplete="email"><label for="register-password">Password:</label><input type="password" id="register-password" name="password" required autocomplete="new-password"><button type="submit">Daftar</button></form><p style="text-align: center; margin-top: 1rem; font-size: 0.9rem;">Sudah punya akun? <a href="#" id="show-login">Login</a></p></div>`; authContainer.querySelector('#register-form').addEventListener('submit', handleRegister); authContainer.querySelector('#show-login').addEventListener('click', (e) => { e.preventDefault(); renderLoginView(); }); }
+      
       async function renderProfileView() {
           const user = state.user; const profile = state.profile;
           if (user && profile) {
-              const isModerator = profile.role === 'admin' || profile.role === 'moderator'; const isAdmin = profile.role === 'admin';
-              const adminPanelButtonHTML = isModerator ? `<button id="go-to-admin-btn" style="background-color: var(--success);">Panel Admin</button>` : ''; const userManagementButtonHTML = isAdmin ? `<button id="manage-users-btn" style="background-color: var(--accent);">Kelola Pengguna</button>` : ''; const requestManagementButtonHTML = isModerator ? `<button id="manage-requests-btn" style="background-color: #f39c12;">Kelola Request</button>` : '';
+              const isModerator = profile.role === 'admin' || profile.role === 'moderator';
+              const isAdmin = profile.role === 'admin';
+              
               const avatarSrc = profile.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${user.email}`;
-              authContainer.innerHTML = `<form id="profile-form"><h2>Profil Saya</h2><div class="profile-header"><div class="profile-avatar-wrapper"><img src="${avatarSrc}" alt="Avatar" class="profile-avatar" id="avatar-preview"><label for="avatar-upload" id="avatar-upload-label"><i class="fas fa-camera"></i></label><input type="file" id="avatar-upload" name="avatar" class="hidden" accept="image/png, image/jpeg"></div></div><label for="nickname">Nickname:</label><input type="text" id="nickname" name="nickname" value="${profile.nickname || ''}" placeholder="Masukkan nickname Anda"><label for="email" style="margin-top:0.5rem;">Email:</label><input type="email" id="email" name="email" value="${user.email}" disabled><button type="submit">Simpan Perubahan</button></form><div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">${adminPanelButtonHTML}${userManagementButtonHTML}${requestManagementButtonHTML}<button id="logout-btn">Logout</button></div>`;
-              authContainer.querySelector('#profile-form').addEventListener('submit', handleProfileUpdate); authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout); authContainer.querySelector('#avatar-upload').addEventListener('change', (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (event) => { $('#avatar-preview').src = event.target.result; }; reader.readAsDataURL(file); } });
-              if(isModerator) { $('#go-to-admin-btn').addEventListener('click', (e) => { e.preventDefault(); renderAdminForm(); }); $('#manage-requests-btn').addEventListener('click', (e) => { e.preventDefault(); renderRequestManagementView(); }); }
-              if(isAdmin) { $('#manage-users-btn').addEventListener('click', (e) => { e.preventDefault(); renderUserManagementView(); }); }
-          } else { renderLoginView(); }
+
+              const uploadDlcButtonHTML = isModerator ? 
+                `<button id="upload-dlc-btn" class="admin-action-btn">
+                    <i class="fas fa-plus-square"></i>
+                    <span>Upload DLC</span>
+                 </button>` : '';
+              const uploadInfoButtonHTML = isModerator ?
+                `<button id="upload-info-btn" class="admin-action-btn">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Upload Info</span>
+                </button>` : '';
+              const userManagementButtonHTML = isAdmin ? 
+                `<button id="manage-users-btn" class="admin-action-btn">
+                    <i class="fas fa-users"></i>
+                    <span>Kelola User</span>
+                 </button>` : '';
+              const requestManagementButtonHTML = isModerator ? 
+                `<button id="manage-requests-btn" class="admin-action-btn">
+                    <i class="fas fa-inbox"></i>
+                    <span>Kelola Request</span>
+                 </button>` : '';
+
+              authContainer.innerHTML = `
+                <form id="profile-form">
+                    <h2>Profil Saya</h2>
+                    <div class="profile-header">
+                        <div class="profile-avatar-wrapper">
+                            <img src="${avatarSrc}" alt="Avatar" class="profile-avatar" id="avatar-preview">
+                            <label for="avatar-upload" id="avatar-upload-label"><i class="fas fa-camera"></i></label>
+                            <input type="file" id="avatar-upload" name="avatar" class="hidden" accept="image/png, image/jpeg">
+                        </div>
+                    </div>
+                    <label for="nickname">Nickname:</label>
+                    <input type="text" id="nickname" name="nickname" value="${profile.nickname || ''}" placeholder="Masukkan nickname Anda">
+                    <label for="email" style="margin-top:0.5rem;">Email:</label>
+                    <input type="email" id="email" name="email" value="${user.email}" disabled>
+                    <button type="submit">Simpan Perubahan</button>
+                </form>
+                
+                <div class="admin-actions-grid">
+                    ${uploadDlcButtonHTML}
+                    ${uploadInfoButtonHTML}
+                    ${userManagementButtonHTML}
+                    ${requestManagementButtonHTML}
+                </div>
+                
+                <button id="logout-btn">Logout</button>
+              `;
+              
+              authContainer.querySelector('#profile-form').addEventListener('submit', handleProfileUpdate); 
+              authContainer.querySelector('#logout-btn').addEventListener('click', handleLogout); 
+              authContainer.querySelector('#avatar-upload').addEventListener('change', (e) => { 
+                  const file = e.target.files[0]; 
+                  if (file) { 
+                      const reader = new FileReader(); 
+                      reader.onload = (event) => { $('#avatar-preview').src = event.target.result; }; 
+                      reader.readAsDataURL(file); 
+                  } 
+              });
+
+              if(isModerator) { 
+                  const dlcBtn = $('#upload-dlc-btn');
+                  if (dlcBtn) dlcBtn.addEventListener('click', (e) => { e.preventDefault(); renderAdminForm(null, 'dlc'); });
+
+                  const infoBtn = $('#upload-info-btn');
+                  if (infoBtn) infoBtn.addEventListener('click', (e) => { e.preventDefault(); renderAdminForm(null, 'info'); });
+                  
+                  const reqBtn = $('#manage-requests-btn');
+                  if (reqBtn) reqBtn.addEventListener('click', (e) => { e.preventDefault(); renderRequestManagementView(); });
+              }
+              if(isAdmin) { 
+                  const userBtn = $('#manage-users-btn');
+                  if (userBtn) userBtn.addEventListener('click', (e) => { e.preventDefault(); renderUserManagementView(); });
+              }
+          } else { 
+              renderLoginView(); 
+          }
       }
+
       async function handleProfileUpdate(e) {
           e.preventDefault(); const form = e.target; const user = state.user; const newNickname = form.nickname.value; const avatarFile = form.avatar.files[0]; let avatar_url = state.profile.avatar_url;
           if (avatarFile) {
@@ -913,17 +1225,37 @@
         showNotification('Anda telah logout.', 'success'); 
         closeAuthModal(); 
       }
+
+      // --- FUNGSI handleSubmit DIPERBARUI (Link Dinamis) ---
       async function handleSubmit(e) {
         e.preventDefault(); const form = e.target; const editingId = form.dataset.editingId;
-        const postData = { title: form.title.value, description: form.description.value, category: form.category.value, isFeatured: form.isFeatured.checked, img: form.img.value, links: { mediafire: form.mediafire.value, gofile: form.gofile.value } };
+        
+        // --- KODE BARU UNTUK MENGAMBIL LINK DINAMIS ---
+        const links = {};
+        $$('#dynamic-links-container .link-entry').forEach(entry => {
+          const name = entry.querySelector('.link-name-input').value.trim();
+          const url = entry.querySelector('.link-url-input').value.trim();
+          if (name && url) {
+            links[name] = url;
+          }
+        });
+        // --- AKHIR KODE BARU ---
+
+        const postData = { 
+          title: form.title.value, 
+          description: form.description.value, 
+          category: form.category.value, 
+          isFeatured: form.isFeatured.checked, 
+          img: form.img.value, 
+          links: links // Menggunakan objek 'links' yang baru
+        };
+
         const { error } = editingId ? await supabase.from('posts').update(postData).eq('id', editingId) : await supabase.from('posts').insert([postData]);
         if (error) { showNotification('Operasi Gagal: ' + error.message, 'error'); } else { 
             showNotification(`Postingan berhasil ${editingId ? 'diperbarui' : 'diupload'}!`, 'success'); 
             form.reset(); 
             closeAuthModal(); 
 
-            // !!! INI ADALAH KODE YANG MENGIRIM NOTIFIKASI KE USER !!!
-            // Hanya kirim notif jika ini adalah postingan BARU (bukan edit)
             if (!editingId) {
                 try {
                     console.log('Mengirim notifikasi push ke pengguna...');
@@ -939,11 +1271,37 @@
                     console.log('Perintah kirim notifikasi push berhasil.');
                 } catch (error) {
                     console.error('Gagal memicu fungsi notifikasi:', error);
-                    // Tidak perlu menakuti admin, jadi cukup log di console
                 }
             }
         }
       }
+      // --- AKHIR FUNGSI DIPERBARUI ---
+
+      async function handleDeletePost(post) {
+        if (!confirm(`Anda yakin ingin menghapus postingan "${post.title}"? Tindakan ini tidak bisa dibatalkan.`)) {
+          return;
+        }
+
+        try {
+          const { error } = await supabase
+            .from('posts')
+            .delete()
+            .eq('id', post.id);
+
+          if (error) {
+            throw error;
+          }
+
+          showNotification('Postingan berhasil dihapus.', 'success');
+          state.posts = state.posts.filter(p => p.id !== post.id);
+          renderPosts();
+
+        } catch (error) {
+          showNotification('Gagal menghapus postingan: ' + error.message, 'error');
+          console.error('Gagal Hapus Postingan:', error);
+        }
+      }
+
       async function fetchPosts() { try { const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false }); if (error) throw error; state.posts = data; renderPosts(); } catch (error) { console.error('Gagal memuat data postingan:', error); $('#post-grid').innerHTML = `<p style="color: var(--muted); text-align: center;">Gagal memuat data. Silakan coba lagi nanti.</p>`; showNotification('Gagal memuat data postingan.', 'error'); } }
       function renderRequestView() {
         if (state.user) { requestContainer.innerHTML = `<h2>Buat Request</h2><p style="font-size: 0.9rem; color: var(--muted); margin-top: -0.5rem; margin-bottom: 1.5rem;">Ingin Addon, Template, atau TexturePack yang kalian mau? Silahkan ajukan request Anda!</p><form id="request-form"><label for="request-title">Nama Item/Game:</label><input type="text" id="request-title" name="title" required placeholder="Contoh: Shader Realistis"><label for="request-category">Kategori:</label><select id="request-category" name="category" required><option value="" disabled selected>Pilih Kategori</option><option value="Addon">Addon</option><option value="Template">Template</option><option value="TexturePack">TexturePack</option><option value="Informasi">Informasi</option></select><label for="request-description">Deskripsi (Opsional):</label><textarea id="request-description" name="description" rows="3" placeholder="Jelaskan lebih detail tentang request Anda..."></textarea><button type="submit">Kirim Request</button></form>`; $('#request-form').addEventListener('submit', handleRequestSubmit); }
@@ -1184,19 +1542,15 @@
       $('#request-menu-btn').addEventListener('click', handleRequestButtonClick);
       $('#chat-menu-btn').addEventListener('click', handleChatButtonClick);
       
-      // --- LISTENER DIPERBARUI ---
       $('#notifications-toggle').addEventListener('click', () => {
         if ($('#notifications-toggle').classList.contains('subscribed')) {
-          // Jika sudah subscribe, tampilkan konfirmasi untuk unsub
           if (confirm('Anda yakin ingin berhenti berlangganan notifikasi?')) {
-            unsubscribeUserFromPush(); // Panggil fungsi baru
+            unsubscribeUserFromPush();
           }
         } else {
-          // Jika belum subscribe, jalankan proses subscribe
           askNotificationPermission();
         }
       });
-      // --- AKHIR LISTENER DIPERBARUI ---
       
       init();
     });
