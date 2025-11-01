@@ -420,7 +420,34 @@
     }
     /* --- AKHIR CSS POPUP --- */
 
-  </style>
+  
+  
+    #debug-console {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      max-height: 150px;
+      background: rgba(20, 0, 0, 0.9);
+      border-top: 2px solid var(--danger);
+      color: #ffaaaa;
+      font-family: monospace;
+      font-size: 11px;
+      z-index: 99999;
+      overflow-y: auto;
+      padding: 5px;
+      box-sizing: border-box;
+    }
+    #debug-console pre {
+      margin: 0 0 5px 0;
+      padding-bottom: 5px;
+      border-bottom: 1px dashed #555;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    /* --------------------------------- */
+    
+    </style>
 </head>
 <body>
 
@@ -563,6 +590,37 @@
 
       const { createClient } = window.supabase;
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // --- FUNGSI DEBUG CONSOLE ---
+      function showDebugMessage(message) {
+        try {
+          let debugConsole = document.getElementById('debug-console');
+          if (!debugConsole) {
+            debugConsole = document.createElement('div');
+            debugConsole.id = 'debug-console';
+            document.body.appendChild(debugConsole);
+          }
+          const errorEntry = document.createElement('pre');
+          
+          let errorMessage = (typeof message === 'object' && message !== null) 
+                             ? message.stack || JSON.stringify(message) 
+                             : String(message);
+          
+          errorEntry.textContent = `[${new Date().toLocaleTimeString()}] ${errorMessage}`;
+          debugConsole.appendChild(errorEntry);
+          debugConsole.scrollTop = debugConsole.scrollHeight;
+        } catch(e) {
+          // Fallback if debug console itself fails
+          console.error('Debug console failure:', e);
+        }
+      }
+      
+      // Menangkap semua error global
+      window.onerror = function(message, source, lineno, colno, error) {
+        showDebugMessage(`GLOBAL ERROR:\n${message}\nDi: ${source} (Line: ${lineno})\nError: ${error?.stack || error}`);
+        return true; 
+      };
+      // ----------------------------
 
       const createStorageManager = (key) => ({ get: () => JSON.parse(localStorage.getItem(key)) || [], save: (data) => localStorage.setItem(key, JSON.stringify(data)), });
       const WishlistManager = { ...createStorageManager('luminox_wishlist'), add: (postId) => { const wishlist = WishlistManager.get(); if (!wishlist.includes(postId)) { wishlist.push(postId); WishlistManager.save(wishlist); } }, remove: (postId) => { let wishlist = WishlistManager.get(); wishlist = wishlist.filter(id => id !== postId); WishlistManager.save(wishlist); }, has: (postId) => WishlistManager.get().includes(postId) };
@@ -793,7 +851,6 @@
         }
       }
 
-      // --- KODE BARU DARI tes.js ---
       async function sendTestNotification() {
         try {
           const { error } = await supabase.functions.invoke('send-push-notification', {
@@ -809,9 +866,9 @@
         } catch (error) {
           console.error('Gagal mengirim test notifikasi:', error);
           showNotification('Gagal mengirim test notifikasi.', 'error');
+          showDebugMessage(error); 
         }
       }
-      // --- AKHIR KODE BARU ---
 
       const showLoading = (loading) => {
         state.isLoading = loading;
@@ -1324,7 +1381,7 @@ async function handleDeleteRequest(e) {
 
         const { error } = editingId ? await supabase.from('posts').update(postData).eq('id', editingId) : await supabase.from('posts').insert([postData]);
         if (error) { showNotification('Operasi Gagal: ' + error.message, 'error'); } else { 
-            showNotification(`Postingan berhasil ${editingId ? 'diperbarui' : 'diupload'}!`, 'success'); 
+            showNotification(`Postingan berhasil ${editingId ? 'diperbarui' : 'dibuat'}!`, 'success'); 
             form.reset(); 
             closeAuthModal(); 
 
@@ -1343,6 +1400,8 @@ async function handleDeleteRequest(e) {
                     console.log('Perintah kirim notifikasi push berhasil.');
                 } catch (error) {
                     console.error('Gagal memicu fungsi notifikasi:', error);
+                    // TAMPILKAN ERROR DI LAYAR
+                    showDebugMessage(error); 
                 }
             }
         }
@@ -1465,11 +1524,13 @@ async function handleRequestSubmit(e) {
     
     if (telegramError) {
       console.error('❌ Telegram function error:', telegramError);
+      showDebugMessage(telegramError); // Tampilkan error di layar
     } else {
       console.log('✅ Telegram function result:', data);
     }
   } catch (err) {
     console.error('❌ Unexpected Telegram error:', err);
+    showDebugMessage(err); // Tampilkan error di layar
   }
 }
       
