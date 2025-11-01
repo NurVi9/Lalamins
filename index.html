@@ -217,14 +217,15 @@
       margin-bottom: 0;
       flex: 1;
     }
-    .remove-link-btn {
-      padding: 0.5rem 0.75rem;
-      background: var(--danger);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      line-height: 1;
+    #auth-container .remove-link-btn {
+    padding: 0.5rem 0.75rem;
+    background: var(--danger);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    line-height: 1;
+    width: auto;
     }
     #add-link-btn {
       width: auto;
@@ -291,10 +292,20 @@
     .request-management-user { font-size: 0.85rem; color: var(--muted); margin: 0.25rem 0 0.75rem; }
     .request-management-desc { font-size: 0.9rem; margin-bottom: 1rem; }
     .request-management-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
-    .request-management-actions button { width: auto; padding: 0.3rem 0.8rem; font-size: 0.8rem; }
-    .request-management-actions .delete-btn { background-color: var(--danger); }
+   #auth-container .request-management-actions button { 
+  width: auto; 
+  padding: 0.3rem 0.8rem; 
+  font-size: 0.8rem; 
+}
+  #auth-container .request-management-actions .delete-btn { 
+  background-color: var(--danger); 
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: auto;
+}
 
-    /* --- Tampilan Chat & Menu Edit/Hapus --- */
+
     #chat-view { padding: 0; display: flex; justify-content: center; }
     #chat-view-container { display: flex; flex-direction: column; height: calc(100vh - 70px); max-width: 900px; width: 100%; background: var(--card); }
     .chat-messages { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; scroll-behavior: smooth; }
@@ -1096,11 +1107,37 @@
           $('#user-list-container').innerHTML = `<ul class="user-management-list">${userListHTML}</ul>`;
           $$('.user-management-role select').forEach(select => { select.addEventListener('change', (e) => { const userId = e.target.dataset.userId; const newRole = e.target.value; handleRoleUpdate(userId, newRole); }); });
       }
-      async function handleDeleteRequest(e) {
-        const requestId = e.target.dataset.id; if (!confirm('Anda yakin ingin menghapus request ini?')) return;
-        const { error } = await supabase.from('requests').delete().eq('id', requestId);
-        if (error) { showNotification('Gagal menghapus request: ' + error.message, 'error'); } else { showNotification('Request berhasil dihapus.', 'success'); renderRequestManagementView(); }
-      }
+
+async function handleDeleteRequest(e) {
+  const button = e.currentTarget; 
+  const requestId = button.dataset.id;
+  
+  if (!requestId) {
+    console.error('Tidak ada ID request pada tombol.');
+    return;
+  }
+
+  if (!confirm('Anda yakin ingin menghapus request ini?')) {
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = 'Menghapus...';
+
+  const { error } = await supabase
+    .from('requests')
+    .delete()
+    .eq('id', requestId);
+  
+  if (error) { 
+    showNotification('Gagal menghapus request: ' + error.message, 'error'); 
+    button.disabled = false;
+    button.textContent = 'Hapus';
+  } else { 
+    showNotification('Request berhasil dihapus.', 'success'); 
+    renderRequestManagementView();
+  }
+}
       async function renderRequestManagementView() {
         authContainer.innerHTML = `<a href="#" class="admin-nav-link" id="go-to-profile-view">Kembali ke Profil</a><h2>Kelola Request Pengguna</h2><div id="request-list-container">Memuat request...</div>`;
         $('#go-to-profile-view').addEventListener('click', (e) => { e.preventDefault(); renderProfileView(); });
