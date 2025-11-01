@@ -70,7 +70,7 @@ self.addEventListener('pushsubscriptionchange', function(event) {
   event.waitUntil(
     self.registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array('BJPmbgeeLhcQIeo2CSt5vjqVy0WQ1qNjclpwcUD2Qrq2Duz_7zCyxFz9-zzC-tR8qn188pRo4pSoxnb4F0qotgo')
+      applicationServerKey: urlBase64ToUint8Array('BOGxyDihJa42olM4Y_rO3za2VQ6cojG89XkE3O38V1p_vLxzeYPaa2PS2QX7ciJfwpt0bEdDQPjB_qMOAQhN_KY')
     }).then(function(subscription) {
       // Kirim subscription baru ke server
       return fetch('/api/update-subscription', {
